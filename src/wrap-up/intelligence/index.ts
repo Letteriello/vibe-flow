@@ -12,8 +12,7 @@
  */
 
 import { KnowledgeGraphCompiler, KnowledgeGraph } from './knowledge-graph.js';
-import { ContextDAGManager } from './context-dag.js';
-import { DAGState } from '../../context/index.js';
+import { ContextDAGManager, LocalDAGState } from './context-dag.js';
 import { EscalationSummarizer, EscalationSummary } from './escalation-summarizer.js';
 import { JustificationLinker, JustificationLink } from './justification-linker.js';
 import { ArtifactSealer, SealedArtifact } from './artifact-sealer.js';
@@ -63,7 +62,7 @@ export interface EnrichedSessionPackage {
   sessionId: string;
   enrichedAt: string;
   knowledgeGraph: KnowledgeGraph;
-  contextDAG: DAGState;
+  contextDAG: LocalDAGState;
   escalationSummary: EscalationSummary;
   justificationLinks: JustificationLink[];
   sealedArtifacts: SealedArtifact[];
@@ -249,7 +248,7 @@ export class WrapUpIntelligenceFacade {
       sessionId,
       enrichedAt: new Date().toISOString(),
       knowledgeGraph: knowledgeGraph as KnowledgeGraph,
-      contextDAG: contextDAG as DAGState,
+      contextDAG: contextDAG as LocalDAGState,
       escalationSummary: escalationSummary as EscalationSummary,
       justificationLinks: justificationLinks as JustificationLink[],
       sealedArtifacts,
@@ -312,7 +311,7 @@ export class WrapUpIntelligenceFacade {
    */
   private generateSealChecksum(data: {
     knowledgeGraph: KnowledgeGraph;
-    contextDAG: DAGState;
+    contextDAG: LocalDAGState;
     escalationSummary: EscalationSummary;
     justificationLinks: JustificationLink[];
     sealedArtifacts: SealedArtifact[];

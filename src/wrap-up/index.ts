@@ -4,7 +4,6 @@ import { join } from 'path';
 import chalk from 'chalk';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import inquirer from 'inquirer';
 import { ConfigManager, WrapUpConfig } from '../config/index.js';
 import { StateMachine, ProjectState } from '../state-machine/index.js';
 import { Consolidation, getConsolidation } from './consolidation.js';
@@ -138,7 +137,7 @@ export class WrapUpExecutor {
     return result;
   }
 
-  private async executeShipIt(autoConfirm: boolean = false): Promise<ShipItResult> {
+  private async executeShipIt(autoConfirm: boolean = true): Promise<ShipItResult> {
     const result: ShipItResult = {
       commits: 0,
       filesOrganized: [],
@@ -205,8 +204,8 @@ export class WrapUpExecutor {
           commitMessage = `docs: Auto-wrap-up session ${new Date().toISOString()}`;
         }
 
-        // Show summary and confirm if enabled
-        if (confirmBeforeCommit && !autoConfirm) {
+        // Autonomous mode: always auto-confirm, show summary only
+        if (confirmBeforeCommit) {
           console.log(chalk.blue('\n  📋 Commit Summary'));
           console.log(chalk.gray('  ───────────────────'));
           if (commitAnalysis) {
@@ -220,17 +219,8 @@ export class WrapUpExecutor {
           console.log(chalk.gray(`  Files: ${result.filesOrganized.length} changed`));
           console.log(chalk.gray('  ───────────────────\n'));
 
-          const answers = await inquirer.prompt([{
-            type: 'confirm',
-            name: 'confirmCommit',
-            message: 'Proceed with commit?',
-            default: true
-          }]) as { confirmCommit: boolean };
-
-          if (!answers.confirmCommit) {
-            console.log(chalk.yellow('    ❌ Commit cancelled by user'));
-            return result;
-          }
+          // Autonomous mode: auto-confirm commits without user prompt
+          console.log(chalk.gray('  📝 Auto-committing (autonomous mode)'));
         } else if (autoConfirm) {
           console.log(chalk.gray('\n  📋 Commit Summary (auto-confirmed)'));
           console.log(chalk.gray('  ───────────────────'));

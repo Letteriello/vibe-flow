@@ -48,7 +48,7 @@ export interface DegradationConfig {
 
 // Default configuration
 const DEFAULT_DEGRADATION_CONFIG: DegradationConfig = {
-  timeoutMs: 30000, // 30 seconds
+  timeoutMs: 60000, // 60 seconds for wrap-up operations
   maxConsecutiveFailures: 3,
   enableHotReload: true,
   hotReloadIntervalMs: 60000 // 1 minute
@@ -651,7 +651,8 @@ export class MCPServer {
         const mode = params.mode || 'full';
 
         try {
-          const result = await this.wrapUpExecutor.execute(mode, false);
+          // Pass true for yes parameter to skip interactive prompts (MCP has no stdin)
+          const result = await this.wrapUpExecutor.execute(mode, false, true);
           await this.wrapUpExecutor.saveReport(result);
 
           return {

@@ -143,7 +143,6 @@ describe('ConfigManager', () => {
             publishIt: { enabled: false }
           },
           safety: {
-            dryRunDefault: true,
             requireTestsPass: false,
             secretDetection: true
           }
@@ -171,7 +170,6 @@ describe('ConfigManager', () => {
             publishIt: { enabled: false }
           },
           safety: {
-            dryRunDefault: true,
             requireTestsPass: false,
             secretDetection: true
           }
@@ -199,7 +197,6 @@ describe('ConfigManager', () => {
             publishIt: { enabled: false }
           },
           safety: {
-            dryRunDefault: true,
             requireTestsPass: false,
             secretDetection: true
           }
@@ -222,7 +219,6 @@ describe('ConfigManager', () => {
             publishIt: { enabled: false }
           },
           safety: {
-            dryRunDefault: true,
             requireTestsPass: false,
             secretDetection: true
           }
