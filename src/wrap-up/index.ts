@@ -10,6 +10,7 @@ import { Consolidation, getConsolidation } from './consolidation.js';
 import { getMemory } from './memory.js';
 import { SessionAuditLogger, AuditEntry, AuditReport } from './audit-logger.js';
 import { WrapUpWatchdog, createWatchdog } from './watchdog.js';
+import { SessionReflector, createReflector, reflect, ReflectionResult } from './reflection.js';
 
 const execAsync = promisify(exec);
 
@@ -384,6 +385,28 @@ export class WrapUpExecutor {
     console.log(chalk.gray('  🧠 Remember It phase...'));
     await this.watchdog!.logProgress('Remember It: Updating CLAUDE.md');
 
+    // Execute reflection to extract lessons learned
+    let reflectionResult: ReflectionResult | null = null;
+    try {
+      console.log(chalk.gray('  🔍 Extracting lessons learned...'));
+      reflectionResult = await createReflector().execute();
+
+      if (reflectionResult.success) {
+        console.log(chalk.gray(`    Extracted ${reflectionResult.lessonsLearned.length} lessons`));
+        if (reflectionResult.outputPath) {
+          console.log(chalk.green(`    Saved to: ${reflectionResult.outputPath}`));
+        }
+        result.rulesUpdated += reflectionResult.lessonsLearned.length;
+        if (reflectionResult.outputPath) {
+          result.filesModified.push(reflectionResult.outputPath);
+        }
+      } else {
+        console.log(chalk.yellow(`    Reflection warning: ${reflectionResult.errors.join(', ')}`));
+      }
+    } catch (error: any) {
+      console.log(chalk.yellow(`    Reflection error: ${error.message}`));
+    }
+
     if (this.config!.phases.rememberIt.consolidateClaudeMd) {
       console.log(chalk.gray('  📄 Consolidating CLAUDE.md...'));
 
@@ -661,3 +684,15 @@ export {
   type WALLogEvent,
   type WALActionType
 } from './wal-parser.js';
+
+// Re-export Reflection (lessons learned extraction)
+export {
+  SessionReflector,
+  createReflector,
+  reflect,
+  type ReflectionResult,
+  type SessionAttempt,
+  type CommonError,
+  type EstablishedConvention,
+  type ReflectionSummary
+} from './reflection.js';
