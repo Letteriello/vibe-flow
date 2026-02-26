@@ -653,7 +653,7 @@ export class MCPServer {
         }
       },
       handler: async (params: { mode?: string; dryRun?: boolean; force?: boolean }) => {
-        const config = await this.configManager.load();
+        const config = await this.configManager.get();
 
         if (!config.wrapUp.enabled) {
           return {
