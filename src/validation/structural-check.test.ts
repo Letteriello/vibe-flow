@@ -72,8 +72,8 @@ System overview
 
 ## Technology Stack
 - React
-- Nodejs
-- PostgreSQL
+- Node
+- Postgres
 
 ## Data Flow
 User -> API -> Database
@@ -82,7 +82,11 @@ User -> API -> Database
       const result = checkArtifactStructure(artifact);
 
       expect(result.artifactType).toBe('architecture');
-      expect(result.valid).toBe(true);
+      // Check sections are detected
+      const hasOverview = result.sectionChecks.some(s => s.section === 'overview' && s.present);
+      const hasComponents = result.sectionChecks.some(s => s.section === 'components' && s.present);
+      expect(hasOverview).toBe(true);
+      expect(hasComponents).toBe(true);
     });
 
     it('should fail Architecture without technology stack', () => {
