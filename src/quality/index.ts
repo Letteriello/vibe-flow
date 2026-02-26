@@ -15,3 +15,6 @@ export type { GuardrailsConfig, GuardrailsResult } from './guardrails.js';
 
 export { Linter } from './linter.js';
 export type { LinterConfig, LinterResult } from './linter.js';
+
+export { runFormattingGuardrails, checkFileFormatting, formatDiagnosticSummary } from './formatter-hook.js';
+export type { FormatterDiagnostic, FormatterHookConfig, FormattedIssue } from './formatter-hook.js';
