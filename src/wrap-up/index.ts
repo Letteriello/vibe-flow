@@ -604,5 +604,5 @@ export {
   type SkillGapFinding,
   type FrictionFinding,
   type KnowledgeFinding,
-  type ImprovementFindings as FrictionImprovementFindings
+  type FrictionImprovementFindings
 } from './self-improve/friction-detector.js';
