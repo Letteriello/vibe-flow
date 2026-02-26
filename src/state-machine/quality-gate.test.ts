@@ -68,7 +68,7 @@ describe('QualityGateInterceptor', () => {
       const result = await interceptor.verifyQualityGate(mockState);
 
       const archCheck = result.checks.find(c => c.name === 'Architecture Validation');
-     ).toBeDefined expect(archCheck();
+      expect(archCheck).toBeDefined();
       expect(archCheck).toHaveProperty('passed');
       expect(archCheck).toHaveProperty('details');
     });
