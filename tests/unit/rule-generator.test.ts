@@ -18,7 +18,7 @@ describe('RuleGenerator', () => {
         systemicErrors: []
       };
 
-      const generator = new RuleGenerator(testWorkspacePath, true);
+      const generator = new RuleGenerator(testWorkspacePath);
       const rules = await generator.applyRules(findings, testWorkspacePath);
 
       expect(rules.length).toBeGreaterThan(0);
@@ -39,7 +39,7 @@ describe('RuleGenerator', () => {
         ]
       };
 
-      const generator = new RuleGenerator(testWorkspacePath, true);
+      const generator = new RuleGenerator(testWorkspacePath);
       const rules = await generator.applyRules(findings, testWorkspacePath);
 
       expect(rules.length).toBeGreaterThan(0);
@@ -57,7 +57,7 @@ describe('RuleGenerator', () => {
         ]
       };
 
-      const generator = new RuleGenerator(testWorkspacePath, true);
+      const generator = new RuleGenerator(testWorkspacePath);
       const rules = await generator.applyRules(findings, testWorkspacePath);
 
       expect(rules.length).toBeGreaterThanOrEqual(1);
@@ -73,7 +73,7 @@ describe('RuleGenerator', () => {
         systemicErrors: []
       };
 
-      const generator = new RuleGenerator(testWorkspacePath, true);
+      const generator = new RuleGenerator(testWorkspacePath);
       await generator.applyRules(findings, testWorkspacePath);
 
       const contents = generator.getFileContents();
@@ -90,7 +90,7 @@ describe('RuleGenerator', () => {
         systemicErrors: []
       };
 
-      const generator = new RuleGenerator(testWorkspacePath, true);
+      const generator = new RuleGenerator(testWorkspacePath);
       const rules = await generator.applyRules(findings, testWorkspacePath);
 
       expect(rules[0].filename).toBe('router-rules.md');
@@ -104,7 +104,7 @@ describe('RuleGenerator', () => {
         systemicErrors: []
       };
 
-      const generator = new RuleGenerator(testWorkspacePath, true);
+      const generator = new RuleGenerator(testWorkspacePath);
       const rules = await generator.applyRules(findings, testWorkspacePath);
 
       expect(rules[0].filename).toBe('react-hooks-rules.md');
@@ -118,7 +118,7 @@ describe('RuleGenerator', () => {
         systemicErrors: []
       };
 
-      const generator = new RuleGenerator(testWorkspacePath, true);
+      const generator = new RuleGenerator(testWorkspacePath);
       const rules = await generator.applyRules(findings, testWorkspacePath);
 
       expect(rules[0].filename).toBe('general-errors.md');
