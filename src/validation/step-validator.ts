@@ -82,8 +82,8 @@ export class StepValidator {
     const outputValidation = await this.validateOutput(state);
     validations.push(outputValidation);
 
-    // Check if all passed
-    const allPassed = validations.every(v => v.status === ValidationStatus.PASSED);
+    // Check if all passed (allow warnings, only fail on FAILED status)
+    const allPassed = !validations.some(v => v.status === ValidationStatus.FAILED);
     const failed = validations.find(v => v.status === ValidationStatus.FAILED);
 
     return {

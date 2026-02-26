@@ -2,11 +2,7 @@
   "mcpServers": {
     "vibe-flow": {
       "command": "node",
-      "args": [
-        "C:/Users/gabri/Desktop/vibe-flow/dist/mcp/official-server.js"
-      ],
-      "env": {},
-      "description": "Vibe-flow workflow orchestration system - exposes project management tools"
+      "args": ["C:/Users/gabri/Desktop/vibe-flow/dist/mcp/official-server.js"]
     }
   }
 }

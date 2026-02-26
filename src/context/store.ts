@@ -9,7 +9,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import * as crypto from 'crypto';
 
 /**
  * Tipo de transação possível no store
@@ -182,16 +181,11 @@ export class ImmutableStore {
     // Serializar para JSONL (uma linha por transação)
     const line = JSON.stringify(transaction) + '\n';
 
-    // Escrita atômica usando arquivo temporário
-    const tempPath = this.filePath + '.tmp.' + crypto.randomBytes(8).toString('hex');
-    fs.writeFileSync(tempPath, line, 'utf-8');
+    // Obter offset atual antes de escrever
+    const currentSize = fs.existsSync(this.filePath) ? fs.statSync(this.filePath).size : 0;
 
-    // Verificar se é append (o arquivo pode ter sido criado por outro processo)
-    const exists = fs.existsSync(this.filePath);
-    const currentSize = exists ? fs.statSync(this.filePath).size : 0;
-
-    // atomic rename para o arquivo final
-    fs.renameSync(tempPath, this.filePath);
+    // Append direto ao arquivo (append-only)
+    fs.appendFileSync(this.filePath, line, 'utf-8');
 
     // Atualizar índice
     this.lineCount++;
@@ -262,6 +256,8 @@ export class ImmutableStore {
         filteredIndexes = filteredIndexes.filter(entry => entry.timestamp <= endTime);
       }
 
+      const total = filteredIndexes.length;
+
       // Aplicar offset e limit nos índices
       const paginatedIndexes = filteredIndexes.slice(offset, offset + limit);
 
@@ -273,7 +269,6 @@ export class ImmutableStore {
         }
       }
 
-      const total = filteredIndexes.length;
       return {
         transactions,
         total,
