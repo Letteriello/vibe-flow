@@ -55,6 +55,13 @@ export class DecisionHandler {
         options: ['Finish', 'Continue Implementing', 'Override'],
         requiresJustification: true
       },
+      [Phase.WRAP_UP]: {
+        id: 'decision-wrap-up',
+        phase: Phase.WRAP_UP,
+        message: 'Wrap-up complete? Proceed to Complete?',
+        options: ['Continue', 'Review', 'Override'],
+        requiresJustification: true
+      },
       [Phase.COMPLETE]: null
     };
     return decisionPoints[phase];
