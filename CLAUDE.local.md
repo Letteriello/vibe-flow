@@ -74,3 +74,20 @@ Auto-generated lessons from vibe-flow sessions
   - FailureContext: testName, file, line, expected, received, errorType, summary
   - isRetryableFailure() - filters Syntax/Reference/TypeError
   - serializeFailureContext() - minimal string for LLM context
+
+## Session Notes (2026-02-27)
+- Created TaskIngestor in src/execution/tdd/task-queue.ts:
+  - TDDTaskStatus enum: PENDING, IN_PROGRESS, FAILED, COMPLETED
+  - TDDTask interface with id, description, status, priority, metadata
+  - TaskIngestor class parses Markdown checkboxes [ ] and [x]
+  - getNextTask() - extracts next incomplete item ordered by priority (indent level)
+  - markInProgress/markFailed/markCompleted/resetTask - state transitions
+  - getStats() - returns queue statistics (total, pending, inProgress, failed, completed)
+  - saveToFile/loadFromFile - JSON persistence
+  - Feeds TDDLoopController for execution loop
+
+## Session Notes (2026-02-27)
+- Fixed TypeScript errors in TDD modules:
+  - Fixed partiallyCoveredBranches property name in coverage-tracker.ts
+  - Fixed Set iteration with Array.from() for ES5 compatibility
+  - Added src/execution/tdd/index.ts export for coverage-tracker
