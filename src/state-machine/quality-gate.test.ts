@@ -1,6 +1,6 @@
 // Quality Gate Interceptor Tests
-import { QualityGateInterceptor, QualityGateStatus, Phase } from './quality-gate';
-import { ProjectState } from './index';
+import { QualityGateInterceptor, QualityGateStatus } from './quality-gate';
+import { ProjectState, Phase } from './index';
 
 describe('QualityGateInterceptor', () => {
   let interceptor: QualityGateInterceptor;

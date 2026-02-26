@@ -118,7 +118,7 @@ const DEFAULT_ARCHITECTURE_RULES: ArchitectureRule[] = [
     id: 'api-no-fs',
     name: 'API FileSystem Isolation',
     description: 'API routes must not directly access file system',
-    pattern: /(?:import|require)\s*\(?['"]fs['"]|require\s*\(\s*['"]fs['"]\s*\))/gi,
+    pattern: /(?:import|require)\s*(?:\(\s*)?['"](?:\.\.?\/)*fs['"]/gi,
     severity: 'warning',
     message: 'API route imports fs module - use dedicated file service',
     suggestion: 'Create a file service abstraction for file operations'
@@ -129,7 +129,7 @@ const DEFAULT_ARCHITECTURE_RULES: ArchitectureRule[] = [
     id: 'service-index-export',
     name: 'Service Index Pattern',
     description: 'Service modules should have index files for clean imports',
-    pattern: /import\s+.*?\s+from\s+['"]\.\/services\/[a-z]+['"`]/gi,
+    pattern: /import\s+.*?\s+from\s+['"]\.\/services\/[a-z]+['"]/gi,
     severity: 'info',
     message: 'Importing directly from service file - consider index export',
     suggestion: 'Create an index.ts that re-exports service members'

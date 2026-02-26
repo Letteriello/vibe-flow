@@ -316,8 +316,14 @@ async function analyzeFile(
       });
     }
 
-    // Check for == instead of ===
-    if (line.match(/[^!]=[^=]/)) {
+    // Check for == or != (but not === or !==) in actual code, not type declarations
+    // Exclude: type definitions, interfaces, generics, default values
+    const isTypeDeclaration = line.includes('type ') ||
+                              line.includes('interface ') ||
+                              line.match(/^\s*\w+:\s*[^=]/) ||
+                              line.includes('=>') ||
+                              line.match(/^\s*\*/);
+    if (!isTypeDeclaration && line.match(/[^!]==[^=]|[^!]!=[^=]/)) {
       findings.push({
         id: generateId(),
         severity: FindingSeverity.MEDIUM,
