@@ -2,7 +2,7 @@
 // Integrates MCP callers, validation guards, context pruning, fallback routing, and subagent isolation
 
 import { StateMachine, Phase, ProjectState, ActionType, TransitionAuditEntry } from './index.js';
-import { MCPClient, MCPClientManager, MCPToolResult } from '../mcp/client.js';
+import { MCPClient, MCPClientManager, MCPToolResult, MCPClientConfig } from '../mcp/client.js';
 import { MCPRouter, RouterConfig, DEFAULT_ROUTER_CONFIG } from '../mcp/router.js';
 import { FallbackRouter, FallbackConfig, DEFAULT_FALLBACK_CONFIG, FallbackResult } from '../mcp/fallback.js';
 import { MCPToolResponse } from '../mcp/types.js';
@@ -19,6 +19,7 @@ export interface OrchestratorConfig {
     router?: Partial<RouterConfig>;
     fallback?: Partial<FallbackConfig>;
     clientEnabled?: boolean;
+    client?: MCPClientConfig;
   };
   context: {
     maxTokens?: number;
@@ -174,7 +175,10 @@ export class Orchestrator {
     this.fallbackRouter = new FallbackRouter(config.mcp?.fallback ?? DEFAULT_FALLBACK_CONFIG);
 
     // Initialize MCP Client (Programmatic Caller equivalent)
-    this.mcpClient = config.mcp?.clientEnabled !== false ? new MCPClient() : null;
+    // Only initialize if explicit config provided, otherwise skip
+    this.mcpClient = config.mcp?.client && config.mcp.client.name && config.mcp.client.command
+      ? new MCPClient(config.mcp.client)
+      : null;
 
     // Initialize Context Manager
     this.contextManager = createContextManager({

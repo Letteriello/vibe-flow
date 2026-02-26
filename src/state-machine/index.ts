@@ -546,3 +546,18 @@ export {
   getGlobalLockManager,
   resetGlobalLockManager
 } from './file-lock.js';
+
+// Re-export Orchestrator - Advanced orchestration layer
+export {
+  Orchestrator,
+  OrchestratorConfig,
+  OrchestratorContext,
+  OrchestratorResult,
+  TransitionLifecycleHook,
+  SubagentIsolator,
+  ContextEditor,
+  LLMHttpClient,
+  createOrchestrator,
+  getDefaultOrchestrator,
+  DEFAULT_ORCHESTRATOR_CONFIG
+} from './orchestrator.js';
