@@ -543,6 +543,7 @@ export {
 export {
   WorkspaceLockManager,
   LockError,
+  LockType,
   getGlobalLockManager,
   resetGlobalLockManager
 } from './file-lock.js';
