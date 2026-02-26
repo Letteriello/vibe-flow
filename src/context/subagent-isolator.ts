@@ -204,7 +204,8 @@ The parent agent handles: ${this.config.retainedWork}
       .filter((m) => m.role === 'assistant')
       .pop();
     if (lastAssistant?.tool_calls && lastAssistant.tool_calls.length > 0) {
-      return lastAssistant.tool_calls[lastAssistant.tool_calls.length - 1].name;
+      const lastTool = lastAssistant.tool_calls[lastAssistant.tool_calls.length - 1];
+      return lastTool.function.name;
     }
     return '';
   }

@@ -274,7 +274,13 @@ export class Orchestrator {
         toolName,
         async () => {
           if (this.mcpClient) {
-            return await this.mcpClient.callTool(toolName, enrichedRequest);
+            const toolResult = await this.mcpClient.callTool(toolName, enrichedRequest);
+            return {
+              success: toolResult.success,
+              data: toolResult.data,
+              error: toolResult.error,
+              toolName
+            };
           }
           // Fallback to direct execution if no client
           return { success: true, data: null, toolName };
@@ -307,7 +313,7 @@ export class Orchestrator {
         error: result.error,
         context: preparedContext,
         fallbackUsed: false,
-        pruned: preparedContext.pruned
+        pruned: preparedContext.status.wasCompacted
       };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);

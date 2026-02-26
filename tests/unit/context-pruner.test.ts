@@ -37,7 +37,7 @@ function createMockMessages(count: number, withThinking: boolean = false): Array
 }
 
 // Helper to create mock tool messages
-function createMockToolMessages(): Array<{ role: string; content: string; name?: string; toolCalls?: Array<{ id: string; type: string; function: { name: string; arguments: string } }> }> {
+function createMockToolMessages(): Array<Record<string, unknown>> {
   return [
     { role: 'user', content: 'Read file', timestamp: '2026-01-01T00:00:00Z' },
     { role: 'assistant', content: 'Reading file...', timestamp: '2026-01-01T00:00:01Z' },
