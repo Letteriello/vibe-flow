@@ -18,40 +18,48 @@ const __dirname = path.dirname(__filename);
 
 // Import after setting up paths
 const projectRoot = path.resolve(__dirname, '../..');
-const storeModule = await import(path.join(projectRoot, 'dist/context/store.js'));
-const loggerModule = await import(path.join(projectRoot, 'dist/context/immutable-logger.js'));
-
-const ImmutableStore = storeModule.ImmutableStore;
-const ImmutableLogger = loggerModule.ImmutableLogger;
 
 describe('ImmutableStore', () => {
-  const testDir = path.join(projectRoot, '.vibe-flow', 'test-store');
-  let store: storeModule.ImmutableStore;
+  // Use unique directory for each test to avoid state pollution
+  const baseDir = path.join(projectRoot, '.vibe-flow', 'test-store');
+
+  // Import dynamically to avoid TypeScript issues
+  let ImmutableStore: any;
+  let testDir: string;
+  let store: any;
+  let testCounter = 0;
 
   beforeAll(async () => {
-    // Clean up test directory
+    const module = await import(path.join(projectRoot, 'dist/context/store.js'));
+    ImmutableStore = module.ImmutableStore;
+  });
+
+  beforeEach(async () => {
+    // Create unique directory for each test
+    testCounter++;
+    testDir = path.join(baseDir, `test-${testCounter}`);
+
+    // Clean up before each test
     try {
       await fs.promises.rm(testDir, { recursive: true, force: true });
     } catch {
       // Ignore
     }
-  });
 
-  afterAll(async () => {
-    // Clean up test directory
-    try {
-      await fs.promises.rm(testDir, { recursive: true, force: true });
-    } catch {
-      // Ignore
-    }
-  });
-
-  beforeEach(() => {
     // Create fresh store for each test
     store = new ImmutableStore({
       storageDir: testDir,
       enableIndex: true
     });
+  });
+
+  afterAll(async () => {
+    // Clean up all test directories
+    try {
+      await fs.promises.rm(baseDir, { recursive: true, force: true });
+    } catch {
+      // Ignore
+    }
   });
 
   describe('constructor', () => {
@@ -202,7 +210,7 @@ describe('ImmutableStore', () => {
       const result = store.search({ type: 'user_prompt' });
 
       expect(result.transactions.length).toBe(2);
-      expect(result.transactions.every(t => t.type === 'user_prompt')).toBe(true);
+      expect(result.transactions.every((t: any) => t.type === 'user_prompt')).toBe(true);
     });
 
     it('should filter by time range', () => {
@@ -229,7 +237,7 @@ describe('ImmutableStore', () => {
     });
 
     it('should return empty for no matches', () => {
-      const result = store.search({ type: 'nonexistent' as storeModule.TransactionType });
+      const result = store.search({ type: 'nonexistent' });
 
       expect(result.transactions.length).toBe(0);
       expect(result.total).toBe(0);
@@ -307,30 +315,39 @@ describe('ImmutableStore', () => {
 });
 
 describe('ImmutableLogger', () => {
-  const testDir = path.join(projectRoot, '.vibe-flow', 'test-logger');
-  let logger: loggerModule.ImmutableLogger;
+  const baseDir = path.join(projectRoot, '.vibe-flow', 'test-logger');
+  let ImmutableLogger: any;
+  let testDir: string;
+  let logger: any;
+  let loggerCounter = 0;
 
   beforeAll(async () => {
+    const module = await import(path.join(projectRoot, 'dist/context/immutable-logger.js'));
+    ImmutableLogger = module.ImmutableLogger;
+  });
+
+  beforeEach(async () => {
+    loggerCounter++;
+    testDir = path.join(baseDir, `test-${loggerCounter}`);
+
     try {
       await fs.promises.rm(testDir, { recursive: true, force: true });
     } catch {
       // Ignore
     }
-  });
 
-  afterAll(async () => {
-    try {
-      await fs.promises.rm(testDir, { recursive: true, force: true });
-    } catch {
-      // Ignore
-    }
-  });
-
-  beforeEach(() => {
     logger = new ImmutableLogger({
       storageDir: testDir,
       minLevel: 'debug'
     });
+  });
+
+  afterAll(async () => {
+    try {
+      await fs.promises.rm(baseDir, { recursive: true, force: true });
+    } catch {
+      // Ignore
+    }
   });
 
   describe('constructor', () => {
@@ -406,13 +423,13 @@ describe('ImmutableLogger', () => {
     it('should filter by level', () => {
       const result = logger.search({ level: 'error' });
 
-      expect(result.entries.every(e => e.level === 'error')).toBe(true);
+      expect(result.entries.every((e: any) => e.level === 'error')).toBe(true);
     });
 
     it('should filter by category', () => {
       const result = logger.search({ category: 'system' });
 
-      expect(result.entries.every(e => e.category === 'system')).toBe(true);
+      expect(result.entries.every((e: any) => e.category === 'system')).toBe(true);
     });
 
     it('should filter by message content', () => {
@@ -441,7 +458,7 @@ describe('ImmutableLogger', () => {
       const result = logger.getAuditLogs();
 
       expect(result.entries.length).toBe(2);
-      expect(result.entries.every(e => e.level === 'audit')).toBe(true);
+      expect(result.entries.every((e: any) => e.level === 'audit')).toBe(true);
     });
   });
 
@@ -464,8 +481,15 @@ describe('ImmutableLogger', () => {
 
 describe('Integration: Store + Logger', () => {
   const testDir = path.join(projectRoot, '.vibe-flow', 'test-integration');
+  let ImmutableStore: any;
+  let ImmutableLogger: any;
 
   beforeAll(async () => {
+    const storeModule = await import(path.join(projectRoot, 'dist/context/store.js'));
+    const loggerModule = await import(path.join(projectRoot, 'dist/context/immutable-logger.js'));
+    ImmutableStore = storeModule.ImmutableStore;
+    ImmutableLogger = loggerModule.ImmutableLogger;
+
     try {
       await fs.promises.rm(testDir, { recursive: true, force: true });
     } catch {
