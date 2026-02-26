@@ -43,3 +43,14 @@ Auto-generated lessons from vibe-flow sessions
   - Exports: CrossRuleValidator, validateCrossRule, CrossRuleStatus enum
   - Types: ValidationResult, CrossRuleOptions, CrossRuleIssue
   - Added exports to src/validation/index.ts
+
+## Session Notes (2026-02-27)
+- Created WALPruner in src/wrap-up/wal-pruner.ts:
+  - WALPruner class with static prune(logs: WALLogEvent[]): WALLogEvent[] method
+  - WALActionType: write, edit, delete, read, bash, create, move, copy
+  - WALLogEvent interface with id, timestamp, action, target, content, metadata
+  - Algorithm: sorts by timestamp, removes exact duplicates, keeps latest version per target
+  - If last action is delete, removes file from final result (write + delete = removed)
+  - pruneWithStats() returns detailed PruneResult with counts
+  - Strong TypeScript typing throughout
+  - Build compiles successfully

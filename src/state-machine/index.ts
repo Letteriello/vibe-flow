@@ -195,17 +195,19 @@ export class StateMachine {
   private auditLog: TransitionAuditEntry[] = [];
 
   constructor() {
-    this.ensureStateDirectory();
+    // Defer directory creation to avoid blocking constructor
+    this.ensureStateDirectoryAsync();
+  }
+
+  private ensureStateDirectoryAsync(): void {
+    this.ensureStateDirectory().catch(error => {
+      console.error('[StateMachine] Failed to create state directory:', error);
+    });
   }
 
   private async ensureStateDirectory(): Promise<void> {
     const stateDir = dirname(STATE_FILE);
-    try {
-      await fs.mkdir(stateDir, { recursive: true });
-    } catch (error) {
-      // Log error for debugging but don't fail - directory may already exist
-      console.error('[StateMachine] Failed to create state directory:', error);
-    }
+    await fs.mkdir(stateDir, { recursive: true });
   }
 
   async initialize(projectName: string): Promise<ProjectState> {
