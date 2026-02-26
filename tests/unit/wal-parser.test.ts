@@ -1,6 +1,6 @@
 // WAL Parser Tests - Unit tests para o parser assíncrono via streams
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -162,8 +162,7 @@ describe('WALParser', () => {
         { id: '2', timestamp: 2000, action: 'read', target: '/b.txt' }
       ].map(e => JSON.stringify(e)).join('\n'));
 
-      let count = 0;
-      const callback = jest.fn();
+      const callback = jest.fn<(event: WALLogEvent) => void | Promise<void>>();
 
       await forEachWALEvent(testFile, callback);
 
