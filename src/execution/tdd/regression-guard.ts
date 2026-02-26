@@ -635,7 +635,7 @@ export class RegressionGuard {
     }
 
     // Find new failures and fixed tests
-    for (const [name, baselineResult] of this.baselineResults) {
+    for (const [name, baselineResult] of Array.from(this.baselineResults.entries())) {
       const currentResult = currentResults.get(name);
 
       if (!currentResult) {
@@ -651,7 +651,7 @@ export class RegressionGuard {
     }
 
     // Find new tests that failed
-    for (const [name, currentResult] of currentResults) {
+    for (const [name, currentResult] of Array.from(currentResults.entries())) {
       if (!this.baselineResults.has(name) && currentResult.status === 'fail') {
         newFailures.push(name);
       }

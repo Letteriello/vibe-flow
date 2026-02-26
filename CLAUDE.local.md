@@ -64,3 +64,13 @@ Auto-generated lessons from vibe-flow sessions
   - pruneWithStats() returns detailed PruneResult with counts
   - Strong TypeScript typing throughout
   - Build compiles successfully
+
+## Session Notes (2026-02-27)
+- Created TDD FailureAnalyzer in src/execution/tdd/failure-analyzer.ts:
+  - parseTestFailure(rawError: string): FailureContext
+  - Extracts test name from Jest (●) and Vitest (FAIL >) patterns
+  - Expected/Received via Regex extraction
+  - Stack trace parsing for file:line
+  - FailureContext: testName, file, line, expected, received, errorType, summary
+  - isRetryableFailure() - filters Syntax/Reference/TypeError
+  - serializeFailureContext() - minimal string for LLM context

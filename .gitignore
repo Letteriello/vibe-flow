@@ -18,6 +18,9 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# Drafts (not versioned)
+drafts/
+
 # Logs
 logs/
 *.log
