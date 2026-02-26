@@ -325,14 +325,9 @@ ${message}
   }
 
   /**
-   * Write a rule file to disk (or simulate if dryRun)
+   * Write a rule file to disk
    */
   private async writeRuleFile(rule: GeneratedRule): Promise<void> {
-    if (this.dryRun) {
-      this.fileContents.set(rule.filename, rule.content);
-      return;
-    }
-
     const filepath = join(this.rulesDir, rule.filename);
 
     try {
