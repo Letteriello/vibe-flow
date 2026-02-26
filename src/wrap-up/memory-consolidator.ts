@@ -255,14 +255,6 @@ export function generateMemoryDelta(sessionInsights: SessionInsights): MemoryDel
     }
   }
 
-  // Also update category counts after processing
-  for (const category of sortedCategories) {
-    const categoryInsights = grouped.get(category);
-    if (categoryInsights) {
-      categories[category] = categoryInsights.length;
-    }
-  }
-
   // If no categorized insights, add a simple marker
   if (lines.length === 0) {
     lines.push('- Wrap-up session executed');

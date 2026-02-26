@@ -389,8 +389,8 @@ export async function runFormattingGuardrails(
 
   // Execute tools in parallel
   const results = await Promise.all([
-    runPrettierCheck ? runPrettier(filesToCheck, cwd, timeout) : Promise.resolve(undefined),
-    runEslintCheck ? runEslint(filesToCheck, cwd, timeout) : Promise.resolve(undefined)
+    runPrettierCheck ? executePrettier(filesToCheck, cwd, timeout) : Promise.resolve(undefined),
+    runEslintCheck ? executeEslint(filesToCheck, cwd, timeout) : Promise.resolve(undefined)
   ]);
 
   const prettierResult = results[0];
