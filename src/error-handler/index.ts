@@ -684,3 +684,17 @@ export type {
 
 export { recovery, RecoveryManager, performRecovery, performAutoRecovery } from './recovery.js';
 export type { RecoveryResult as RecoveryOutcome, RecoveryOptions } from './recovery.js';
+
+// Circuit Breaker exports
+export {
+  AgentCircuitBreaker,
+  CircuitBreakerState,
+  CircuitBreakerErrorCode,
+  CircuitBreakerError,
+  CircuitBreakerConfig,
+  CircuitBreakerResult,
+  createBuildCircuitBreaker,
+  createTestCircuitBreaker,
+  createAgentCircuitBreaker
+} from './circuit-breaker.js';
+export type { CircuitBreakerConfig as CircuitBreakerOptions, CircuitBreakerResult as CircuitBreakerOutcome } from './circuit-breaker.js';

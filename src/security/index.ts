@@ -23,3 +23,12 @@ export {
   isCritical,
   shouldStopOnSeverity
 } from './rules.js';
+
+// Export from secret-scanner.ts (static methods for payload scanning)
+export { scanDiffForSecrets } from './secret-scanner.js';
+export { SecurityScanner as PayloadSecurityScanner } from './secret-scanner.js';
+export type {
+  SecurityFinding,
+  SecurityReport,
+  ScanResult
+} from './secret-scanner.js';

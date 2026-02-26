@@ -18,3 +18,6 @@ export type { LinterConfig, LinterResult } from './linter.js';
 
 export { runFormattingGuardrails, checkFileFormatting, formatDiagnosticSummary } from './formatter-hook.js';
 export type { FormatterDiagnostic, FormatterHookConfig, FormattedIssue } from './formatter-hook.js';
+
+export { SemanticQualityChecker, createSemanticChecker } from './ast-checker.js';
+export type { SyntaxAnomaly, QualityCheckResult } from './ast-checker.js';

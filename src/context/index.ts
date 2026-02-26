@@ -125,3 +125,17 @@ export {
   analyzeTextPreview,
   generateCodeStructure
 } from './file-analyzer.js';
+// Hierarchical Context Manager - Compactação hierárquica de contexto
+export {
+  HierarchicalContextManager,
+  createHierarchicalContextManager,
+  HierarchicalConfig,
+  CompactionResult,
+  CompactedContextResult,
+  ExpandNodeResult,
+  HierarchicalError,
+  ContextEntry,
+  ContextEntryType,
+  SummaryNode,
+  HierarchicalState
+} from './hierarchical.js';

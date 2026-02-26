@@ -866,3 +866,12 @@ export type { MCPClientConfig, MCPToolResult } from './client.js';
 
 // Re-export Official MCP Server
 export { VibeFlowMCPServer } from './official-server.js';
+
+// Re-export Telemetry Tracker
+export { MCPTelemetryTracker } from './telemetry.js';
+export type {
+  TelemetryRecord,
+  SessionMetrics,
+  ToolUsageStats,
+  TokenEstimateConfig
+} from './telemetry.js';

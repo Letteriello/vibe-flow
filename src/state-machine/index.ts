@@ -531,3 +531,11 @@ export {
   TransitionMetric,
   PhaseMetrics
 } from './telemetry.js';
+
+// Re-export Story 1.6: Workspace Lock Manager (File Lock)
+export {
+  WorkspaceLockManager,
+  LockError,
+  getGlobalLockManager,
+  resetGlobalLockManager
+} from './file-lock.js';

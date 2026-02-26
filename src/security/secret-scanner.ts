@@ -1,8 +1,36 @@
-// Secret Scanner - Scan diffs for exposed credentials
-// Uses robust RegEx patterns to detect common credential patterns
+// Security Scanner - Scan payloads for secrets and prompt injection
+// Uses robust RegEx patterns to detect common credential patterns and prompt injection
 
 // ============================================
-// ScanResult Interface
+// SecurityReport Interface
+// ============================================
+
+export interface SecurityFinding {
+  type: 'secret' | 'prompt_injection' | 'suspicious_pattern';
+  category: string;
+  pattern: string;
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  description: string;
+  match: string;
+}
+
+export interface SecurityReport {
+  isSecure: boolean;
+  findings: SecurityFinding[];
+  secretsFound: string[];
+  promptInjectionDetected: boolean;
+  summary: {
+    total: number;
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    info: number;
+  };
+}
+
+// ============================================
+// ScanResult Interface (legacy compatibility)
 // ============================================
 
 export interface ScanResult {
@@ -242,8 +270,327 @@ const SECRET_PATTERNS: SecretPattern[] = [
     name: 'PyPI Token',
     pattern: /\bpypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{50,}\b/g,
     description: 'PyPI Token detected'
+  },
+  // Default Passwords
+  {
+    name: 'Default Password',
+    pattern: /(?:password|passwd|pwd)\s*[=:]\s*["']?(?:admin|root|123456|password|default|letmein|welcome|qwerty)["']?/gi,
+    description: 'Default or common password detected'
   }
 ];
+
+// ============================================
+// Prompt Injection Patterns
+// ============================================
+
+interface InjectionPattern {
+  name: string;
+  pattern: RegExp;
+  description: string;
+  severity: 'critical' | 'high' | 'medium';
+}
+
+const INJECTION_PATTERNS: InjectionPattern[] = [
+  // Classic "ignore previous instructions"
+  {
+    name: 'Ignore Previous Instructions',
+    pattern: /(?:ignore\s+(?:all\s+)?(?:previous|prior|earlier)\s+(?:instructions?|commands?|directives?|requests?))/gi,
+    description: 'Attempt to override previous system instructions',
+    severity: 'critical'
+  },
+  // "Ignore all" commands
+  {
+    name: 'Ignore All Command',
+    pattern: /(?:ignore\s+all\b|disregard\s+all|forget\s+(?:everything|all\s+previous))/gi,
+    description: 'Attempt to make model forget context',
+    severity: 'critical'
+  },
+  // "System prompt" extraction attempts
+  {
+    name: 'System Prompt Extraction',
+    pattern: /(?:(?:reveal|show|tell|give|extract)\s+(?:me\s+)?(?:your\s+)?(?:system\s+)?(?:prompt|instructions?|system)|what\s+(?:are|is)\s+your\s+(?:system\s+)?instructions)/gi,
+    description: 'Attempt to extract system prompt',
+    severity: 'critical'
+  },
+  // "You are now" / role playing overrides
+  {
+    name: 'Role Override',
+    pattern: /(?:you\s+(?:are\s+now|have\s+become|will\s+be)|act\s+as\s+(?:if|though)|pretend\s+(?:to\s+be|you\s+are)|roleplay\s+(?:as|being))/gi,
+    description: 'Attempt to override system role',
+    severity: 'high'
+  },
+  // Jailbreak prompts
+  {
+    name: 'Jailbreak Prompt',
+    pattern: /(?:DAN\s+mode|do\s+anything\s+now|developer\s+mode|bypass\s+(?:ethics|restrictions?)|jailbreak)/gi,
+    description: 'Known jailbreak attempt detected',
+    severity: 'critical'
+  },
+  // "New instructions" override
+  {
+    name: 'Instruction Override',
+    pattern: /(?:instead\s+of\s+(?:what|that)|new\s+instructions?|overriding|replace\s+(?:your|these))/gi,
+    description: 'Attempt to provide new conflicting instructions',
+    severity: 'high'
+  },
+  // XML/JSON tag injection
+  {
+    name: 'XML Tag Injection',
+    pattern: /<\/?(?:system|instructions|prompt|override)>/gi,
+    description: 'XML-style instruction injection attempt',
+    severity: 'high'
+  },
+  // Base64 encoded instructions
+  {
+    name: 'Encoded Instructions',
+    pattern: /(?:base64|decode|encoded)\s*(?:instructions?|payload|command)/gi,
+    description: 'Attempt to hide instructions in encoding',
+    severity: 'medium'
+  },
+  // "Forget safety" patterns
+  {
+    name: 'Safety Override',
+    pattern: /(?:ignore\s+(?:safety|ethical|content\s+policy)|bypass\s+(?:safety|filter|restriction)|disable\s+(?:safety|filter))/gi,
+    description: 'Attempt to disable safety measures',
+    severity: 'critical'
+  },
+  // "Confidential" / "Not for reproduction"
+  {
+    name: 'Confidential Injection',
+    pattern: /(?:this\s+is\s+(?:confidential|secret|private)|do\s+not\s+(?:share|repeat|output)|strictly\s+confidential)/gi,
+    description: 'Attempt to hide malicious instructions as confidential',
+    severity: 'medium'
+  },
+  // "Previous message was corrupted"
+  {
+    name: 'Corruption Claim',
+    pattern: /(?:previous\s+(?:message|response|output)\s+(?:was\s+)?(?:corrupted|malformed|truncated)|message\s+corruption)/gi,
+    description: 'Claim of message corruption to override context',
+    severity: 'medium'
+  }
+];
+
+// ============================================
+// SecurityScanner Class
+// ============================================
+
+/**
+ * SecurityScanner - Static methods for scanning payloads (AI-generated code)
+ * for hardcoded secrets and prompt injection attempts.
+ */
+export class SecurityScanner {
+  /**
+   * Main method to scan a payload for security issues.
+   * Detects hardcoded secrets (JWT, AWS keys, passwords) and prompt injection patterns.
+   *
+   * @param payload - The string content to scan (e.g., AI-generated code)
+   * @returns SecurityReport with findings and summary
+   */
+  static scanPayload(payload: string): SecurityReport {
+    const findings: SecurityFinding[] = [];
+    const secretsFound: string[] = [];
+    let promptInjectionDetected = false;
+
+    if (!payload || typeof payload !== 'string') {
+      return {
+        isSecure: true,
+        findings: [],
+        secretsFound: [],
+        promptInjectionDetected: false,
+        summary: { total: 0, critical: 0, high: 0, medium: 0, low: 0, info: 0 }
+      };
+    }
+
+    // Scan for secrets
+    for (const secretPattern of SECRET_PATTERNS) {
+      secretPattern.pattern.lastIndex = 0;
+      const matches = payload.match(secretPattern.pattern);
+
+      if (matches && matches.length > 0) {
+        const uniqueMatches = [...new Set(matches)];
+
+        for (const match of uniqueMatches) {
+          findings.push({
+            type: 'secret',
+            category: secretPattern.name,
+            pattern: secretPattern.name,
+            severity: 'critical',
+            description: secretPattern.description,
+            match: match.substring(0, 50)
+          });
+
+          if (!secretsFound.includes(secretPattern.name)) {
+            secretsFound.push(secretPattern.name);
+          }
+        }
+      }
+    }
+
+    // Scan for prompt injection
+    for (const injectionPattern of INJECTION_PATTERNS) {
+      injectionPattern.pattern.lastIndex = 0;
+      const matches = payload.match(injectionPattern.pattern);
+
+      if (matches && matches.length > 0) {
+        promptInjectionDetected = true;
+        const uniqueMatches = [...new Set(matches)];
+
+        for (const match of uniqueMatches) {
+          findings.push({
+            type: 'prompt_injection',
+            category: injectionPattern.name,
+            pattern: injectionPattern.name,
+            severity: injectionPattern.severity,
+            description: injectionPattern.description,
+            match: match.substring(0, 100)
+          });
+        }
+      }
+    }
+
+    // Calculate summary
+    const summary = {
+      total: findings.length,
+      critical: findings.filter(f => f.severity === 'critical').length,
+      high: findings.filter(f => f.severity === 'high').length,
+      medium: findings.filter(f => f.severity === 'medium').length,
+      low: findings.filter(f => f.severity === 'low').length,
+      info: findings.filter(f => f.severity === 'info').length
+    };
+
+    return {
+      isSecure: findings.length === 0,
+      findings,
+      secretsFound,
+      promptInjectionDetected,
+      summary
+    };
+  }
+
+  /**
+   * Scan only for hardcoded secrets in a payload.
+   *
+   * @param payload - The string content to scan
+   * @returns ScanResult with hasSecrets boolean and findings array
+   */
+  static scanForSecrets(payload: string): ScanResult {
+    return scanDiffForSecrets(payload);
+  }
+
+  /**
+   * Scan only for prompt injection patterns in a payload.
+   *
+   * @param payload - The string content to scan
+   * @returns Array of injection findings
+   */
+  static scanForPromptInjection(payload: string): SecurityFinding[] {
+    const findings: SecurityFinding[] = [];
+
+    if (!payload || typeof payload !== 'string') {
+      return findings;
+    }
+
+    for (const injectionPattern of INJECTION_PATTERNS) {
+      injectionPattern.pattern.lastIndex = 0;
+      const matches = payload.match(injectionPattern.pattern);
+
+      if (matches && matches.length > 0) {
+        const uniqueMatches = [...new Set(matches)];
+
+        for (const match of uniqueMatches) {
+          findings.push({
+            type: 'prompt_injection',
+            category: injectionPattern.name,
+            pattern: injectionPattern.name,
+            severity: injectionPattern.severity,
+            description: injectionPattern.description,
+            match: match.substring(0, 100)
+          });
+        }
+      }
+    }
+
+    return findings;
+  }
+
+  /**
+   * Check if a payload contains any prompt injection patterns.
+   *
+   * @param payload - The string content to check
+   * @returns true if prompt injection detected
+   */
+  static hasPromptInjection(payload: string): boolean {
+    if (!payload || typeof payload !== 'string') {
+      return false;
+    }
+
+    for (const injectionPattern of INJECTION_PATTERNS) {
+      injectionPattern.pattern.lastIndex = 0;
+      if (injectionPattern.pattern.test(payload)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a payload contains hardcoded secrets.
+   *
+   * @param payload - The string content to check
+   * @returns true if secrets detected
+   */
+  static hasSecrets(payload: string): boolean {
+    if (!payload || typeof payload !== 'string') {
+      return false;
+    }
+
+    for (const secretPattern of SECRET_PATTERNS) {
+      secretPattern.pattern.lastIndex = 0;
+      if (secretPattern.pattern.test(payload)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Get a detailed report of all detected secrets.
+   *
+   * @param payload - The string content to analyze
+   * @returns Array of secret findings with details
+   */
+  static getSecretDetails(payload: string): SecurityFinding[] {
+    const findings: SecurityFinding[] = [];
+
+    if (!payload || typeof payload !== 'string') {
+      return findings;
+    }
+
+    for (const secretPattern of SECRET_PATTERNS) {
+      secretPattern.pattern.lastIndex = 0;
+      const matches = payload.match(secretPattern.pattern);
+
+      if (matches && matches.length > 0) {
+        const uniqueMatches = [...new Set(matches)];
+
+        for (const match of uniqueMatches) {
+          findings.push({
+            type: 'secret',
+            category: secretPattern.name,
+            pattern: secretPattern.name,
+            severity: 'critical',
+            description: secretPattern.description,
+            match: match.substring(0, 50)
+          });
+        }
+      }
+    }
+
+    return findings;
+  }
+}
 
 /**
  * Scans a diff text for exposed secrets using robust RegEx patterns.

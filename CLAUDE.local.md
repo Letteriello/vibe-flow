@@ -2,8 +2,6 @@
 
 Auto-generated lessons from vibe-flow sessions
 
-
-
 ## Auto-Learned Lessons
 
 ## Auto-Learned Lessons

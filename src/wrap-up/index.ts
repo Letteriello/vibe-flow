@@ -9,6 +9,7 @@ import { ConfigManager, WrapUpConfig } from '../config/index.js';
 import { StateMachine, ProjectState } from '../state-machine/index.js';
 import { Consolidation, getConsolidation } from './consolidation.js';
 import { getMemory } from './memory.js';
+import { SessionAuditLogger, AuditEntry, AuditReport } from './audit-logger.js';
 
 const execAsync = promisify(exec);
 
@@ -542,3 +543,6 @@ ${state.errors && state.errors.length > 0 ? state.errors.map(e => `- ${e.phase}:
     await fs.writeFile(reportPath, JSON.stringify(result, null, 2), 'utf-8');
   }
 }
+
+// Re-export audit logger
+export { SessionAuditLogger, AuditEntry, AuditReport };
