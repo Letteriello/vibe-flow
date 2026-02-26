@@ -654,8 +654,9 @@ export class MCPServer {
       },
       handler: async (params: { mode?: string; dryRun?: boolean; force?: boolean }) => {
         const config = await this.configManager.get();
+        const force = params.force || false;
 
-        if (!config.wrapUp.enabled) {
+        if (!force && !config.wrapUp.enabled) {
           return {
             success: false,
             error: 'Wrap-up is not enabled. Enable it in configuration first.'
@@ -667,7 +668,7 @@ export class MCPServer {
         const dryRun = params.dryRun || false;
 
         try {
-          const result = await this.wrapUpExecutor.execute(mode, dryRun);
+          const result = await this.wrapUpExecutor.execute(mode, dryRun, force);
           await this.wrapUpExecutor.saveReport(result);
 
           return {

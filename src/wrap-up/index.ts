@@ -606,3 +606,28 @@ export {
   type KnowledgeFinding,
   type FrictionImprovementFindings
 } from './self-improve/friction-detector.js';
+
+// Re-export OntologyMetadataTagger
+export {
+  OntologyMetadataTagger,
+  type RAGMetadata,
+  type DomainKeyword,
+  type ObjectKeyword,
+  type ActionKeyword
+} from './intelligence/rag-metadata.js';
+
+// Re-export FinalQAAuditor
+export {
+  FinalQAAuditor,
+  type QAReport,
+  type QAAlert
+} from './intelligence/qa-auditor.js';
+
+// Re-export EscalationSummarizer
+export {
+  EscalationSummarizer,
+  createEscalationSummarizer,
+  type SummarizationResult,
+  type LLMProvider,
+  type EscalationOptions
+} from './intelligence/summarization-escalation.js';
