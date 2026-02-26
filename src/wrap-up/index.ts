@@ -562,3 +562,47 @@ export {
   type FlushResult,
   type ConsolidatorOptions
 } from './incremental.js';
+
+// Re-export RuleGenerator
+export {
+  RuleGenerator,
+  type ImprovementFindings,
+  type SkillGap,
+  type SystemicError,
+  type GeneratedRule
+} from './self-improve/rule-generator.js';
+
+// Re-export AutonomyMetricsTracker
+export {
+  AutonomyMetricsTracker,
+  type DiffLine,
+  type Diff,
+  type HumanEdit,
+  type AcceptanceMetrics,
+  type TelemetrySummary
+} from './self-improve/autonomy-metrics.js';
+
+// Re-export DocFreshnessValidator
+export {
+  DocFreshnessValidator,
+  type DocFreshnessResult,
+  type DocRule
+} from './self-improve/doc-freshness.js';
+
+// Re-export ContentDrafter
+export {
+  PostSessionDrafter,
+  type DraftReport,
+  type ResolvedBug
+} from './self-improve/content-drafter.js';
+
+// Re-export FrictionDetector
+export {
+  FrictionDetector,
+  analyzeSessionLogs,
+  type LogEntry,
+  type SkillGapFinding,
+  type FrictionFinding,
+  type KnowledgeFinding,
+  type ImprovementFindings as FrictionImprovementFindings
+} from './self-improve/friction-detector.js';

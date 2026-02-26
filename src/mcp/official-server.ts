@@ -20,7 +20,7 @@ class VibeFlowMCPServer {
 
     if (!this._mcpServerPromise) {
       this._mcpServerPromise = (async () => {
-        // Dynamic import to avoid circular dependency
+        // Dynamic import to avoid circular dependency - lazy load
         const mcp = await import('./index.js');
         this._mcpServer = new mcp.MCPServer();
         return this._mcpServer;
@@ -47,7 +47,7 @@ class VibeFlowMCPServer {
   }
 
   private setupHandlers(): void {
-    // List available tools
+    // List available tools - lazy load
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       const mcpServer = await this.getMcpServer();
       const tools = mcpServer.getTools();
@@ -61,7 +61,7 @@ class VibeFlowMCPServer {
       };
     });
 
-    // Handle tool calls
+    // Handle tool calls - lazy load
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
@@ -99,8 +99,20 @@ class VibeFlowMCPServer {
   }
 }
 
-// Start the server if this file is executed directly
-const server = new VibeFlowMCPServer();
-server.start().catch(console.error);
+// Lazy load the server - only create when actually needed
+let serverInstance: VibeFlowMCPServer | null = null;
 
-export { VibeFlowMCPServer };
+async function getServer(): Promise<VibeFlowMCPServer> {
+  if (!serverInstance) {
+    serverInstance = new VibeFlowMCPServer();
+    await serverInstance.start();
+  }
+  return serverInstance;
+}
+
+// Start the server when this file is loaded - but only if in stdio mode
+if (process.env.MCP_SERVER_MODE !== 'manual') {
+  getServer().catch(console.error);
+}
+
+export { VibeFlowMCPServer, getServer };
