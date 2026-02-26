@@ -2,7 +2,7 @@
 // Integrates MCP callers, validation guards, context pruning, fallback routing, and subagent isolation
 
 import { StateMachine, Phase, ProjectState, ActionType, TransitionAuditEntry } from './index.js';
-import { MCPClient, MCPClientManager } from '../mcp/client.js';
+import { MCPClient, MCPClientManager, MCPToolResult } from '../mcp/client.js';
 import { MCPRouter, RouterConfig, DEFAULT_ROUTER_CONFIG } from '../mcp/router.js';
 import { FallbackRouter, FallbackConfig, DEFAULT_FALLBACK_CONFIG, FallbackResult } from '../mcp/fallback.js';
 import { MCPToolResponse } from '../mcp/types.js';
@@ -185,7 +185,7 @@ export class Orchestrator {
     this.contextEditor = new ContextEditor(this.contextManager, config.context);
 
     // Initialize Step Validator (Delegation Guard equivalent)
-    this.stepValidator = new StepValidator();
+    this.stepValidator = new StepValidator('./_bmad-output');
 
     // Initialize Subagent Isolator
     this.subagentIsolator = new SubagentIsolator(config.isolation);
@@ -275,10 +275,10 @@ export class Orchestrator {
         toolName,
         async () => {
           if (this.mcpClient) {
-            const toolResult = await this.mcpClient.callTool(toolName, enrichedRequest);
+            const toolResult: MCPToolResult = await this.mcpClient.callTool(toolName, enrichedRequest);
             return {
               success: toolResult.success,
-              data: toolResult.data,
+              data: toolResult.content,
               error: toolResult.error,
               toolName
             };

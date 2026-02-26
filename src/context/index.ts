@@ -79,7 +79,6 @@ export {
   thinkingBlockClearing,
   staleToolClearing,
   needsAggressiveCleaning,
-  ContextMessage,
   ActiveWindowConfig,
   CleaningResult
 } from './pruning.js';
