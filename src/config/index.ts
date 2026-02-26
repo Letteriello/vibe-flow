@@ -6,6 +6,9 @@ import { homedir } from 'os';
 // Re-export fallback router
 export * from './fallback-router.js';
 
+// Re-export cognitive tiering router
+export * from './cognitive-tiering.js';
+
 export interface UserPreferences {
   language: string;
   autoAdvance: boolean;

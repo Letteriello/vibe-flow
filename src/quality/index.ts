@@ -21,3 +21,9 @@ export type { FormatterDiagnostic, FormatterHookConfig, FormattedIssue } from '.
 
 export { SemanticQualityChecker, createSemanticChecker } from './ast-checker.js';
 export type { SyntaxAnomaly, QualityCheckResult } from './ast-checker.js';
+
+export { ArchitectureGuard } from './architecture-guard.js';
+export type { GuardViolation, GuardResult, ArchitectureRule } from './architecture-guard.js';
+
+export { CodeDenoiser, denoiseCode } from './denoiser.js';
+export type { DenoiseResult, DenoiseRemoval, DenoiseStatistics, DenoiseRemovalType } from './denoiser.js';

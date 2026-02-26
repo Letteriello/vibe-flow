@@ -698,3 +698,20 @@ export {
   createAgentCircuitBreaker
 } from './circuit-breaker.js';
 export type { CircuitBreakerConfig as CircuitBreakerOptions, CircuitBreakerResult as CircuitBreakerOutcome } from './circuit-breaker.js';
+
+// Refiner Loop exports (Self-Healing Mechanism)
+export {
+  RefinerManager,
+  createRefinerManager,
+  hasActionableIssues,
+  filterIssuesBySeverity,
+  IssueSeverity,
+  IssueCategory,
+  RefinementTaskStatus,
+  CriticIssue,
+  CriticReport,
+  RefinementTask,
+  RefinementStatus,
+  RefinerConfig
+} from './refiner-loop.js';
+export type { RefinerConfig as RefinerOptions } from './refiner-loop.js';

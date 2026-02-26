@@ -562,3 +562,17 @@ export {
   getDefaultOrchestrator,
   DEFAULT_ORCHESTRATOR_CONFIG
 } from './orchestrator.js';
+
+// Re-export Quality Gate Interceptor - Architectural quality gate
+export {
+  QualityGateInterceptor,
+  QualityGateStatus,
+  QualityGateResult,
+  QualityCheck,
+  RefinementAction,
+  ArchitectureGuard,
+  RefinerManager,
+  createQualityGate,
+  getGlobalQualityGate,
+  resetGlobalQualityGate
+} from './quality-gate.js';

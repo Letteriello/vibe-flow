@@ -1,6 +1,16 @@
 // Decision Handler - FR-006: Decision point interaction and workflow overrides
 import { Phase } from '../state-machine/index.js';
 
+// Re-export ensemble voting types and class
+export {
+  EnsembleVotingMechanism,
+  AgentVote,
+  DivergencePoint,
+  ConsensusResult
+} from './ensemble-voting.js';
+
+export { ProjectState, analyzeProjectMaturity } from './state-detector.js';
+
 export interface DecisionPoint {
   id: string;
   phase: Phase;

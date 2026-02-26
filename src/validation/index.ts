@@ -22,3 +22,5 @@ export { SpecVersioning, createSpecVersion, compareSpecVersions, rollbackSpecVer
 export type { SpecVersion, SpecVersionHistory, VersionComparison, VersionChange, SpecVersioningOptions } from './spec-versioning.js';
 export { SubAgentDelegationGuard, validateDelegation, InfiniteDelegationError } from './delegation-guard.js';
 export type { DelegationRequest, DelegationValidationResult } from './delegation-guard.js';
+export { ImplementationDriftDetector, detectDrift, DriftType, DriftSeverity } from './drift-detector.js';
+export type { DriftReport, DriftItem, DriftDetectorOptions } from './drift-detector.js';

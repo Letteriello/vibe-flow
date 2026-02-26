@@ -6,6 +6,7 @@ import { HelpExecutor } from '../help/index.js';
 import { CommandRegistry } from '../command-registry/index.js';
 import { getLCMTools } from './tools/lcm-tools.js';
 import { JobStatusManager, getWrapUpJobStatus, registerWrapUpJob, updateWrapUpJobStatus, initializeJobStatusManager } from './status-polling.js';
+import { getAdversarialReviewTool } from './adversarial-critic.js';
 
 export interface MCPTool {
   name: string;
@@ -780,6 +781,15 @@ export class MCPServer {
         handler: tool.handler
       });
     }
+
+    // Register Adversarial Review tool
+    const adversarialTool = getAdversarialReviewTool();
+    this.tools.set(adversarialTool.name, {
+      name: adversarialTool.name,
+      description: adversarialTool.description,
+      inputSchema: adversarialTool.inputSchema,
+      handler: adversarialTool.handler
+    });
   }
 
   getTools(): MCPTool[] {
@@ -994,3 +1004,17 @@ export type {
   RegisteredAgent,
   BrokerStats
 } from './acp-broker.js';
+
+// Re-export Adversarial Critic (Adversarial Review Tool)
+export {
+  adversarialReview,
+  getAdversarialReviewTool,
+  getCriticSystemPrompt,
+  FindingSeverity,
+  FindingCategory
+} from './adversarial-critic.js';
+export type {
+  AdversarialFinding,
+  AdversarialReviewResult,
+  AdversarialReviewInput
+} from './adversarial-critic.js';
