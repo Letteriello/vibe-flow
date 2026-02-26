@@ -41,7 +41,7 @@ const DEFAULT_ARCHITECTURE_RULES: ArchitectureRule[] = [
     id: 'ui-no-db-queries',
     name: 'UI-DB Isolation',
     description: 'UI components must not import database query logic directly',
-    pattern: /(?:import|require)\s*\(?['"](?:\.\.?\/)*(?:db|database|queries?|sql|prisma| knex | mongoose)[\/'`](?:\?.*)?(?!\.css)/gi,
+    pattern: /(?:import|require).*?(?:from\s+)?['"](?:\.\.?\/)*(?:db|database|queries?|sql|prisma|knex|mongoose)/gi,
     severity: 'error',
     message: 'UI component imports database query layer - violates layer isolation',
     suggestion: 'Move database logic to a service/repository layer and import from there'
@@ -52,7 +52,7 @@ const DEFAULT_ARCHITECTURE_RULES: ArchitectureRule[] = [
     id: 'ui-no-infra',
     name: 'UI-Infrastructure Isolation',
     description: 'UI components must not import infrastructure code directly',
-    pattern: /(?:import|require)\s*\(?['"](?:\.\.?\/)*(?:infra|infrastructure|config\/|utils\/(?:db|aws|s3|redis|email))/gi,
+    pattern: /(?:import|require).*?(?:from\s+)?['"](?:\.\.?\/)*(?:infra|infrastructure|config\/|utils)/gi,
     severity: 'error',
     message: 'UI component imports infrastructure code - violates architectural boundaries',
     suggestion: 'Create a service layer abstraction between UI and infrastructure'
@@ -63,7 +63,7 @@ const DEFAULT_ARCHITECTURE_RULES: ArchitectureRule[] = [
     id: 'domain-no-presentation',
     name: 'Domain-Presentation Isolation',
     description: 'Domain logic must not reference presentation components',
-    pattern: /(?:import|require)\s*\(?['"](?:\.\.?\/)*(?:components?|pages?|views?|screens?|ui\/(?!styles|theme)|hooks\/(?:use|use[A-Z]))/gi,
+    pattern: /(?:import|require).*?(?:from\s+)?['"](?:\.\.?\/)*(?:components?|pages?|views?|screens?)/gi,
     severity: 'error',
     message: 'Domain layer imports presentation code - violates layered architecture',
     suggestion: 'Domain layer should be presentation-agnostic'
@@ -74,7 +74,7 @@ const DEFAULT_ARCHITECTURE_RULES: ArchitectureRule[] = [
     id: 'api-no-direct-db',
     name: 'API-DB Abstraction',
     description: 'API route handlers must use repository pattern for database access',
-    pattern: /(?:import|require)\s*\(?['"](?:\.\.?\/)*(?:db|database|prisma\.client|mongoose|knex)['"`]/gi,
+    pattern: /(?:import|require).*?(?:from\s+)?['"](?:\.\.?\/)*(?:db|database|prisma\.client|mongoose|knex)/gi,
     severity: 'warning',
     message: 'API handler directly imports database client - use repository pattern',
     suggestion: 'Inject database access through a service/repository layer'
@@ -118,7 +118,7 @@ const DEFAULT_ARCHITECTURE_RULES: ArchitectureRule[] = [
     id: 'api-no-fs',
     name: 'API FileSystem Isolation',
     description: 'API routes must not directly access file system',
-    pattern: /(?:import|require)\s*(?:\(\s*)?['"](?:\.\.?\/)*fs['"]/gi,
+    pattern: /(?:import|require).*?(?:from\s+)?['"](?:\.\.?\/)*fs['"]/gi,
     severity: 'warning',
     message: 'API route imports fs module - use dedicated file service',
     suggestion: 'Create a file service abstraction for file operations'
@@ -129,7 +129,7 @@ const DEFAULT_ARCHITECTURE_RULES: ArchitectureRule[] = [
     id: 'service-index-export',
     name: 'Service Index Pattern',
     description: 'Service modules should have index files for clean imports',
-    pattern: /import\s+.*?\s+from\s+['"]\.\/services\/[a-z]+['"]/gi,
+    pattern: /import.*?from\s+['"]\.\/services\/[a-z]+['"]/gi,
     severity: 'info',
     message: 'Importing directly from service file - consider index export',
     suggestion: 'Create an index.ts that re-exports service members'

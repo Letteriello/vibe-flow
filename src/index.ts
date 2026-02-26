@@ -2,6 +2,7 @@
 // Workflow orchestration system for AI development agents
 
 export { StateMachine, Phase, ProjectState } from './state-machine/index.js';
+export { QualityGateInterceptor, QualityGateStatus } from './state-machine/quality-gate.js';
 export { ConfigManager, UserPreferences, WrapUpConfig, ValidationResult } from './config/index.js';
 export { MCPServer } from './mcp/index.js';
 export { DecisionHandler, DecisionPoint, DecisionResult } from './decision/index.js';
