@@ -1,8 +1,10 @@
 // Recovery Logic - Restore environment to exact state before failed task
 import * as fs from 'fs';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { wal, Checkpoint, StateSnapshot, WALEntry, WALAction } from './wal.js';
+import { RateLimitHandler, RateLimitError, rateLimitHandler } from './rate-limit.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +15,33 @@ const WAL_DIR = path.join(VIBE_FLOW_DIR, 'wal');
 const SNAPSHOTS_DIR = path.join(WAL_DIR, 'snapshots');
 const CHECKPOINTS_FILE = path.join(WAL_DIR, 'checkpoints.json');
 const RECOVERY_LOG_FILE = path.join(WAL_DIR, 'recovery.log');
+const WAL_LOG_FILE = path.join(WAL_DIR, 'wal.log');
+
+// Interfaces para parsing seguro do WAL
+export interface WALFrame {
+  id: string;
+  checkpointId: string;
+  timestamp: number;
+  action: string;
+  target: string;
+  previousState: Record<string, unknown> | null;
+  newState: Record<string, unknown> | null;
+  status: string;
+}
+
+export interface CorruptedFrame {
+  lineNumber: number;
+  rawContent: string;
+  parseError: string;
+}
+
+export interface WALParseResult {
+  success: boolean;
+  frames: WALFrame[];
+  corruptedFrames: CorruptedFrame[];
+  totalLines: number;
+  validFrames: number;
+}
 
 // Recovery Result
 export interface RecoveryResult {
@@ -328,6 +357,337 @@ class RecoveryManager {
     } catch (error) {
       console.error('[Recovery] Error clearing log:', error);
     }
+  }
+}
+
+// ============================================================
+// WAL Safe Parsing - Parsing seguro do Write-Ahead Log
+// ============================================================
+
+/**
+ * Valida se um frame WAL tem a estrutura mínima necessária
+ */
+function isValidWALFrame(obj: unknown): obj is WALFrame {
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+
+  const frame = obj as Record<string, unknown>;
+
+  return (
+    typeof frame.id === 'string' &&
+    typeof frame.checkpointId === 'string' &&
+    typeof frame.timestamp === 'number' &&
+    typeof frame.action === 'string' &&
+    typeof frame.target === 'string' &&
+    (frame.status === 'pending' ||
+      frame.status === 'applied' ||
+      frame.status === 'rolled_back' ||
+      frame.status === 'failed')
+  );
+}
+
+/**
+ * Gera checksum para validar integridade do frame
+ */
+function generateFrameChecksum(frame: WALFrame): string {
+  const content = JSON.stringify({
+    id: frame.id,
+    checkpointId: frame.checkpointId,
+    timestamp: frame.timestamp,
+    action: frame.action,
+    target: frame.target
+  });
+  return crypto.createHash('sha256').update(content).digest('hex').substring(0, 16);
+}
+
+/**
+ * ParseSafeWAL - Faz parsing seguro do arquivo WAL, descartando frames corrompidos
+ *
+ * @param walFilePath - Caminho para o arquivo WAL (padrão: .vibe-flow/wal/wal.log)
+ * @returns WALParseResult com frames válidos e informações sobre frames corrompidos
+ */
+export function parseSafeWAL(walFilePath: string = WAL_LOG_FILE): WALParseResult {
+  const result: WALParseResult = {
+    success: false,
+    frames: [],
+    corruptedFrames: [],
+    totalLines: 0,
+    validFrames: 0
+  };
+
+  try {
+    if (!fs.existsSync(walFilePath)) {
+      console.log('[Recovery] WAL file not found, starting fresh');
+      result.success = true;
+      return result;
+    }
+
+    const content = fs.readFileSync(walFilePath, 'utf-8');
+    const lines = content.split('\n').filter(line => line.trim().length > 0);
+
+    result.totalLines = lines.length;
+
+    for (let i = 0; i < lines.length; i++) {
+      const lineNumber = i + 1;
+      const rawContent = lines[i];
+
+      try {
+        const parsed = JSON.parse(rawContent);
+
+        // Valida estrutura do frame
+        if (!isValidWALFrame(parsed)) {
+          result.corruptedFrames.push({
+            lineNumber,
+            rawContent: rawContent.substring(0, 200), // Limita tamanho para log
+            parseError: 'Invalid frame structure - missing required fields'
+          });
+          continue;
+        }
+
+        // Valida campos extras/incorretos
+        const validActions = [
+          WALAction.FILE_CREATE,
+          WALAction.FILE_MODIFY,
+          WALAction.FILE_DELETE,
+          WALAction.DIR_CREATE,
+          WALAction.DIR_DELETE,
+          WALAction.METADATA_UPDATE
+        ];
+
+        if (!validActions.includes(parsed.action as WALAction)) {
+          result.corruptedFrames.push({
+            lineNumber,
+            rawContent: rawContent.substring(0, 200),
+            parseError: `Invalid action type: ${parsed.action}`
+          });
+          continue;
+        }
+
+        // Valida timestamp razoável (não muito antigo nem futuro)
+        const now = Date.now();
+        const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
+        if (parsed.timestamp < oneYearAgo || parsed.timestamp > now + 60000) {
+          result.corruptedFrames.push({
+            lineNumber,
+            rawContent: rawContent.substring(0, 200),
+            parseError: `Invalid timestamp: ${parsed.timestamp}`
+          });
+          continue;
+        }
+
+        // Frame válido - adiciona à lista
+        result.frames.push({
+          id: parsed.id,
+          checkpointId: parsed.checkpointId,
+          timestamp: parsed.timestamp,
+          action: parsed.action,
+          target: parsed.target,
+          previousState: parsed.previousState as Record<string, unknown> | null,
+          newState: parsed.newState as Record<string, unknown> | null,
+          status: parsed.status
+        });
+        result.validFrames++;
+
+      } catch (parseError) {
+        const errorMessage = parseError instanceof Error
+          ? parseError.message
+          : 'Unknown parse error';
+
+        result.corruptedFrames.push({
+          lineNumber,
+          rawContent: rawContent.substring(0, 200),
+          parseError: errorMessage
+        });
+      }
+    }
+
+    result.success = result.frames.length > 0 || result.corruptedFrames.length === 0;
+
+    // Log do resultado
+    if (result.corruptedFrames.length > 0) {
+      console.log(
+        `[Recovery] WAL parsing: ${result.validFrames} valid, ` +
+        `${result.corruptedFrames.length} corrupted frames`
+      );
+    }
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`[Recovery] Error parsing WAL: ${errorMessage}`);
+  }
+
+  return result;
+}
+
+/**
+ * GetLastValidState - Recupera o último estado válido do WAL
+ *
+ * @param walFilePath - Caminho para o arquivo WAL
+ * @returns Último frame válido ou null
+ */
+export function getLastValidState(walFilePath: string = WAL_LOG_FILE): WALFrame | null {
+  const parseResult = parseSafeWAL(walFilePath);
+
+  if (parseResult.frames.length === 0) {
+    return null;
+  }
+
+  // Retorna o frame mais recente (maior timestamp)
+  return parseResult.frames.reduce((latest, frame) => {
+    return frame.timestamp > latest.timestamp ? frame : latest;
+  }, parseResult.frames[0]);
+}
+
+/**
+ * GetFramesForCheckpoint - Retorna todos os frames de um checkpoint específico
+ */
+export function getFramesForCheckpoint(
+  checkpointId: string,
+  walFilePath: string = WAL_LOG_FILE
+): WALFrame[] {
+  const parseResult = parseSafeWAL(walFilePath);
+  return parseResult.frames.filter(frame => frame.checkpointId === checkpointId);
+}
+
+/**
+ * RecoverFromCorruptedWAL - Tenta recuperar de um WAL corrompido
+ *
+ * Remove linhas corrompidas e cria um WAL limpo
+ */
+export function recoverFromCorruptedWAL(
+  walFilePath: string = WAL_LOG_FILE,
+  backupPath?: string
+): { success: boolean; linesRemoved: number; error?: string } {
+  try {
+    const parseResult = parseSafeWAL(walFilePath);
+
+    if (parseResult.corruptedFrames.length === 0) {
+      return { success: true, linesRemoved: 0 };
+    }
+
+    // Cria backup antes de modificar
+    const backup = backupPath || walFilePath + '.backup';
+    if (!fs.existsSync(backup)) {
+      fs.copyFileSync(walFilePath, backup);
+      console.log(`[Recovery] Created backup at ${backup}`);
+    }
+
+    // Reconstrui o WAL apenas com frames válidos
+    const content = fs.readFileSync(walFilePath, 'utf-8');
+    const lines = content.split('\n').filter(line => line.trim().length > 0);
+
+    const validLines: string[] = [];
+    let currentLine = 0;
+
+    for (const frame of parseResult.frames) {
+      // Encontra a linha correspondente ao frame
+      currentLine++;
+      const originalLine = lines[currentLine - 1];
+
+      if (originalLine) {
+        validLines.push(originalLine);
+      }
+    }
+
+    // Escreve WAL limpo
+    fs.writeFileSync(walFilePath, validLines.join('\n') + '\n', 'utf-8');
+
+    console.log(
+      `[Recovery] Recovered WAL: removed ${parseResult.corruptedFrames.length} corrupted frames`
+    );
+
+    return {
+      success: true,
+      linesRemoved: parseResult.corruptedFrames.length
+    };
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, linesRemoved: 0, error: errorMessage };
+  }
+}
+
+// ============================================================
+// Rate Limit Retry Integration
+// ============================================================
+
+/**
+ * RetryWithRateLimitBackoff - Executa operação com retry usando backoff exponencial
+ *
+ * @param operation - Função a ser executada
+ * @param maxRetries - Número máximo de tentativas
+ * @returns Resultado da operação
+ */
+export async function retryWithRateLimitBackoff<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 5
+): Promise<{
+  success: boolean;
+  result?: T;
+  error?: RateLimitError;
+  attempts: number;
+  totalDelayMs: number;
+}> {
+  const handler = new RateLimitHandler({
+    maxRetries,
+    baseDelayMs: 1000,
+    maxDelayMs: 60000,
+    jitterFactor: 0.3,
+    backoffMultiplier: 2
+  });
+
+  return handler.executeWithRetry(operation);
+}
+
+// ============================================================
+// Enhanced Recovery Manager
+// ============================================================
+
+class EnhancedRecoveryManager extends RecoveryManager {
+  /**
+   * Verifica integridade do WAL antes de recovery
+   */
+  async validateWALIntegrity(): Promise<{
+    valid: boolean;
+    issues: CorruptedFrame[];
+    lastValidFrame: WALFrame | null;
+  }> {
+    const parseResult = parseSafeWAL();
+
+    return {
+      valid: parseResult.corruptedFrames.length === 0,
+      issues: parseResult.corruptedFrames,
+      lastValidFrame: parseResult.frames.length > 0
+        ? parseResult.frames.reduce((latest, frame) =>
+            frame.timestamp > latest.timestamp ? frame : latest
+          )
+        : null
+    };
+  }
+
+  /**
+   * Recovery com validação de integridade do WAL
+   */
+  async recoverWithWALValidation(options: RecoveryOptions = {}): Promise<RecoveryResult> {
+    // Primeiro, valida o WAL
+    const walValidation = await this.validateWALIntegrity();
+
+    if (!walValidation.valid && walValidation.issues.length > 0) {
+      console.log(
+        `[Recovery] WAL has ${walValidation.issues.length} corrupted frames. ` +
+        'Attempting auto-repair...'
+      );
+
+      const repairResult = recoverFromCorruptedWAL();
+
+      if (!repairResult.success) {
+        console.error(`[Recovery] WAL repair failed: ${repairResult.error}`);
+      }
+    }
+
+    // Executa recovery normal
+    return this.recover(options);
   }
 }
 

@@ -3,6 +3,7 @@
 // AC: Dado código gerado por IA, Quando o Security Scanner executa, Então detecta OWASP Top 10 vulnerabilities
 
 export { SecurityScanner } from './scanner.js';
+export { scanFiles, scanBuffer, hasCriticalIssues } from './scanner.js';
 export type {
   Vulnerability,
   SecretFinding,
@@ -32,3 +33,16 @@ export type {
   SecurityReport,
   ScanResult
 } from './secret-scanner.js';
+
+// Export from owasp-rules.ts (OWASP validation rules)
+export {
+  scanFiles as owaspScanFiles,
+  scanBuffer as owaspScanBuffer,
+  hasViolations,
+  getOWASPRules
+} from './owasp-rules.js';
+export type {
+  OWASPRule,
+  OWASPScanResult,
+  OWASPViolation
+} from './owasp-rules.js';

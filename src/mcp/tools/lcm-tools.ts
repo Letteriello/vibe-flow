@@ -3,7 +3,7 @@
 
 import { promises as fs } from 'fs';
 import { join, basename } from 'path';
-import { loadFromPointer, RawDataPointer, CompactedMessage } from '../../context/compaction.js';
+import { compactionLoadFromPointer as loadFromPointer, RawDataPointer, CompactedMessage } from '../../context/compaction.js';
 import {
   lcmDescribeSchema,
   lcmExpandSchema,

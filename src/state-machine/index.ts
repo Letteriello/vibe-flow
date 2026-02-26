@@ -576,3 +576,19 @@ export {
   getGlobalQualityGate,
   resetGlobalQualityGate
 } from './quality-gate.js';
+
+// Re-export SubagentCoordinator - Parallel task coordination for Implementation phase
+export {
+  SubagentCoordinator,
+  TaskStatus,
+  ParallelTask,
+  TaskResult,
+  CoordinatorResult,
+  CoordinatorConfig,
+  CoordinatorStatus,
+  PhaseTransitionContext,
+  canTransitionToImplementation,
+  extractParallelTasks,
+  createSubagentCoordinator,
+  createCoordinatorWithDefaults
+} from './subagent-coordinator.js';

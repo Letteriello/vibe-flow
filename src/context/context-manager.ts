@@ -13,6 +13,17 @@ import {
   CompactionResult,
   CompactedMessage
 } from './compaction.js';
+import {
+  compressOldLogs,
+  needsCompression,
+  getPayloadStatus,
+  PayloadSizeMonitor,
+  CompressionConfig,
+  CompressionResult,
+  CompressedLogEntry,
+  expandCompressedLogs,
+  DEFAULT_COMPRESSION_CONFIG
+} from './compression.js';
 
 /**
  * Context Manager configuration
@@ -24,6 +35,11 @@ export interface ContextManagerConfig {
   autoCompact: boolean;
   backgroundCompaction: boolean;
   projectPath: string;
+  // Payload compression settings
+  enablePayloadCompression: boolean;
+  maxPayloadSize: number;
+  compressionThreshold: number;
+  compressionArchiveDir: string;
 }
 
 /**
@@ -65,6 +81,8 @@ export class ContextManager extends EventEmitter {
   private state: ContextManagerState;
   private compactionInProgress: boolean = false;
   private pendingCompaction: boolean = false;
+  private payloadMonitor: PayloadSizeMonitor;
+  private compressedEntries: CompressedLogEntry[] | null = null;
 
   constructor(config: Partial<ContextManagerConfig> = {}) {
     super();
@@ -75,7 +93,11 @@ export class ContextManager extends EventEmitter {
       preserveRecentMessages: config.preserveRecentMessages ?? 20,
       autoCompact: config.autoCompact ?? true,
       backgroundCompaction: config.backgroundCompaction ?? true,
-      projectPath: config.projectPath ?? process.cwd()
+      projectPath: config.projectPath ?? process.cwd(),
+      enablePayloadCompression: config.enablePayloadCompression ?? true,
+      maxPayloadSize: config.maxPayloadSize ?? 500 * 1024,
+      compressionThreshold: config.compressionThreshold ?? 0.8,
+      compressionArchiveDir: config.compressionArchiveDir ?? '.vibe-flow/compressed-archives'
     };
 
     this.state = {
@@ -84,6 +106,16 @@ export class ContextManager extends EventEmitter {
       lastCompacted: null,
       isCompacting: false
     };
+
+    // Initialize payload size monitor
+    this.payloadMonitor = new PayloadSizeMonitor({
+      maxPayloadSize: this.config.maxPayloadSize,
+      tokenLimit: this.config.maxTokens,
+      thresholdPercentage: this.config.compressionThreshold,
+      preserveRecentMessages: this.config.preserveRecentMessages,
+      archiveDirectory: this.config.compressionArchiveDir,
+      enableLosslessMode: true
+    });
   }
 
   /**
@@ -128,6 +160,131 @@ export class ContextManager extends EventEmitter {
       lastCompacted: this.state.lastCompacted,
       isCompacting: this.compactionInProgress
     };
+  }
+
+  /**
+   * Get payload size status
+   */
+  getPayloadStatus(): {
+    needsCompression: boolean;
+    currentSize: number;
+    threshold: number;
+    percentage: number;
+    tokenCount: number;
+    messageCount: number;
+    lastCompressed: string | null;
+    pointerCount: number;
+  } {
+    const status = this.payloadMonitor.getStatus(this.state.messages);
+    return {
+      needsCompression: status.needsCompression,
+      currentSize: status.currentSize,
+      threshold: status.threshold,
+      percentage: status.percentage,
+      tokenCount: getPayloadStatus(this.state.messages, {
+        tokenLimit: this.config.maxTokens,
+        thresholdPercentage: this.config.compressionThreshold,
+        maxPayloadSize: this.config.maxPayloadSize,
+        preserveRecentMessages: this.config.preserveRecentMessages,
+        archiveDirectory: this.config.compressionArchiveDir
+      }).tokenCount,
+      messageCount: this.state.messages.length,
+      lastCompressed: status.lastCompressed,
+      pointerCount: status.pointerCount
+    };
+  }
+
+  /**
+   * Check if payload compression is needed
+   */
+  needsPayloadCompression(): boolean {
+    return this.payloadMonitor.shouldCompress(this.state.messages);
+  }
+
+  /**
+   * Compress old logs using lossless compression (preserves reasoning)
+   */
+  async compressPayload(): Promise<CompressionResult> {
+    if (!this.config.enablePayloadCompression) {
+      return {
+        success: false,
+        originalSize: 0,
+        compressedSize: 0,
+        reductionPercentage: 0,
+        messagesArchived: 0,
+        messagesPreserved: 0,
+        pointersCreated: [],
+        metadata: [],
+        summary: 'Payload compression is disabled'
+      };
+    }
+
+    const compressionConfig: Partial<CompressionConfig> = {
+      maxPayloadSize: this.config.maxPayloadSize,
+      tokenLimit: this.config.maxTokens,
+      thresholdPercentage: this.config.compressionThreshold,
+      preserveRecentMessages: this.config.preserveRecentMessages,
+      archiveDirectory: this.config.compressionArchiveDir,
+      enableLosslessMode: true
+    };
+
+    const result = await compressOldLogs(
+      this.state.messages,
+      compressionConfig,
+      this.config.projectPath
+    );
+
+    if (result.success) {
+      // Convert result to compressed entries
+      this.compressedEntries = this.state.messages.slice(
+        0,
+        this.state.messages.length - result.messagesPreserved
+      ).map((msg, idx) => ({
+        role: (msg as any).role || 'user',
+        content: (msg as any).content,
+        timestamp: (msg as any).timestamp || new Date().toISOString(),
+        compressed: true,
+        reasoning: result.metadata[idx] ? ContextManager.createReasoningSummaryFromMetadata(result.metadata[idx]) : undefined
+      })) as CompressedLogEntry[];
+
+      // Add preserved messages
+      const preserved = this.state.messages.slice(-result.messagesPreserved);
+      this.compressedEntries.push(...preserved.map(msg => ({
+        role: (msg as any).role || 'user',
+        content: (msg as any).content,
+        timestamp: (msg as any).timestamp || new Date().toISOString(),
+        compressed: false
+      })));
+
+      // Update monitor
+      this.payloadMonitor.markCompressed(result.pointersCreated.length);
+
+      // Persist state
+      await this.persistCompressionState();
+    }
+
+    return result;
+  }
+
+  /**
+   * Expand compressed payload back to full context
+   */
+  async expandPayload(): Promise<unknown[]> {
+    if (!this.compressedEntries) {
+      return this.state.messages;
+    }
+
+    const expanded = await expandCompressedLogs(this.compressedEntries);
+    this.compressedEntries = null;
+
+    return expanded;
+  }
+
+  /**
+   * Get compressed entries
+   */
+  getCompressedEntries(): CompressedLogEntry[] | null {
+    return this.compressedEntries;
   }
 
   /**
@@ -251,6 +408,82 @@ export class ContextManager extends EventEmitter {
     this.state.lastCompacted = null;
     this.compactionInProgress = false;
     this.pendingCompaction = false;
+    this.compressedEntries = null;
+  }
+
+  /**
+   * Create reasoning summary from metadata
+   */
+  private static createReasoningSummaryFromMetadata(metadata: {
+    keyDecisions?: string[];
+    fileReferences?: string[];
+    userMessageCount?: number;
+    assistantMessageCount?: number;
+    toolCallCount?: number;
+    toolResultCount?: number;
+    firstTimestamp?: string;
+    lastTimestamp?: string;
+  }): string {
+    const parts: string[] = [];
+
+    if (metadata.keyDecisions && metadata.keyDecisions.length > 0) {
+      parts.push(`Decisions: ${metadata.keyDecisions.join('; ')}`);
+    }
+
+    if (metadata.fileReferences && metadata.fileReferences.length > 0) {
+      parts.push(`Files: ${metadata.fileReferences.join(', ')}`);
+    }
+
+    parts.push(`Messages: ${metadata.userMessageCount || 0} user, ${metadata.assistantMessageCount || 0} assistant, ${metadata.toolCallCount || 0} tools, ${metadata.toolResultCount || 0} results`);
+
+    return `[ARCHIVED] ${parts.join(' | ')} | Span: ${metadata.firstTimestamp || 'unknown'} to ${metadata.lastTimestamp || 'unknown'}`;
+  }
+
+  /**
+   * Persist compression state to disk
+   */
+  private async persistCompressionState(): Promise<void> {
+    const stateFile = join(
+      this.config.projectPath,
+      '.vibe-flow',
+      'compression-state.json'
+    );
+
+    const state = {
+      lastCompressed: this.payloadMonitor.getStatus([]).lastCompressed,
+      compressedEntryCount: this.compressedEntries?.length || 0,
+      config: {
+        maxPayloadSize: this.config.maxPayloadSize,
+        compressionThreshold: this.config.compressionThreshold,
+        enablePayloadCompression: this.config.enablePayloadCompression
+      }
+    };
+
+    await fs.writeFile(stateFile, JSON.stringify(state, null, 2), 'utf-8');
+  }
+
+  /**
+   * Load compression state from disk
+   */
+  async loadCompressionState(): Promise<void> {
+    try {
+      const stateFile = join(
+        this.config.projectPath,
+        '.vibe-flow',
+        'compression-state.json'
+      );
+
+      const content = await fs.readFile(stateFile, 'utf-8');
+      const state = JSON.parse(content);
+
+      if (state.config) {
+        this.config.maxPayloadSize = state.config.maxPayloadSize ?? this.config.maxPayloadSize;
+        this.config.compressionThreshold = state.config.compressionThreshold ?? this.config.compressionThreshold;
+        this.config.enablePayloadCompression = state.config.enablePayloadCompression ?? this.config.enablePayloadCompression;
+      }
+    } catch {
+      // No state file exists yet
+    }
   }
 
   /**

@@ -7,6 +7,7 @@ import { Vulnerability, VulnerabilityCategory, VulnerabilitySeverity, SecuritySc
 import { SecretsDetector } from './secrets-detector.js';
 import { SecurityHeadersValidator } from './headers-validator.js';
 import { SECRET_PATTERNS, CONFIG_PATTERNS, shouldStopOnSeverity } from './rules.js';
+import { scanFiles as owaspScanFiles, scanBuffer as owaspScanBuffer, hasViolations as owaspHasViolations } from './owasp-rules.js';
 
 // Default patterns for OWASP Top 10 detection
 const VULNERABILITY_PATTERNS: Array<{
@@ -565,4 +566,171 @@ export class SecurityScanner {
 
     return severityLevel >= thresholdLevel;
   }
+}
+
+// ============================================
+// Export Wrapper Functions (OWASP Integration)
+// ============================================
+
+/**
+ * Scan specified file paths for security vulnerabilities.
+ * Blocks workflow advancement if CRITICAL or HIGH severity issues are detected.
+ *
+ * @param paths - Array of file paths to scan
+ * @returns SecurityReport with vulnerabilities and blocked status
+ */
+export async function scanFiles(paths: string[]): Promise<SecurityScanResult> {
+  const startTime = Date.now();
+  const vulnerabilities: Vulnerability[] = [];
+  let filesScanned = 0;
+
+  // Scan each file using OWASP rules
+  const owaspResult = await owaspScanFiles(paths);
+
+  // Convert OWASP violations to Vulnerability format with deduplication
+  const seenVulnerabilities = new Set<string>();
+  for (const violation of owaspResult.violations) {
+    // Deduplicate by file-line-ruleName
+    const dedupKey = `${violation.file}:${violation.line}:${violation.ruleName}`;
+    if (seenVulnerabilities.has(dedupKey)) {
+      continue;
+    }
+    seenVulnerabilities.add(dedupKey);
+
+    vulnerabilities.push({
+      id: violation.ruleId,
+      title: violation.ruleName,
+      description: violation.description,
+      category: violation.category,
+      severity: violation.severity,
+      file: violation.file,
+      line: violation.line,
+      code: violation.code,
+      recommendation: violation.recommendation,
+      cwe: violation.cwe,
+      owasp: violation.owasp
+    });
+  }
+
+  filesScanned = owaspResult.pathsScanned.length;
+
+  const severityCounts = {
+    critical: owaspResult.summary.critical,
+    high: owaspResult.summary.high,
+    medium: owaspResult.summary.medium,
+    low: owaspResult.summary.low,
+    info: 0
+  };
+
+  const scanDuration = Date.now() - startTime;
+
+  // Determine overall severity
+  let overallSeverity = VulnerabilitySeverity.INFO;
+  if (owaspResult.summary.critical > 0) {
+    overallSeverity = VulnerabilitySeverity.CRITICAL;
+  } else if (owaspResult.summary.high > 0) {
+    overallSeverity = VulnerabilitySeverity.HIGH;
+  } else if (owaspResult.summary.medium > 0) {
+    overallSeverity = VulnerabilitySeverity.MEDIUM;
+  } else if (owaspResult.summary.low > 0) {
+    overallSeverity = VulnerabilitySeverity.LOW;
+  }
+
+  // Block if CRITICAL or HIGH severity violations found
+  const blocked = owaspResult.blocked;
+
+  if (blocked) {
+    console.warn('[SecurityScanner] BLOCKED: CRITICAL or HIGH severity vulnerabilities detected.');
+    console.warn('[SecurityScanner] Fix the following issues before proceeding:');
+    for (const v of vulnerabilities.filter(v => v.severity === VulnerabilitySeverity.CRITICAL || v.severity === VulnerabilitySeverity.HIGH)) {
+      console.warn(`  - [${v.severity}] ${v.title} in ${v.file}:${v.line}`);
+    }
+  }
+
+  return {
+    timestamp: new Date().toISOString(),
+    projectPath: paths.join(', '),
+    filesScanned,
+    vulnerabilities,
+    secretsFound: [],
+    headersFindings: [],
+    summary: severityCounts,
+    scanDuration,
+    blocked
+  };
+}
+
+/**
+ * Scan buffer content for security vulnerabilities.
+ * Quick validation function for code snippets or staged files.
+ *
+ * @param content - Buffer or string content to scan
+ * @param filePath - Optional file path for reporting
+ * @returns SecurityReport with scan results
+ */
+export function scanBuffer(content: string | Buffer, filePath: string = 'buffer'): SecurityScanResult {
+  const startTime = Date.now();
+  const contentStr = Buffer.isBuffer(content) ? content.toString('utf-8') : content;
+
+  const violations = owaspScanBuffer(contentStr, filePath);
+
+  const vulnerabilities: Vulnerability[] = violations.map(v => ({
+    id: v.ruleId,
+    title: v.ruleName,
+    description: v.description,
+    category: v.category,
+    severity: v.severity,
+    file: v.file,
+    line: v.line,
+    code: v.code,
+    recommendation: v.recommendation,
+    cwe: v.cwe,
+    owasp: v.owasp
+  }));
+
+  const severityCounts = {
+    critical: vulnerabilities.filter(v => v.severity === VulnerabilitySeverity.CRITICAL).length,
+    high: vulnerabilities.filter(v => v.severity === VulnerabilitySeverity.HIGH).length,
+    medium: vulnerabilities.filter(v => v.severity === VulnerabilitySeverity.MEDIUM).length,
+    low: vulnerabilities.filter(v => v.severity === VulnerabilitySeverity.LOW).length,
+    info: 0
+  };
+
+  const scanDuration = Date.now() - startTime;
+
+  let overallSeverity = VulnerabilitySeverity.INFO;
+  if (severityCounts.critical > 0) {
+    overallSeverity = VulnerabilitySeverity.CRITICAL;
+  } else if (severityCounts.high > 0) {
+    overallSeverity = VulnerabilitySeverity.HIGH;
+  } else if (severityCounts.medium > 0) {
+    overallSeverity = VulnerabilitySeverity.MEDIUM;
+  } else if (severityCounts.low > 0) {
+    overallSeverity = VulnerabilitySeverity.LOW;
+  }
+
+  const blocked = severityCounts.critical > 0 || severityCounts.high > 0;
+
+  return {
+    timestamp: new Date().toISOString(),
+    projectPath: filePath,
+    filesScanned: 1,
+    vulnerabilities,
+    secretsFound: [],
+    headersFindings: [],
+    summary: severityCounts,
+    scanDuration,
+    blocked
+  };
+}
+
+/**
+ * Quick check if content has critical security issues.
+ *
+ * @param content - Buffer or string content to check
+ * @returns true if CRITICAL or HIGH severity issues detected
+ */
+export function hasCriticalIssues(content: string | Buffer): boolean {
+  const contentStr = Buffer.isBuffer(content) ? content.toString('utf-8') : content;
+  return owaspHasViolations(contentStr);
 }

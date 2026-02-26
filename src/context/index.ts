@@ -1,4 +1,25 @@
 // Context module exports
+// Compression - Lossless Context Management
+export {
+  compressOldLogs,
+  loadFromPointer as loadCompressedLogs,
+  expandCompressedLogs,
+  needsCompression,
+  getPayloadStatus,
+  PayloadSizeMonitor,
+  estimateTokens as compressionEstimateTokens,
+  calculateTotalTokens as compressionCalculateTotalTokens,
+  calculatePayloadSize,
+  DEFAULT_COMPRESSION_CONFIG,
+  CompressionConfig,
+  CompressionResult,
+  CompressionStatus,
+  CompressedLogEntry,
+  LogPointer,
+  LogMetadata,
+  PayloadStats
+} from './compression.js';
+
 export { ContextAwarePromptGenerator } from './context-aware-prompt.js';
 export { ContextAggregator, ContextSummary, ContextEntry } from './context-aggregation.js';
 export { pruneStaleTools } from './pruner.js';
@@ -8,9 +29,9 @@ export {
   expandContext,
   needsCompaction,
   getContextStatus,
-  estimateTokens,
-  calculateTotalTokens,
-  loadFromPointer,
+  compactionEstimateTokens,
+  compactionCalculateTotalTokens,
+  compactionLoadFromPointer,
   CompactionConfig,
   CompactionResult,
   CompactedMessage,

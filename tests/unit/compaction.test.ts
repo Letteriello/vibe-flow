@@ -18,8 +18,12 @@ const __dirname = path.dirname(__filename);
 
 // Import after setting up paths
 const projectRoot = path.resolve(__dirname, '../..');
-const { default: compaction, estimateTokens, calculateTotalTokens, needsCompaction, getContextStatus } = await import(path.join(projectRoot, 'dist/context/compaction.js'));
+const { default: compaction, compactionEstimateTokens, compactionCalculateTotalTokens, needsCompaction, getContextStatus } = await import(path.join(projectRoot, 'dist/context/compaction.js'));
 const { default: ContextManager, createContextManager } = await import(path.join(projectRoot, 'dist/context/context-manager.js'));
+
+// Alias for backwards compatibility in tests
+const estimateTokens = compactionEstimateTokens;
+const calculateTotalTokens = compactionCalculateTotalTokens;
 
 // Test fixtures
 function createMockMessages(count: number): Array<{ role: string; content: string; timestamp: string }> {

@@ -715,3 +715,28 @@ export {
   RefinerConfig
 } from './refiner-loop.js';
 export type { RefinerConfig as RefinerOptions } from './refiner-loop.js';
+
+// Rate Limit Handler exports
+export {
+  RateLimitHandler,
+  rateLimitHandler,
+  isRateLimitError,
+  extractRetryAfter,
+  calculateBackoff,
+  RateLimitError,
+  RateLimitType,
+  BackoffConfig,
+  RetryResult
+} from './rate-limit.js';
+
+// WAL Safe Parsing exports
+export {
+  parseSafeWAL,
+  getLastValidState,
+  getFramesForCheckpoint,
+  recoverFromCorruptedWAL,
+  retryWithRateLimitBackoff,
+  WALFrame,
+  CorruptedFrame,
+  WALParseResult
+} from './recovery.js';

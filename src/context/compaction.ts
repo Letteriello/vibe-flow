@@ -67,7 +67,7 @@ const DEFAULT_CONFIG: CompactionConfig = {
 /**
  * Estimate token count (approximate: 1 token ≈ 4 characters for English text)
  */
-export function estimateTokens(text: string | unknown): number {
+export function compactionEstimateTokens(text: string | unknown): number {
   if (!text) return 0;
 
   const textContent = typeof text === 'string' ? text : JSON.stringify(text);
@@ -78,10 +78,10 @@ export function estimateTokens(text: string | unknown): number {
 /**
  * Calculate total tokens in a message array
  */
-export function calculateTotalTokens(messages: unknown[]): number {
+export function compactionCalculateTotalTokens(messages: unknown[]): number {
   let total = 0;
   for (const msg of messages) {
-    total += estimateTokens(msg);
+    total += compactionEstimateTokens(msg);
   }
   return total;
 }
@@ -164,7 +164,7 @@ export async function compactContext(
     storageDir = join(projectPath, '.vibe-flow', cfg.storageDir);
   }
 
-  const originalTokenCount = calculateTotalTokens(messages);
+  const originalTokenCount = compactionCalculateTotalTokens(messages);
   const threshold = cfg.maxTokens * cfg.compactionThreshold;
 
   // Check if compaction is needed
@@ -235,7 +235,7 @@ export async function compactContext(
 
   // Combine compacted summaries with preserved messages
   const finalMessages = [...compactedMessages, ...messagesToPreserve];
-  const compactedTokenCount = calculateTotalTokens(finalMessages);
+  const compactedTokenCount = compactionCalculateTotalTokens(finalMessages);
 
   const reductionPercentage = originalTokenCount > 0
     ? Math.round(((originalTokenCount - compactedTokenCount) / originalTokenCount) * 100)
@@ -256,7 +256,7 @@ export async function compactContext(
 /**
  * Load raw messages from a pointer
  */
-export async function loadFromPointer(
+export async function compactionLoadFromPointer(
   pointer: RawDataPointer
 ): Promise<unknown[]> {
   try {
@@ -281,7 +281,7 @@ export async function expandContext(
     if (msg.compacted && typeof msg.content === 'object' && (msg.content as any)?.type === 'pointer') {
       // Load from pointer
       const pointer = msg.content as RawDataPointer;
-      const rawMessages = await loadFromPointer(pointer);
+      const rawMessages = await compactionLoadFromPointer(pointer);
       expanded.push(...rawMessages);
     } else {
       // Keep as is
@@ -300,7 +300,7 @@ export function needsCompaction(
   config: Partial<CompactionConfig> = {}
 ): boolean {
   const cfg: CompactionConfig = { ...DEFAULT_CONFIG, ...config };
-  const tokenCount = calculateTotalTokens(messages);
+  const tokenCount = compactionCalculateTotalTokens(messages);
   return tokenCount >= (cfg.maxTokens * cfg.compactionThreshold);
 }
 
@@ -318,7 +318,7 @@ export function getContextStatus(
   compactionPercentage: number;
 } {
   const cfg: CompactionConfig = { ...DEFAULT_CONFIG, ...config };
-  const tokenCount = calculateTotalTokens(messages);
+  const tokenCount = compactionCalculateTotalTokens(messages);
   const threshold = cfg.maxTokens * cfg.compactionThreshold;
 
   return {
@@ -335,7 +335,7 @@ export default {
   expandContext,
   needsCompaction,
   getContextStatus,
-  estimateTokens,
-  calculateTotalTokens,
-  loadFromPointer
+  compactionEstimateTokens,
+  compactionCalculateTotalTokens,
+  compactionLoadFromPointer
 };

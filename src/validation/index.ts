@@ -24,3 +24,11 @@ export { SubAgentDelegationGuard, validateDelegation, InfiniteDelegationError } 
 export type { DelegationRequest, DelegationValidationResult } from './delegation-guard.js';
 export { ImplementationDriftDetector, detectDrift, DriftType, DriftSeverity } from './drift-detector.js';
 export type { DriftReport, DriftItem, DriftDetectorOptions } from './drift-detector.js';
+
+// Gate Keeper - Pipeline Governado de Validação de Transição
+export { GateKeeper, validateInput, validateSpecification, validateOutput, validateTransition, GateStatus, GateSeverity, GateType } from './gate-keeper.js';
+export type { GateIssue, GateResult, ValidationResult as GateValidationResult, PhasePrerequisites, ArtifactRequirement } from './gate-keeper.js';
+
+// Structural Check - Verificações Estruturais Profundas
+export { StructuralChecker, checkArtifactStructure, validatePhaseStructure, generateStructuralReport, ARTIFACT_STRUCTURES, PHASE_STRUCTURAL_RULES } from './structural-check.js';
+export type { StructureRule, ValidationPattern, StructuralPhaseRule, StructuralCheckResult, SectionCheck, PatternCheck, LengthCheck, StructuralIssue } from './structural-check.js';
