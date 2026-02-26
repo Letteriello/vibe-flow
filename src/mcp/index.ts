@@ -918,3 +918,18 @@ export type {
   ToolUsageStats,
   TokenEstimateConfig
 } from './telemetry.js';
+
+// Re-export Status Polling
+export {
+  JobStatusManager,
+  getJobStatusManager,
+  initializeJobStatusManager,
+  getWrapUpJobStatus,
+  registerWrapUpJob,
+  updateWrapUpJobStatus
+} from './status-polling.js';
+export type {
+  JobStatus,
+  JobInfo,
+  WrapUpJobResult
+} from './status-polling.js';
