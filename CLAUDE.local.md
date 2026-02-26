@@ -17,6 +17,16 @@ Auto-generated lessons from vibe-flow sessions
   - validateDAG() ensures DAG consistency
 
 ## Session Notes (2026-02-27)
+- Created TDDLoopController in src/execution/tdd/loop-controller.ts:
+  - TDDPhase enum: IDLE, RED, GREEN, REFACTOR, COMPLETED, FAILED
+  - runTask(taskDescription): async method orchestrating TDD phases
+  - RED: generates test via TestGenerator, validates it fails
+  - GREEN: generates implementation until tests pass
+  - REFACTOR: optional code improvement (keeps original if tests fail)
+  - Uses dependency injection: TestGenerator, ImplementationGenerator, TestRunner
+  - maxIterationsPerPhase: 5, maxTotalIterations: 15 (configurable)
+
+## Session Notes (2026-02-27)
 - Created SemanticQualityChecker in src/quality/ast-checker.ts:
   - hasOrphanedImports(code): detects unused imports via regex analysis
   - hasSyntaxAnomalies(code): detects structural issues
