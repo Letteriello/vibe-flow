@@ -5,7 +5,7 @@ import { WrapUpExecutor } from '../wrap-up/index.js';
 import { HelpExecutor } from '../help/index.js';
 import { CommandRegistry } from '../command-registry/index.js';
 import { getLCMTools } from './tools/lcm-tools.js';
-import { JobStatusManager, getWrapUpJobStatus, registerWrapUpJob, initializeJobStatusManager } from './status-polling.js';
+import { JobStatusManager, getWrapUpJobStatus, registerWrapUpJob, updateWrapUpJobStatus, initializeJobStatusManager } from './status-polling.js';
 
 export interface MCPTool {
   name: string;
@@ -643,35 +643,40 @@ export class MCPServer {
           projectPath: {
             type: 'string',
             description: 'Optional project path. Defaults to current working directory'
+          },
+          force: {
+            type: 'boolean',
+            description: 'Skip confirmation prompts',
+            default: false
           }
         }
       },
-      handler: async (params: { mode?: string; projectPath?: string }) => {
-        // Wrap-up is always enabled - execute directly
+      handler: async (params: { mode?: string; projectPath?: string; force?: boolean }) => {
+        // Register job and get ID
+        const { jobId } = registerWrapUpJob();
         const mode = params.mode || 'full';
 
-        try {
-          // Pass true for yes parameter to skip interactive prompts (MCP has no stdin)
-          const result = await this.wrapUpExecutor.execute(mode, false, true);
-          await this.wrapUpExecutor.saveReport(result);
+        // Update to processing status
+        updateWrapUpJobStatus(jobId, 'processing', {
+          message: `Wrap-up mode: ${mode}`
+        });
 
-          return {
-            success: result.success,
-            mode,
-            phasesExecuted: result.phasesExecuted,
-            shipIt: result.shipIt,
-            rememberIt: result.rememberIt,
-            selfImprove: result.selfImprove,
-            publishIt: result.publishIt,
-            errors: result.errors,
-            message: result.success ? 'Wrap-up completed successfully' : 'Wrap-up completed with errors'
-          };
-        } catch (error: any) {
-          return {
-            success: false,
-            error: error.message
-          };
-        }
+        // Execute wrap-up in background (fire and forget)
+        this.wrapUpExecutor.execute(mode, params.force ?? false, true)
+          .then(async (result) => {
+            await this.wrapUpExecutor.saveReport(result);
+            updateWrapUpJobStatus(jobId, 'completed', {
+              message: result.success ? 'Wrap-up completed successfully' : 'Wrap-up completed with errors'
+            });
+          })
+          .catch((error) => {
+            updateWrapUpJobStatus(jobId, 'failed', {
+              error: error.message
+            });
+          });
+
+        // Return fixed minimal message
+        return `Wrap-up initiated successfully in background. Job ID: ${jobId}. Do NOT wait for completion. You may terminate the session now.`;
       }
     });
 
