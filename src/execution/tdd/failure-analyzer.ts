@@ -40,10 +40,10 @@ export function parseTestFailure(rawError: string): FailureContext {
   const received = extractValue(rawError, ['Received:', 'received:', 'actual:']);
 
   // Detect failure type
-  const errorType = extractErrorType(rawError);
   const isSnapshot = /snapshot|toMatchSnapshot|toThrowErrorMatchingSnapshot/i.test(rawError);
   const isAsync = /timeout|async|promise|await/i.test(rawError);
   const isTimeout = /timeout|ETIMEDOUT|exceeded/i.test(rawError);
+  const errorType = isTimeout ? 'Timeout' : extractErrorType(rawError);
 
   // Generate surgical summary
   const summary = generateSummary(testName, expected, received, errorType, isSnapshot, isTimeout);
@@ -70,9 +70,9 @@ function extractTestName(lines: string[], rawError: string): string {
   }
 
   // Try Vitest pattern: "FAIL file.test.ts > describe > test name"
-  const vitestMatch = rawError.match(/FAIL\s+.+?>\s*(.+)$/m);
+  const vitestMatch = rawError.match(/FAIL\s+.*?>\s*(.+)$/m);
   if (vitestMatch) {
-    return cleanTestName(vitestMatch[1]);
+    return cleanTestName(vitestMatch[1]).replace(/^.*>\s*/, ''); // Get last part after >
   }
 
   // Try "Test name:" or "Test:"
