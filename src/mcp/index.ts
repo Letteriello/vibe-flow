@@ -838,6 +838,7 @@ export class MCPServer {
       [Phase.PLANNING]: 'Planning phase in progress - defining the solution',
       [Phase.SOLUTIONING]: 'Solutioning phase in progress - designing the architecture',
       [Phase.IMPLEMENTATION]: 'Implementation phase in progress - building the solution',
+      [Phase.WRAP_UP]: 'Wrap-up phase in progress - consolidating and finalizing',
       [Phase.COMPLETE]: 'Project is complete'
     };
     return phaseDescriptions[state.phase];

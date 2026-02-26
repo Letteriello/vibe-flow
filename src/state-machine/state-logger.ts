@@ -95,6 +95,7 @@ const PHASE_STEPS: Record<Phase, number> = {
   [Phase.PLANNING]: 4,
   [Phase.SOLUTIONING]: 4,
   [Phase.IMPLEMENTATION]: 10,
+  [Phase.WRAP_UP]: 3,
   [Phase.COMPLETE]: 0
 };
 

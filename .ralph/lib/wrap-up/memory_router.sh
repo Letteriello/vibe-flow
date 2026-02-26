@@ -4,10 +4,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/config.sh"
 
-# Memory hierarchy locations
-CLAUDE_MD="vibe-flow/CLAUDE.md"
-CLAUDE_LOCAL="vibe-flow/CLAUDE.local.md"
-RULES_DIR="vibe-flow/.claude/rules"
+# Memory hierarchy locations (absolute paths from project root)
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../" && pwd)"
+CLAUDE_MD="$PROJECT_ROOT/CLAUDE.md"
+CLAUDE_LOCAL="$PROJECT_ROOT/CLAUDE.local.md"
+RULES_DIR="$PROJECT_ROOT/.claude/rules"
 
 # Phase 2: Remember It
 wrap_up_remember_it() {

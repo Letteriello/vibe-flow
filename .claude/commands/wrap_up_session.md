@@ -5,7 +5,7 @@ Execute a wrap-up session to organize the project, consolidate learnings, and ge
 ## Usage
 
 ```
-/wrap_up_session [mode] [options]
+/wrap_up_session [mode]
 ```
 
 ## Arguments
@@ -17,18 +17,13 @@ Execute a wrap-up session to organize the project, consolidate learnings, and ge
   - `self-improve` - Update agent configuration
   - `publish-it` - Publish changes
 
-## Options
-
-- `--dry-run` - Show what would be done without executing
-- `--force` - Skip confirmations and execute directly
-
 ## Examples
 
 ```
 /wrap_up_session
-/wrap_up_session full --dry-run
-/wrap_up_session remember-it --force
+/wrap_up_session remember-it
 /wrap_up_session ship-it
+/wrap_up_session full
 ```
 
-This will call the MCP tool `wrap_up_session` with the specified mode and options.
+This will call the MCP tool `wrap_up_session` with the specified mode. Wrap-up always executes definitively - no dry-run or bypass options are available via API.

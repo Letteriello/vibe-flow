@@ -164,6 +164,7 @@ export class StateMachineTelemetry {
       [Phase.PLANNING]: 1.8,
       [Phase.SOLUTIONING]: 2.0,
       [Phase.IMPLEMENTATION]: 2.5,
+      [Phase.WRAP_UP]: 1.2,
       [Phase.COMPLETE]: 1.0
     };
 

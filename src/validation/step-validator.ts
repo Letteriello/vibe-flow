@@ -161,6 +161,7 @@ export class StepValidator {
       [Phase.PLANNING]: 'planning-artifacts',
       [Phase.SOLUTIONING]: 'planning-artifacts',
       [Phase.IMPLEMENTATION]: 'implementation-artifacts',
+      [Phase.WRAP_UP]: 'wrap-up-artifacts',
       [Phase.COMPLETE]: null
     };
     return phaseToDir[phase];

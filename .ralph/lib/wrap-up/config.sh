@@ -1,7 +1,9 @@
 #!/bin/bash
 # Wrap-up Configuration Management
 
-WRAP_UP_CONFIG_DIR="${BASH_SOURCE%/*}/../../../_bmad/core/workflows/wrap-up/config"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../" && pwd)"
+WRAP_UP_CONFIG_DIR="$PROJECT_ROOT/_bmad/core/workflows/wrap-up/config"
 DEFAULT_CONFIG="$WRAP_UP_CONFIG_DIR/default-config.json"
 
 # Load configuration
