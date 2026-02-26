@@ -1,0 +1,46 @@
+{
+  "wrap_up": {
+    "enabled": true,
+    "phases": {
+      "ship_it": {
+        "enabled": true,
+        "auto_commit": true,
+        "auto_push": false,
+        "check_naming": true,
+        "move_files": true,
+        "cleanup_temp": false,
+        "run_deploy": false
+      },
+      "remember_it": {
+        "enabled": true,
+        "consolidate_claude_md": true,
+        "update_rules": true,
+        "update_local": true,
+        "max_context_size": "1MB"
+      },
+      "self_improve": {
+        "enabled": true,
+        "analyze_errors": true,
+        "generate_rules": true,
+        "min_occurrence_threshold": 3
+      },
+      "publish_it": {
+        "enabled": false,
+        "platforms": ["reddit", "twitter"],
+        "require_review": true
+      }
+    },
+    "safety": {
+      "dry_run_default": true,
+      "require_tests_pass": false,
+      "secret_detection": true,
+      "force_push_blocked": true,
+      "max_timeout_minutes": 5
+    },
+    "output": {
+      "verbose": true,
+      "silent_mode": false,
+      "report_format": "markdown"
+    }
+  }
+}

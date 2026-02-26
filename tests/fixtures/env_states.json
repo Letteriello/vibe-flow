@@ -1,0 +1,163 @@
+{
+  "scenarios": [
+    {
+      "name": "small_context_8k",
+      "description": "Cenário com janela de contexto pequena (8k tokens)",
+      "tokens": 8192,
+      "charCount": 24576,
+      "expectedBehavior": "SUCCESS",
+      "payload": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Generate a simple hello world function in TypeScript."
+          },
+          {
+            "role": "assistant",
+            "content": "I'll create a simple hello world function for you."
+          },
+          {
+            "role": "tool",
+            "content": "File created successfully at /project/hello.ts"
+          }
+        ],
+        "contextWindow": {
+          "maxTokens": 8192,
+          "usedTokens": 7500,
+          "remainingTokens": 692
+        },
+        "fileTree": [
+          "/project/src/index.ts",
+          "/project/src/utils.ts",
+          "/project/package.json"
+        ],
+        "activeFile": "/project/src/index.ts"
+      }
+    },
+    {
+      "name": "massive_context_128k",
+      "description": "Cenário com janela de contexto massiva (128k tokens)",
+      "tokens": 131072,
+      "charCount": 393216,
+      "expectedBehavior": "SUCCESS",
+      "payload": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Analyze the entire codebase and provide a comprehensive architectural overview including all components, their interactions, and design patterns used throughout the system."
+          },
+          {
+            "role": "assistant",
+            "content": "I'll analyze the codebase thoroughly. This is a complex request that requires reading multiple files and understanding the overall architecture."
+          },
+          {
+            "role": "tool",
+            "content": "Read 150 files across the codebase"
+          },
+          {
+            "role": "assistant",
+            "content": "Based on my analysis of the 150 files, here's the comprehensive architectural overview..."
+          },
+          {
+            "role": "tool",
+            "content": "Read 200 additional files for deeper analysis"
+          },
+          {
+            "role": "assistant",
+            "content": "Now I have a complete picture of the architecture. Let me provide the detailed breakdown."
+          }
+        ],
+        "contextWindow": {
+          "maxTokens": 131072,
+          "usedTokens": 128000,
+          "remainingTokens": 3072
+        },
+        "fileTree": [
+          "/project/src/**/*.ts",
+          "/project/src/**/*.js",
+          "/project/src/**/*.json",
+          "/project/tests/**/*.ts",
+          "/project/docs/**/*.md",
+          "/project/config/**/*",
+          "/project/scripts/**/*.sh"
+        ],
+        "activeFile": "/project/src/index.ts",
+        "analysisSummary": {
+          "totalFiles": 450,
+          "totalLines": 125000,
+          "components": 45,
+          "patterns": ["Singleton", "Factory", "Observer", "Strategy", "Repository"]
+        }
+      }
+    },
+    {
+      "name": "context_overflow_8k",
+      "description": "Cenário de overflow com contexto pequeno (8k tokens) - deve falhar",
+      "tokens": 8192,
+      "charCount": 28000,
+      "expectedBehavior": "FAILURE",
+      "payload": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Summarize all 500 files in the codebase"
+          },
+          {
+            "role": "assistant",
+            "content": "I'll need to read through all the files to provide a summary."
+          },
+          {
+            "role": "tool",
+            "content": "Reading file 1/500..."
+          },
+          {
+            "role": "tool",
+            "content": "Reading file 2/500..."
+          }
+        ],
+        "contextWindow": {
+          "maxTokens": 8192,
+          "usedTokens": 8500,
+          "remainingTokens": -308
+        },
+        "fileTree": [
+          "/project/src/**/*.ts"
+        ],
+        "activeFile": "/project/src/index.ts"
+      }
+    },
+    {
+      "name": "context_exact_limit_128k",
+      "description": "Cenário exatamente no limite de 128k tokens",
+      "tokens": 131072,
+      "charCount": 393216,
+      "expectedBehavior": "SUCCESS",
+      "payload": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Process this large dataset and return results"
+          }
+        ],
+        "contextWindow": {
+          "maxTokens": 131072,
+          "usedTokens": 131072,
+          "remainingTokens": 0
+        },
+        "fileTree": [],
+        "activeFile": null,
+        "dataProcessing": {
+          "recordsProcessed": 50000,
+          "status": "complete"
+        }
+      }
+    }
+  ],
+  "testConfig": {
+    "maxTokens8k": 8192,
+    "maxTokens128k": 131072,
+    "charLimitMultiplier": 3,
+    "successThreshold": 0.95,
+    "failureThreshold": 0.8
+  }
+}
