@@ -9,3 +9,9 @@ export type { QualityIssue, QualityReport } from './types.js';
 
 export { AICodePatternsDetector } from './ai-patterns-detector.js';
 export type { AIQualityIssue } from './types.js';
+
+export { Guardrails } from './guardrails.js';
+export type { GuardrailsConfig, GuardrailsResult } from './guardrails.js';
+
+export { Linter } from './linter.js';
+export type { LinterConfig, LinterResult } from './linter.js';

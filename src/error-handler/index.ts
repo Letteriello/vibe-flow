@@ -669,3 +669,18 @@ export interface RecoveryResult<T> {
   attempts: number;
   recovered: boolean;
 }
+
+// Export WAL (Write-Ahead Log) and Recovery modules
+export { wal, WriteAheadLog } from './wal.js';
+export type {
+  FileSnapshot,
+  DirectorySnapshot,
+  StateSnapshot,
+  Checkpoint,
+  WALEntry,
+  WALAction,
+  WALConfig
+} from './wal.js';
+
+export { recovery, RecoveryManager, performRecovery, performAutoRecovery } from './recovery.js';
+export type { RecoveryResult as RecoveryOutcome, RecoveryOptions } from './recovery.js';

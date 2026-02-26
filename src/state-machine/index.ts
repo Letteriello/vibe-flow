@@ -509,3 +509,25 @@ export { ProjectStateClassifier, ProjectClassification } from './project-classif
 
 // Re-export Story 1.4: State Drift Detection
 export { StateDriftDetector, DriftStatus } from './state-drift-detector.js';
+
+// Re-export Story: State Machine Tracker (Stagnation Detection)
+export {
+  StateMachineTracker,
+  CircuitBreakerError,
+  TransitionRecord,
+  ArtifactSnapshot,
+  StagnationResult
+} from './tracker.js';
+
+// Re-export Story: State Machine Telemetry
+export {
+  StateMachineTelemetry,
+  getGlobalTelemetry,
+  createTelemetry,
+  formatDuration,
+  estimateTokensFromText,
+  MetricData,
+  SessionMetrics,
+  TransitionMetric,
+  PhaseMetrics
+} from './telemetry.js';

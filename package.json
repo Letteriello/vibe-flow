@@ -11,6 +11,7 @@
     "build": "tsc",
     "start": "node dist/cli.js",
     "dev": "tsc && node dist/cli.js",
+    "mcp": "node dist/mcp/official-server.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "test:watch": "jest --watch",
     "lint": "eslint src --ext .ts",
@@ -26,9 +27,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "better-sqlite3": "^11.8.1",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
+    "esprima": "^4.0.1",
     "inquirer": "^9.2.12",
     "uuid": "^13.0.0",
     "zod": "^3.22.4"

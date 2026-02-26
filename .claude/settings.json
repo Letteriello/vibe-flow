@@ -3,7 +3,7 @@
     "vibe-flow": {
       "command": "node",
       "args": [
-        "C:\\Users\\gabri\\Desktop\\Claude Code\\vibe-flow\\dist\\cli.js",
+        "C:\\Users\\gabri\\Desktop\\vibe-flow\\dist\\cli.js",
         "mcp",
         "--stdio"
       ],
