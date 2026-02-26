@@ -91,11 +91,9 @@ const CATEGORY_TO_FILENAME: Record<string, string> = {
 export class RuleGenerator {
   private rulesDir: string;
   private fileContents: Map<string, string> = new Map();
-  private dryRun: boolean = false;
 
-  constructor(workspacePath: string, dryRun: boolean = false) {
+  constructor(workspacePath: string) {
     this.rulesDir = join(workspacePath, '.vibe-flow', 'rules');
-    this.dryRun = dryRun;
   }
 
   /**
@@ -131,7 +129,7 @@ export class RuleGenerator {
       }
     }
 
-    // Write rules to files (or simulate if dryRun)
+    // Write rules to files
     for (const rule of rulesMap.values()) {
       try {
         await this.writeRuleFile(rule);

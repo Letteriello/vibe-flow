@@ -155,6 +155,11 @@ What patterns will guide the implementation?`,
 - How does this align with previous decisions?
 - What tests validate your approach?`,
 
+      [Phase.WRAP_UP]: `Let's consolidate and wrap up:
+- What was accomplished in this session?
+- What decisions were made?
+- What should be remembered for future work?`,
+
       [Phase.COMPLETE]: `Congratulations on completing the project!`
     };
 
