@@ -43,12 +43,12 @@ export class ConfigLoader {
         );
       }
 
-      // Apply defaults using partial schema first (Zod defaults only apply when field exists)
+      // First validate with partial schema (allows missing fields)
       const PartialSchema = VibeFlowConfigSchema.partial();
-      const withDefaults = PartialSchema.safeParse(parsed);
+      const partialResult = PartialSchema.safeParse(parsed);
 
-      if (!withDefaults.success) {
-        const issues = withDefaults.error.issues.map(issue => ({
+      if (!partialResult.success) {
+        const issues = partialResult.error.issues.map(issue => ({
           path: issue.path,
           message: issue.message,
           code: issue.code
@@ -59,8 +59,11 @@ export class ConfigLoader {
         );
       }
 
+      // Merge parsed data with DEFAULT_CONFIG to apply defaults for missing fields
+      const mergedWithDefaults = this.deepMerge(DEFAULT_CONFIG as unknown as Record<string, unknown>, partialResult.data as Record<string, unknown>);
+
       // Validate against full schema to ensure type safety after defaults applied
-      const validated = validateConfig(withDefaults.data);
+      const validated = validateConfig(mergedWithDefaults);
 
       this.cachedConfig = validated;
       return validated;
