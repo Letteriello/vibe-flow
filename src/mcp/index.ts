@@ -842,3 +842,15 @@ export class MCPServer {
     return md;
   }
 }
+
+// Re-export Router and Fallback
+export { MCPRouter, RouterConfig, RouterState, RoutingLog, DEFAULT_ROUTER_CONFIG } from './router.js';
+export { FallbackRouter, FallbackConfig, FallbackState, FallbackResult, DEFAULT_FALLBACK_CONFIG } from './fallback.js';
+export { MCPToolRequest, MCPToolResponse, ToolExecutionResult } from './types.js';
+
+// Re-export MCP Client
+export { MCPClient, MCPClientManager } from './client.js';
+export type { MCPClientConfig, MCPToolResult } from './client.js';
+
+// Re-export Official MCP Server
+export { VibeFlowMCPServer } from './official-server.js';
