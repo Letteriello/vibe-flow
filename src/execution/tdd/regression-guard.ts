@@ -371,7 +371,7 @@ export class RegressionGuard {
     const testNameLower = testName.toLowerCase();
 
     // Check if test name contains any modified file name
-    for (const file of modifiedFiles) {
+    for (const file of Array.from(modifiedFiles)) {
       const fileName = path.basename(file, path.extname(file)).toLowerCase();
       if (testNameLower.includes(fileName)) {
         return true;

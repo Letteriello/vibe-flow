@@ -131,7 +131,7 @@ function getIstanbulFileCoverage(data: IstanbulCoverageData, targetFile: string)
 /**
  * Calculate coverage from Istanbul format
  */
-function calculateIstanbulCoverage(fileData: IstanbulCoverageData[string]): { statement: number; branch: number; uncoveredLines: number[]; partialBranches: number[] } {
+function calculateIstanbulCoverage(fileData: IstanbulCoverageData[string]): { statement: number; branch: number; uncoveredLines: number[]; partiallyCoveredBranches: number[] } {
   const statements = fileData.s;
   const branches = fileData.b;
 
@@ -345,7 +345,7 @@ export function verifyTestCoverage(
       // Try partial match for LCOV
       if (!fileData) {
         const fileName = path.basename(normalizedTarget);
-        for (const [key, value] of lcovData) {
+        for (const [key, value] of Array.from(lcovData)) {
           if (key.includes(fileName)) {
             fileData = value;
             break;
