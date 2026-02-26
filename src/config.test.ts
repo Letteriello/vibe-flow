@@ -1,4 +1,5 @@
 // Config Manager Tests - User preferences and configuration
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ConfigManager, VibeFlowConfig, UserPreferences, WrapUpConfig, ValidationResult } from './config/index.js';
 import { promises as fs } from 'fs';
 import { join, dirname } from 'path';
