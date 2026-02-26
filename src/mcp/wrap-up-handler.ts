@@ -54,8 +54,10 @@ export class WrapUpHandler {
     this.jobs.set(jobId, job);
     this.saveJobToFile(job);
 
-    // Execute wrap-up in background (don't await)
-    this.executeBackgroundJob(jobId, mode, force);
+    // Execute wrap-up in background (fire-and-forget with setTimeout)
+    setTimeout(() => {
+      this.executeBackgroundJob(jobId, mode, force);
+    }, 0);
 
     return {
       status: 'processing',
@@ -64,46 +66,66 @@ export class WrapUpHandler {
   }
 
   /**
-   * Execute wrap-up in background without blocking
+   * Execute wrap-up in background without blocking (fire-and-forget)
+   * Uses setTimeout to ensure immediate return - no await anywhere
    */
-  private async executeBackgroundJob(
+  private executeBackgroundJob(
     jobId: string,
     mode: string,
     force: boolean
-  ): Promise<void> {
-    try {
-      // Wrap-up is always enabled - no check needed
-      // Execute the wrap-up
-      const result = await this.wrapUpExecutor.execute(mode, force);
-      await this.wrapUpExecutor.saveReport(result);
+  ): void {
+    // Fire-and-forget: execute completely in background with try-catch protection
+    // Using setTimeout(0) ensures the wrap-up runs after startJob returns
+    setTimeout(() => {
+      this.wrapUpExecutor.execute(mode, force)
+        .then(async (result) => {
+          try {
+            await this.wrapUpExecutor.saveReport(result);
 
-      const job = this.jobs.get(jobId);
-      if (job) {
-        job.status = 'completed';
-        job.completedAt = new Date().toISOString();
-        job.result = {
-          success: result.success,
-          phasesExecuted: result.phasesExecuted,
-          shipIt: result.shipIt,
-          rememberIt: result.rememberIt,
-          selfImprove: result.selfImprove,
-          publishIt: result.publishIt,
-          errors: result.errors,
-          message: result.success ? 'Wrap-up completed successfully' : 'Wrap-up completed with errors'
-        };
-        this.jobs.set(jobId, job);
-        this.saveJobToFile(job);
-      }
-    } catch (error: any) {
-      const job = this.jobs.get(jobId);
-      if (job) {
-        job.status = 'failed';
-        job.error = error.message;
-        job.completedAt = new Date().toISOString();
-        this.jobs.set(jobId, job);
-        this.saveJobToFile(job);
-      }
-    }
+            const job = this.jobs.get(jobId);
+            if (job) {
+              job.status = 'completed';
+              job.completedAt = new Date().toISOString();
+              job.result = {
+                success: result.success,
+                phasesExecuted: result.phasesExecuted,
+                shipIt: result.shipIt,
+                rememberIt: result.rememberIt,
+                selfImprove: result.selfImprove,
+                publishIt: result.publishIt,
+                errors: result.errors,
+                message: result.success ? 'Wrap-up completed successfully' : 'Wrap-up completed with errors'
+              };
+              this.jobs.set(jobId, job);
+              await this.saveJobToFile(job);
+            }
+          } catch (saveError: any) {
+            console.error('[WrapUpHandler] Failed to save result:', saveError);
+            const job = this.jobs.get(jobId);
+            if (job) {
+              job.status = 'failed';
+              job.error = saveError.message;
+              job.completedAt = new Date().toISOString();
+              this.jobs.set(jobId, job);
+              await this.saveJobToFile(job).catch(() => {});
+            }
+          }
+        })
+        .catch(async (error: any) => {
+          try {
+            const job = this.jobs.get(jobId);
+            if (job) {
+              job.status = 'failed';
+              job.error = error.message;
+              job.completedAt = new Date().toISOString();
+              this.jobs.set(jobId, job);
+              await this.saveJobToFile(job);
+            }
+          } catch (saveError) {
+            console.error('[WrapUpHandler] Failed to save error state:', saveError);
+          }
+        });
+    }, 0);
   }
 
   /**

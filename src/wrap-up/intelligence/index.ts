@@ -381,3 +381,15 @@ export { JustificationLinker, JustificationLink } from './justification-linker.j
 export { ArtifactSealer, SealedArtifact } from './artifact-sealer.js';
 export { OntologyMetadataTagger, RAGMetadata } from './rag-metadata.js';
 export { FinalQAAuditor, QAReport } from './qa-auditor.js';
+export {
+  LLMClient,
+  LLMClientError,
+  LLMCircuitState,
+  LLMClientConfig,
+  CompletionOptions,
+  LLMResult,
+  LLMCallMetadata,
+  createAnthropicClient,
+  createOpenAIClient,
+  createGenericLLMClient
+} from './llm-client.js';

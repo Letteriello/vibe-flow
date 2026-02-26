@@ -9,6 +9,7 @@ import { StateMachine, ProjectState } from '../state-machine/index.js';
 import { Consolidation, getConsolidation } from './consolidation.js';
 import { getMemory } from './memory.js';
 import { SessionAuditLogger, AuditEntry, AuditReport } from './audit-logger.js';
+import { WrapUpWatchdog, createWatchdog } from './watchdog.js';
 
 const execAsync = promisify(exec);
 
@@ -57,6 +58,7 @@ export class WrapUpExecutor {
   private configManager: ConfigManager;
   private stateMachine: StateMachine;
   private config: WrapUpConfig | null = null;
+  private watchdog: WrapUpWatchdog | null = null;
 
   constructor(configManager: ConfigManager, stateMachine: StateMachine) {
     this.configManager = configManager;
@@ -70,8 +72,13 @@ export class WrapUpExecutor {
       errors: []
     };
 
+    // Initialize watchdog for real-time progress tracking
+    this.watchdog = createWatchdog(5);
+    await this.watchdog.start();
+
     try {
       this.config = (await this.configManager.load()).wrapUp;
+      await this.watchdog.logProgress('Configuration loaded');
 
       // Wrap-up is always enabled - no check needed
 
@@ -605,3 +612,32 @@ export {
   type LLMProvider,
   type EscalationOptions
 } from './intelligence/summarization-escalation.js';
+
+// Re-export WrapUpWatchdog
+export {
+  WrapUpWatchdog,
+  createWatchdog
+} from './watchdog.js';
+
+// Re-export TimeoutController for worker timeout management
+export {
+  TimeoutController,
+  createTimeoutController,
+  executeWrapUpWithTimeout,
+  type TimeoutControllerOptions,
+  type WorkerExecutionResult
+} from './worker-manager.js';
+
+// Re-export WAL Parser (stream-based async parser)
+export {
+  WALParser,
+  createWALParser,
+  parseWALFile,
+  parseWALDirectory,
+  forEachWALEvent,
+  type WALParserOptions,
+  type WALParseResult,
+  type WALMetadata,
+  type WALLogEvent,
+  type WALActionType
+} from './wal-parser.js';
