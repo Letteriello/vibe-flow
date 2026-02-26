@@ -1,3 +1,6 @@
+export { CrossRuleValidator, validateCrossRule, CrossRuleStatus } from './cross-rule.js';
+export type { ValidationResult, CrossRuleOptions, CrossRuleIssue } from './cross-rule.js';
+
 // Validation module exports
 export { StepValidator, ValidationLevel, ValidationStatus } from './step-validator.js';
 export { SpecificationReadinessGate, ReadinessResult } from './readiness-gate.js';

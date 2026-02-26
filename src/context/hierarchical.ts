@@ -353,7 +353,7 @@ export class HierarchicalContextManager {
     const summaryText = this.generateSummaryText(entriesToCompact);
     const summaryId = uuidv4();
 
-    const summaryNode: SummaryNode = {
+    const summaryNode: HierarchicalSummaryNode = {
       id: summaryId,
       type: 'summary',
       summary: summaryText,
@@ -395,7 +395,7 @@ export class HierarchicalContextManager {
   /**
    * Gera texto de resumo para as entradas
    */
-  private generateSummaryText(entries: ContextEntry[]): string {
+  private generateSummaryText(entries: HierarchicalEntry[]): string {
     const summaries = entries.map(entry => {
       const typeLabel = entry.type.toUpperCase();
       const preview = entry.content.slice(0, 200);
@@ -410,8 +410,8 @@ export class HierarchicalContextManager {
    *
    * @returns Contexto com entradas e summary nodes ativos
    */
-  public getCompactedContext(): CompactedContextResult {
-    const result: (ContextEntry | SummaryNode)[] = [];
+  public getCompactedContext(): HierarchicalCompactedContextResult {
+    const result: (HierarchicalEntry | HierarchicalSummaryNode)[] = [];
     let totalTokens = 0;
     let summaryCount = 0;
 
@@ -444,7 +444,7 @@ export class HierarchicalContextManager {
    * @param summaryId ID do summary node para expandir
    * @returns Entradas originais recuperadas
    */
-  public expandNode(summaryId: string): ExpandNodeResult {
+  public expandNode(summaryId: string): HierarchicalExpandNodeResult {
     const summary = this.state.summaryNodes.find(s => s.id === summaryId);
 
     if (!summary) {
@@ -456,7 +456,7 @@ export class HierarchicalContextManager {
     }
 
     // Tentar recuperar entradas originais do store de entries
-    const expandedEntries: ContextEntry[] = [];
+    const expandedEntries: HierarchicalEntry[] = [];
 
     for (const originalId of summary.originalIds) {
       const entry = this.state.entries.find(e => e.id === originalId);
@@ -495,8 +495,8 @@ export class HierarchicalContextManager {
   /**
    * Expande um summary filho recursivamente
    */
-  private expandChildSummary(summary: SummaryNode): ContextEntry[] {
-    const entries: ContextEntry[] = [];
+  private expandChildSummary(summary: HierarchicalSummaryNode): HierarchicalEntry[] {
+    const entries: HierarchicalEntry[] = [];
 
     for (const childId of summary.originalIds) {
       const entry = this.state.entries.find(e => e.id === childId);
@@ -539,14 +539,14 @@ export class HierarchicalContextManager {
   /**
    * Obtém um summary node pelo ID
    */
-  public getSummaryById(id: string): SummaryNode | null {
+  public getSummaryById(id: string): HierarchicalSummaryNode | null {
     return this.state.summaryNodes.find(s => s.id === id) || null;
   }
 
   /**
    * Obtém uma entrada pelo ID
    */
-  public getEntryById(id: string): ContextEntry | null {
+  public getEntryById(id: string): HierarchicalEntry | null {
     return this.state.entries.find(e => e.id === id) || null;
   }
 
@@ -561,7 +561,7 @@ export class HierarchicalContextManager {
   /**
    * Force compactação manual
    */
-  public forceCompaction(): CompactionResult {
+  public forceCompaction(): HierarchicalCompactionResult {
     return this.compact();
   }
 

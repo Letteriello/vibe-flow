@@ -130,12 +130,12 @@ export {
   HierarchicalContextManager,
   createHierarchicalContextManager,
   HierarchicalConfig,
-  CompactionResult,
-  CompactedContextResult,
-  ExpandNodeResult,
+  HierarchicalCompactionResult,
+  HierarchicalCompactedContextResult,
+  HierarchicalExpandNodeResult,
   HierarchicalError,
-  ContextEntry,
-  ContextEntryType,
-  SummaryNode,
+  HierarchicalEntry,
+  HierarchicalEntryType,
+  HierarchicalSummaryNode,
   HierarchicalState
 } from './hierarchical.js';

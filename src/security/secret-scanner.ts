@@ -407,7 +407,7 @@ export class SecurityScanner {
       const matches = payload.match(secretPattern.pattern);
 
       if (matches && matches.length > 0) {
-        const uniqueMatches = [...new Set(matches)];
+        const uniqueMatches = Array.from(new Set(matches));
 
         for (const match of uniqueMatches) {
           findings.push({
@@ -433,7 +433,7 @@ export class SecurityScanner {
 
       if (matches && matches.length > 0) {
         promptInjectionDetected = true;
-        const uniqueMatches = [...new Set(matches)];
+        const uniqueMatches = Array.from(new Set(matches));
 
         for (const match of uniqueMatches) {
           findings.push({
@@ -495,7 +495,7 @@ export class SecurityScanner {
       const matches = payload.match(injectionPattern.pattern);
 
       if (matches && matches.length > 0) {
-        const uniqueMatches = [...new Set(matches)];
+        const uniqueMatches = Array.from(new Set(matches));
 
         for (const match of uniqueMatches) {
           findings.push({
@@ -573,7 +573,7 @@ export class SecurityScanner {
       const matches = payload.match(secretPattern.pattern);
 
       if (matches && matches.length > 0) {
-        const uniqueMatches = [...new Set(matches)];
+        const uniqueMatches = Array.from(new Set(matches));
 
         for (const match of uniqueMatches) {
           findings.push({
