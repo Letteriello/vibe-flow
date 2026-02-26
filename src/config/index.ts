@@ -9,6 +9,10 @@ export * from './fallback-router.js';
 // Re-export cognitive tiering router
 export * from './cognitive-tiering.js';
 
+// Re-export schema and config-loader
+export * from './schema.js';
+export * from './config-loader.js';
+
 export interface UserPreferences {
   language: string;
   autoAdvance: boolean;
