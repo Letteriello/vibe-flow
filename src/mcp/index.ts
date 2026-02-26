@@ -4,6 +4,7 @@ import { ConfigManager } from '../config/index.js';
 import { WrapUpExecutor } from '../wrap-up/index.js';
 import { HelpExecutor } from '../help/index.js';
 import { CommandRegistry } from '../command-registry/index.js';
+import { getLCMTools } from './tools/lcm-tools.js';
 
 export interface MCPTool {
   name: string;
@@ -714,6 +715,17 @@ export class MCPServer {
         }
       }
     });
+
+    // Register LCM (Large Context Management) tools
+    const lcmTools = getLCMTools();
+    for (const tool of lcmTools) {
+      this.tools.set(tool.name, {
+        name: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+        handler: tool.handler
+      });
+    }
   }
 
   getTools(): MCPTool[] {

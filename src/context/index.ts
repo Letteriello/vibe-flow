@@ -22,3 +22,106 @@ export {
   ContextManagerConfig,
   OptimizedContextResult
 } from './context-manager.js';
+export {
+  LeafSummary,
+  CondensedSummary,
+  SummaryNode,
+  DAGState,
+  ActiveContextEntry,
+  ActiveContextResult,
+  DAGSummaryConfig,
+  MessagePointer,
+  SummaryPointer,
+  DAGPointer,
+  SummaryId,
+  MessageId
+} from './summary-types.js';
+export {
+  createLeafSummary,
+  createCondensedSummary,
+  createDAGState,
+  addSummaryToDAG,
+  getLeafSummaries,
+  getLatestSummariesByLevel,
+  getProvenance,
+  buildActiveContext,
+  rebuildDAGFromSummaries,
+  getSummaryById,
+  validateDAG
+} from './dag-summary.js';
+export {
+  ImmutableStore,
+  ImmutableTransaction,
+  TransactionType,
+  TransactionResult,
+  SearchOptions,
+  SearchResult,
+  ImmutableStoreConfig
+} from './store.js';
+export {
+  ImmutableLogger,
+  LogEntry,
+  LogLevel,
+  LogCategory,
+  LogResult,
+  LogSearchOptions,
+  LogSearchResult,
+  ImmutableLoggerConfig
+} from './immutable-logger.js';
+// Active Window - Aggressive noise cleaning middleware
+export {
+  ActiveWindowMiddleware,
+  createActiveWindowMiddleware,
+  filterProviderPayload,
+  ProviderPayload
+} from './active-window.js';
+export {
+  thinkingBlockClearing,
+  staleToolClearing,
+  needsAggressiveCleaning,
+  ContextMessage,
+  ActiveWindowConfig,
+  CleaningResult
+} from './pruning.js';
+// Three-Level Escalation - LCM pattern
+export {
+  escalatedSummarize,
+  deterministicEscalate,
+  EscalationMessage,
+  EscalationResult,
+  EscalationOptions,
+  EscalationLogger,
+  LLMCaller
+} from './escalation.js';
+export {
+  DEFAULT_COMPACTION_LIMITS,
+  CompactionLimits,
+  EscalationLevelConfig,
+  getLevelConfig,
+  calculateTargetTokens,
+  estimateTokensFromChars,
+  estimateCharsFromTokens
+} from './compaction-limits.js';
+// File Pointers - Intelligent large file injection
+export {
+  SOFT_TOKEN_LIMIT,
+  FilePointer,
+  ExplorationSummary,
+  FileInjectionResult,
+  FilePointerConfig,
+  detectLargeFile,
+  injectFilePointer,
+  createExplorationSummary,
+  storeFileContent,
+  estimateFileTokens,
+  loadFromFilePointer
+} from './file-pointers.js';
+// File Analyzer - Static file structure analysis
+export {
+  FileType,
+  CodeStructure,
+  detectFileType,
+  analyzeFileStructure,
+  analyzeTextPreview,
+  generateCodeStructure
+} from './file-analyzer.js';

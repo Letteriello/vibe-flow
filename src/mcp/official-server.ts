@@ -10,23 +10,27 @@ import {
 
 class VibeFlowMCPServer {
   private server: Server;
-  private vibeFlowServer: any;
   private _mcpServer: any = null;
+  private _mcpServerPromise: Promise<any> | null = null;
 
-  private get mcpServer(): any {
-    if (!this._mcpServer) {
-      // Lazy import to avoid circular dependency
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { MCPServer } = require('./index.js');
-      this._mcpServer = new MCPServer();
+  private async getMcpServer(): Promise<any> {
+    if (this._mcpServer) {
+      return this._mcpServer;
     }
-    return this._mcpServer;
+
+    if (!this._mcpServerPromise) {
+      this._mcpServerPromise = (async () => {
+        // Dynamic import to avoid circular dependency
+        const mcp = await import('./index.js');
+        this._mcpServer = new mcp.MCPServer();
+        return this._mcpServer;
+      })();
+    }
+
+    return this._mcpServerPromise;
   }
 
   constructor() {
-    // Note: MCPServer will be initialized lazily when needed
-    this.vibeFlowServer = null;
-
     this.server = new Server(
       {
         name: 'vibe-flow',
@@ -45,10 +49,11 @@ class VibeFlowMCPServer {
   private setupHandlers(): void {
     // List available tools
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      const tools = this.mcpServer.getTools();
+      const mcpServer = await this.getMcpServer();
+      const tools = mcpServer.getTools();
 
       return {
-        tools: tools.map((tool) => ({
+        tools: tools.map((tool: any) => ({
           name: tool.name,
           description: tool.description,
           inputSchema: tool.inputSchema,
@@ -61,7 +66,8 @@ class VibeFlowMCPServer {
       const { name, arguments: args } = request.params;
 
       try {
-        const result = await this.mcpServer.handleTool(name, args);
+        const mcpServer = await this.getMcpServer();
+        const result = await mcpServer.handleTool(name, args);
 
         return {
           content: [
@@ -71,12 +77,13 @@ class VibeFlowMCPServer {
             },
           ],
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ error: error.message }, null, 2),
+              text: JSON.stringify({ error: errMsg }, null, 2),
             },
           ],
           isError: true,
