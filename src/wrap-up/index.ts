@@ -546,3 +546,19 @@ ${state.errors && state.errors.length > 0 ? state.errors.map(e => `- ${e.phase}:
 
 // Re-export audit logger
 export { SessionAuditLogger, AuditEntry, AuditReport };
+
+// Re-export incremental consolidator
+export {
+  IncrementalConsolidator,
+  getConsolidator,
+  resetConsolidator,
+  type InteractionData,
+  type PartialSummary,
+  type SummaryState,
+  type ArtifactSummary,
+  type ErrorSummary,
+  type DecisionSummary,
+  type LessonSummary,
+  type FlushResult,
+  type ConsolidatorOptions
+} from './incremental.js';

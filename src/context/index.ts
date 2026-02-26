@@ -139,3 +139,9 @@ export {
   HierarchicalSummaryNode,
   HierarchicalState
 } from './hierarchical.js';
+// Worker Thread - CPU-intensive context compression
+export {
+  compressContextAsync,
+  CompressContextOptions,
+  CompressContextResult
+} from './worker-wrapper.js';

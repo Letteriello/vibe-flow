@@ -5,6 +5,7 @@ import { WrapUpExecutor } from '../wrap-up/index.js';
 import { HelpExecutor } from '../help/index.js';
 import { CommandRegistry } from '../command-registry/index.js';
 import { getLCMTools } from './tools/lcm-tools.js';
+import { JobStatusManager, getWrapUpJobStatus, registerWrapUpJob, initializeJobStatusManager } from './status-polling.js';
 
 export interface MCPTool {
   name: string;
@@ -78,9 +79,19 @@ export class MCPServer {
     this.degradationConfig = { ...DEFAULT_DEGRADATION_CONFIG, ...config };
     this.registerTools();
     this.initializeToolHealth();
+    this.initializeJobStatus();
 
     if (this.degradationConfig.enableHotReload) {
       this.startHotReloadMechanism();
+    }
+  }
+
+  private async initializeJobStatus(): Promise<void> {
+    try {
+      await initializeJobStatusManager();
+      console.log('[MCP] Job status manager initialized');
+    } catch (error) {
+      console.error('[MCP] Failed to initialize job status manager:', error);
     }
   }
 
@@ -653,6 +664,38 @@ export class MCPServer {
           return {
             success: false,
             error: error.message
+          };
+        }
+      }
+    });
+
+    // Tool: get_wrapup_status - Poll async wrap-up job status
+    this.tools.set('get_wrapup_status', {
+      name: 'get_wrapup_status',
+      description: 'Poll the status of an async wrap-up job by job ID. Returns the current status (processing/completed/failed) and summary link if completed.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          jobId: {
+            type: 'string',
+            description: 'The job ID to check status for'
+          }
+        },
+        required: ['jobId']
+      },
+      handler: async (params: { jobId: string }) => {
+        try {
+          const result = await getWrapUpJobStatus(params.jobId);
+          return result;
+        } catch (error: any) {
+          return {
+            success: false,
+            jobId: params.jobId,
+            status: 'failed',
+            message: 'Error checking job status',
+            error: error.message,
+            createdAt: '',
+            updatedAt: ''
           };
         }
       }

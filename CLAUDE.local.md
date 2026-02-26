@@ -25,6 +25,15 @@ Auto-generated lessons from vibe-flow sessions
   - sanitizeMarkdownPrefix() removes LLM explanatory text and extracts pure code
   - Exported via src/quality/index.ts with SyntaxAnomaly and QualityCheckResult types
 
+## Session Notes (2026-02-27)
+- Implemented SecurityScanner class in src/security/secret-scanner.ts:
+  - SecurityFinding, SecurityReport, ScanResult interfaces
+  - Static methods: scanPayload(), scanForSecrets(), scanForPromptInjection()
+  - hasPromptInjection(), hasSecrets(), getSecretDetails()
+  - 40+ secret patterns (AWS, JWT, OpenAI, GitHub, Stripe, private keys)
+  - 11 prompt injection patterns ("ignore previous", jailbreak, XML injection)
+  - Fixed Set iteration: use Array.from(new Set()) for ES5 compatibility
+
 ## Session Notes (2026-02-26)
 - Implemented CrossRuleValidator in src/validation/cross-rule.ts:
   - validateConsistency(artifactA, artifactB) compares two specification artifacts
