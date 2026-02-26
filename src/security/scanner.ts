@@ -3,7 +3,10 @@
 
 import { promises as fs } from 'fs';
 import { join, extname } from 'path';
-import { Vulnerability, VulnerabilityCategory, VulnerabilitySeverity, SecurityScanResult, ScanOptions } from './types.js';
+import { Vulnerability, VulnerabilityCategory, VulnerabilitySeverity, SecurityScanResult, ScanOptions, SecretFinding, HeaderFinding } from './types.js';
+import { SecretsDetector } from './secrets-detector.js';
+import { SecurityHeadersValidator } from './headers-validator.js';
+import { SECRET_PATTERNS, CONFIG_PATTERNS, shouldStopOnSeverity } from './rules.js';
 
 // Default patterns for OWASP Top 10 detection
 const VULNERABILITY_PATTERNS: Array<{
@@ -169,6 +172,72 @@ const VULNERABILITY_PATTERNS: Array<{
     recommendation: 'Use a strong, random secret of at least 256 bits',
     cwe: 'CWE-798',
     owasp: 'A02:2021'
+  },
+  // Stripe Test Keys (sk_test_...)
+  {
+    pattern: /sk_test_[a-zA-Z0-9]{24,}/g,
+    category: VulnerabilityCategory.SENSITIVE_DATA,
+    severity: VulnerabilitySeverity.CRITICAL,
+    title: 'Stripe Test API Key Detected',
+    description: 'Hardcoded Stripe test key found in source code. Test keys should never be committed.',
+    recommendation: 'Remove the key and use environment variables (process.env.STRIPE_TEST_KEY)',
+    cwe: 'CWE-798',
+    owasp: 'A02:2021'
+  },
+  // Stripe Live Keys (sk_live_...)
+  {
+    pattern: /sk_live_[a-zA-Z0-9]{24,}/g,
+    category: VulnerabilityCategory.SENSITIVE_DATA,
+    severity: VulnerabilitySeverity.CRITICAL,
+    title: 'Stripe Live API Key Detected',
+    description: 'Hardcoded Stripe live key found in source code. This could lead to financial loss.',
+    recommendation: 'Immediately revoke this key and use environment variables',
+    cwe: 'CWE-798',
+    owasp: 'A02:2021'
+  },
+  // JWT Tokens in plaintext
+  {
+    pattern: /eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*/g,
+    category: VulnerabilityCategory.SENSITIVE_DATA,
+    severity: VulnerabilitySeverity.HIGH,
+    title: 'JWT Token in Plaintext',
+    description: 'Hardcoded JWT token found in source code. Tokens should be generated server-side.',
+    recommendation: 'Remove the token and implement proper JWT generation',
+    cwe: 'CWE-798',
+    owasp: 'A02:2021'
+  },
+  // Cookie without Secure flag
+  {
+    pattern: /(?:cookie|res\.cookie)\s*\([^)]*(?:secure\s*:\s*(?!true))/gi,
+    category: VulnerabilityCategory.SECURITY_MISCONFIGURATION,
+    severity: VulnerabilitySeverity.HIGH,
+    title: 'Cookie Missing Secure Flag',
+    description: 'Cookie is set without the Secure flag.',
+    recommendation: 'Add Secure: true to cookie configuration',
+    cwe: 'CWE-614',
+    owasp: 'A05:2021'
+  },
+  // Cookie without httpOnly flag
+  {
+    pattern: /(?:cookie|res\.cookie)\s*\([^)]*(?:httpOnly\s*:\s*(?!true))/gi,
+    category: VulnerabilityCategory.SECURITY_MISCONFIGURATION,
+    severity: VulnerabilitySeverity.MEDIUM,
+    title: 'Cookie Missing httpOnly Flag',
+    description: 'Cookie is set without the httpOnly flag, allowing JavaScript access.',
+    recommendation: 'Add httpOnly: true to prevent XSS cookie theft',
+    cwe: 'CWE-614',
+    owasp: 'A05:2021'
+  },
+  // Helmet completely disabled
+  {
+    pattern: /helmet\s*\(\s*false\s*\)/gi,
+    category: VulnerabilityCategory.SECURITY_MISCONFIGURATION,
+    severity: VulnerabilitySeverity.CRITICAL,
+    title: 'Helmet Security Disabled',
+    description: 'Helmet is completely disabled, removing all security headers.',
+    recommendation: 'Enable helmet() or configure individual security headers',
+    cwe: 'CWE-346',
+    owasp: 'A05:2021'
   }
 ];
 
@@ -190,6 +259,7 @@ const DEFAULT_EXCLUDE_PATTERNS = [
 
 export class SecurityScanner {
   private options: Required<ScanOptions>;
+  private stopOnCritical: boolean;
 
   constructor(options: ScanOptions) {
     this.options = {
@@ -200,41 +270,171 @@ export class SecurityScanner {
       scanHeaders: options.scanHeaders ?? false,
       severityThreshold: options.severityThreshold || VulnerabilitySeverity.INFO
     };
+    this.stopOnCritical = true; // Default: stop on CRITICAL findings
   }
 
+  /**
+   * Run full security scan including vulnerability patterns, secrets detection,
+   * and security header validation.
+   * Stops early if CRITICAL findings are detected (configurable).
+   */
   async scan(): Promise<SecurityScanResult> {
     const startTime = Date.now();
     const vulnerabilities: Vulnerability[] = [];
+    const secretsFound: SecretFinding[] = [];
+    const headersFindings: HeaderFinding[] = [];
     let filesScanned = 0;
 
     // Find all scannable files
     const files = await this.findScannableFiles(this.options.projectPath);
 
+    // Phase 1: Scan for vulnerabilities (includes hardcoded secrets patterns)
     for (const file of files) {
       try {
         const content = await fs.readFile(file, 'utf-8');
         const fileVulns = this.scanFileContent(file, content);
         vulnerabilities.push(...fileVulns);
         filesScanned++;
+
+        // Check if we should stop on CRITICAL findings
+        if (this.stopOnCritical) {
+          const hasCritical = fileVulns.some(v => v.severity === VulnerabilitySeverity.CRITICAL);
+          if (hasCritical) {
+            console.warn('[SecurityScanner] CRITICAL vulnerability found. Stopping early.');
+            break;
+          }
+        }
       } catch (error) {
         // Skip files that can't be read
         console.error(`[SecurityScanner] Could not read file ${file}:`, error);
       }
     }
 
+    // Phase 2: Deep secrets detection (if enabled and not stopped early)
+    if (this.options.scanSecrets && (!this.stopOnCritical || !vulnerabilities.some(v => v.severity === VulnerabilitySeverity.CRITICAL))) {
+      try {
+        const secretsDetector = new SecretsDetector(this.options.projectPath, this.options.excludePatterns);
+        const detectedSecrets = await secretsDetector.detect();
+        secretsFound.push(...detectedSecrets);
+
+        // Add secrets as vulnerabilities
+        for (const secret of detectedSecrets) {
+          vulnerabilities.push({
+            id: secret.id,
+            title: `Hardcoded ${secret.type}`,
+            description: secret.matchedPattern.substring(0, 50) + '...',
+            category: VulnerabilityCategory.SENSITIVE_DATA,
+            severity: secret.severity,
+            file: secret.file,
+            line: secret.line,
+            recommendation: secret.recommendation,
+            cwe: 'CWE-798',
+            owasp: 'A02:2021'
+          });
+        }
+      } catch (error) {
+        console.error('[SecurityScanner] Secrets detection failed:', error);
+      }
+    }
+
+    // Phase 3: Security headers validation (if enabled and not stopped early)
+    if (this.options.scanHeaders && (!this.stopOnCritical || !vulnerabilities.some(v => v.severity === VulnerabilitySeverity.CRITICAL))) {
+      try {
+        const headersValidator = new SecurityHeadersValidator(this.options.projectPath);
+        const headerResults = await headersValidator.validate();
+        headersFindings.push(...headerResults);
+
+        // Add missing headers as vulnerabilities
+        for (const header of headerResults) {
+          vulnerabilities.push({
+            id: `header-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            title: `Missing Security Header: ${header.header}`,
+            description: header.recommendation,
+            category: VulnerabilityCategory.SECURITY_MISCONFIGURATION,
+            severity: header.severity,
+            file: this.options.projectPath,
+            recommendation: header.recommendation,
+            cwe: 'CWE-346',
+            owasp: 'A05:2021'
+          });
+        }
+      } catch (error) {
+        console.error('[SecurityScanner] Headers validation failed:', error);
+      }
+    }
+
     const severityCounts = this.countSeverities(vulnerabilities);
     const scanDuration = Date.now() - startTime;
+
+    // Determine overall severity level
+    const overallSeverity = this.determineOverallSeverity(severityCounts);
 
     return {
       timestamp: new Date().toISOString(),
       projectPath: this.options.projectPath,
       filesScanned,
       vulnerabilities,
+      secretsFound,
+      headersFindings,
+      summary: severityCounts,
+      scanDuration,
+      blocked: overallSeverity === VulnerabilitySeverity.CRITICAL
+    };
+  }
+
+  /**
+   * Determine if the scan should be blocked based on findings
+   */
+  shouldBlock(): boolean {
+    return this.stopOnCritical;
+  }
+
+  /**
+   * Set whether to stop scanning on CRITICAL findings
+   */
+  setStopOnCritical(stop: boolean): void {
+    this.stopOnCritical = stop;
+  }
+
+  /**
+   * Scan a single file or string content for vulnerabilities
+   * Useful for pre-commit hooks scanning staged files
+   */
+  async scanContent(content: string, filePath: string = 'stdin'): Promise<SecurityScanResult> {
+    const startTime = Date.now();
+    const vulnerabilities = this.scanFileContent(filePath, content);
+
+    const severityCounts = this.countSeverities(vulnerabilities);
+    const scanDuration = Date.now() - startTime;
+    const overallSeverity = this.determineOverallSeverity(severityCounts);
+
+    return {
+      timestamp: new Date().toISOString(),
+      projectPath: filePath,
+      filesScanned: 1,
+      vulnerabilities,
       secretsFound: [],
       headersFindings: [],
       summary: severityCounts,
-      scanDuration
+      scanDuration,
+      blocked: overallSeverity === VulnerabilitySeverity.CRITICAL
     };
+  }
+
+  private determineOverallSeverity(severityCounts: SecurityScanResult['summary']): VulnerabilitySeverity {
+    if (severityCounts.critical > 0) {
+      return VulnerabilitySeverity.CRITICAL;
+    }
+    if (severityCounts.high > 0) {
+      return VulnerabilitySeverity.HIGH;
+    }
+    if (severityCounts.medium > 0) {
+      return VulnerabilitySeverity.MEDIUM;
+    }
+    if (severityCounts.low > 0) {
+      return VulnerabilitySeverity.LOW;
+    }
+    return VulnerabilitySeverity.INFO;
   }
 
   private async findScannableFiles(dir: string): Promise<string[]> {

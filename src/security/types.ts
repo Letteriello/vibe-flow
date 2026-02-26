@@ -74,6 +74,7 @@ export interface SecurityScanResult {
     info: number;
   };
   scanDuration: number; // milliseconds
+  blocked: boolean; // true if CRITICAL findings should block the commit
 }
 
 // Security scan options
