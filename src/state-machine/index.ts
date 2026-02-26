@@ -11,6 +11,7 @@ export enum Phase {
   PLANNING = 'PLANNING',
   SOLUTIONING = 'SOLUTIONING',
   IMPLEMENTATION = 'IMPLEMENTATION',
+  WRAP_UP = 'WRAP_UP',
   COMPLETE = 'COMPLETE'
 }
 
@@ -100,16 +101,19 @@ const PHASE_STEPS: Record<Phase, number> = {
   [Phase.PLANNING]: 4,
   [Phase.SOLUTIONING]: 4,
   [Phase.IMPLEMENTATION]: 10,
+  [Phase.WRAP_UP]: 3,
   [Phase.COMPLETE]: 0
 };
 
 // Phase transition rules
+// IMPLEMENTATION must transition to WRAP_UP - no bypass allowed
 const PHASE_TRANSITIONS: Record<Phase, Phase> = {
   [Phase.NEW]: Phase.ANALYSIS,
   [Phase.ANALYSIS]: Phase.PLANNING,
   [Phase.PLANNING]: Phase.SOLUTIONING,
   [Phase.SOLUTIONING]: Phase.IMPLEMENTATION,
-  [Phase.IMPLEMENTATION]: Phase.COMPLETE,
+  [Phase.IMPLEMENTATION]: Phase.WRAP_UP,
+  [Phase.WRAP_UP]: Phase.COMPLETE,
   [Phase.COMPLETE]: Phase.COMPLETE
 };
 
@@ -120,7 +124,8 @@ const ROLLBACK_TRANSITIONS: Record<Phase, Phase | null> = {
   [Phase.PLANNING]: Phase.ANALYSIS,
   [Phase.SOLUTIONING]: Phase.PLANNING,
   [Phase.IMPLEMENTATION]: Phase.SOLUTIONING,
-  [Phase.COMPLETE]: Phase.IMPLEMENTATION
+  [Phase.WRAP_UP]: Phase.IMPLEMENTATION,
+  [Phase.COMPLETE]: Phase.WRAP_UP
 };
 
 // Transition audit entry

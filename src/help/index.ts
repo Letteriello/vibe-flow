@@ -143,6 +143,7 @@ export class HelpExecutor {
       'PLANNING': '2-planning',
       'SOLUTIONING': '3-solutioning',
       'IMPLEMENTATION': '4-implementation',
+      'WRAP_UP': '5-wrap-up',
       'COMPLETE': 'anytime'
     };
     return phaseMap[phase] || 'anytime';
@@ -366,6 +367,19 @@ export class HelpExecutor {
         'Validar contra especificações'
       ],
       outcome: 'Código funcional que atende aos requisitos'
+    },
+    'WRAP_UP': {
+      phase: 'WRAP_UP',
+      title: 'Consolidação e Encerramento',
+      why: 'A fase de wrap-up é obrigatória para garantir que o projeto atinja o status de finalizado.',
+      mainGoal: 'Consolidar aprendizados e preparar para conclusão',
+      keyActivities: [
+        'Revisar decisões tomadas',
+        'Documentar lições aprendidas',
+        'Consolidar contexto para futuras sessões',
+        'Atualizar estado do projeto'
+      ],
+      outcome: 'Projeto pronto para ser marcado como completo'
     },
     'COMPLETE': {
       phase: 'COMPLETE',

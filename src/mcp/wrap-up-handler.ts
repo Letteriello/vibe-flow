@@ -10,7 +10,6 @@ export interface WrapUpJob {
   job_id: string;
   status: 'processing' | 'completed' | 'failed';
   mode: string;
-  dryRun: boolean;
   force: boolean;
   startedAt: string;
   completedAt?: string;
@@ -40,7 +39,6 @@ export class WrapUpHandler {
    */
   async startJob(
     mode: string = 'full',
-    dryRun: boolean = false,
     force: boolean = false
   ): Promise<{ status: string; job_id: string }> {
     const jobId = randomUUID();
@@ -49,7 +47,6 @@ export class WrapUpHandler {
       job_id: jobId,
       status: 'processing',
       mode,
-      dryRun,
       force,
       startedAt: new Date().toISOString()
     };
@@ -58,7 +55,7 @@ export class WrapUpHandler {
     this.saveJobToFile(job);
 
     // Execute wrap-up in background (don't await)
-    this.executeBackgroundJob(jobId, mode, dryRun, force);
+    this.executeBackgroundJob(jobId, mode, force);
 
     return {
       status: 'processing',
@@ -72,27 +69,12 @@ export class WrapUpHandler {
   private async executeBackgroundJob(
     jobId: string,
     mode: string,
-    dryRun: boolean,
     force: boolean
   ): Promise<void> {
     try {
-      // Check if wrap-up is enabled
-      const config = await this.configManager.load();
-
-      if (!force && !config.wrapUp.enabled) {
-        const job = this.jobs.get(jobId);
-        if (job) {
-          job.status = 'failed';
-          job.error = 'Wrap-up is not enabled. Enable it in configuration first.';
-          job.completedAt = new Date().toISOString();
-          this.jobs.set(jobId, job);
-          this.saveJobToFile(job);
-        }
-        return;
-      }
-
+      // Wrap-up is always enabled - no check needed
       // Execute the wrap-up
-      const result = await this.wrapUpExecutor.execute(mode, dryRun, force);
+      const result = await this.wrapUpExecutor.execute(mode, force);
       await this.wrapUpExecutor.saveReport(result);
 
       const job = this.jobs.get(jobId);

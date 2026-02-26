@@ -11,7 +11,6 @@ export interface UserPreferences {
 }
 
 export interface WrapUpConfig {
-  enabled: boolean;
   trigger: {
     postPhase: boolean;
     manual: boolean;
@@ -50,7 +49,6 @@ export interface WrapUpConfig {
     };
   };
   safety: {
-    dryRunDefault: boolean;
     requireTestsPass: boolean;
     secretDetection: boolean;
     forcePushBlocked?: boolean;
@@ -77,7 +75,6 @@ const DEFAULT_CONFIG: VibeFlowConfig = {
     beginnerMode: false
   },
   wrapUp: {
-    enabled: false,
     trigger: {
       postPhase: false,
       manual: true,
@@ -91,7 +88,6 @@ const DEFAULT_CONFIG: VibeFlowConfig = {
       publishIt: { enabled: false }
     },
     safety: {
-      dryRunDefault: true,
       requireTestsPass: false,
       secretDetection: true
     }
@@ -192,7 +188,13 @@ export class ConfigManager {
 
   private normalizeWrapUpConfig(config: Partial<WrapUpConfig> | undefined): Partial<WrapUpConfig> {
     if (!config) return {};
-    return config;
+    // Strip out any keys that could disable wrap-up - always use autonomous default
+    const stripped: Partial<WrapUpConfig> = { ...config };
+    delete (stripped as any).enabled;
+    delete (stripped as any).disableWrapUp;
+    delete (stripped as any).autoWrapUp;
+    delete (stripped as any).wrapUpMode;
+    return stripped;
   }
 
   private normalizeLegacyPhase(legacy: any): any {

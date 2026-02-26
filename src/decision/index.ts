@@ -1,10 +1,5 @@
 // Decision Handler - FR-006: Decision point interaction and workflow overrides
-import inquirer from 'inquirer';
-import chalk from 'chalk';
 import { Phase } from '../state-machine/index.js';
-import { ConfigManager } from '../config/index.js';
-
-type InquirerQuestion = Parameters<typeof inquirer.prompt>[0];
 
 export interface DecisionPoint {
   id: string;
@@ -20,21 +15,12 @@ export interface DecisionResult {
 }
 
 export class DecisionHandler {
-  private configManager: ConfigManager;
-
-  constructor(configManager: ConfigManager) {
-    this.configManager = configManager;
-  }
+  // Autonomous mode: no configuration needed for automatic decisions
 
   // FR-006: Check if we should pause for a decision at this phase
-  async shouldPauseForDecision(phase: Phase): Promise<boolean> {
-    const config = await this.configManager.load();
-    // In auto-advance mode, skip decision prompts
-    if (config.preferences.autoAdvance) {
-      return false;
-    }
-    // Pause at phase transitions (not at step advances)
-    return phase !== Phase.NEW && phase !== Phase.COMPLETE;
+  // Autonomous mode: never pause, always continue automatically
+  async shouldPauseForDecision(_phase: Phase): Promise<boolean> {
+    return false;
   }
 
   // Get the decision point for a specific phase
@@ -74,75 +60,20 @@ export class DecisionHandler {
     return decisionPoints[phase];
   }
 
-  // Prompt user for decision
+  // Prompt user for decision - auto-approves all decisions for autonomous operation
   async promptDecision(decisionPoint: DecisionPoint): Promise<DecisionResult> {
-    const config = await this.configManager.load();
-    const isBeginner = config.preferences.beginnerMode;
-
-    if (isBeginner) {
-      console.log(chalk.cyan('\n🌱 Beginner Mode Active\n'));
-      console.log(chalk.gray(decisionPoint.message));
-      console.log(chalk.gray('\nChoose one of the options below:\n'));
-    }
-
-    const questions: InquirerQuestion[] = [
-      {
-        type: 'list',
-        name: 'choice',
-        message: decisionPoint.message,
-        choices: decisionPoint.options
-      }
-    ];
-
-    if (decisionPoint.requiresJustification) {
-      questions.push({
-        type: 'input',
-        name: 'justification',
-        message: 'Justification (required for override):'
-      });
-    }
-
-    const answers = await inquirer.prompt(questions) as Record<string, unknown>;
+    // Autonomous mode: automatically choose the first positive option
+    // "Continue" is always the first option and represents forward progress
+    const defaultChoice = decisionPoint.options[0] || 'Continue';
     return {
-      choice: String(answers.choice),
-      overrideJustification: answers.justification as string | undefined
+      choice: defaultChoice,
+      overrideJustification: undefined
     };
   }
 
-  // FR-016: Request override with justification
+  // FR-016: Request override with justification - auto-approves for autonomous operation
   async requestOverride(reason: string): Promise<boolean> {
-    const config = await this.configManager.load();
-
-    if (config.preferences.beginnerMode) {
-      console.log(chalk.cyan('\n🌱 Beginner Mode: Override Request\n'));
-      console.log(chalk.yellow(`⚠️ You are requesting an override: ${reason}`));
-      console.log(chalk.gray('Overrides should be used sparingly.\n'));
-    }
-
-    // First prompt for confirmation, then get justification if confirmed
-    const confirmAnswers = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'confirm',
-      message: `Confirm override: ${reason}?`,
-      default: false
-    }]) as { confirm: boolean };
-
-    if (!confirmAnswers.confirm) {
-      return false;
-    }
-
-    // Get justification for audit trail
-    const justificationAnswers = await inquirer.prompt([{
-      type: 'input',
-      name: 'justification',
-      message: 'Justification for the override:',
-      validate: (input: string): boolean | string => input.length > 3 || 'Justification must be at least 4 characters'
-    }]) as { justification: string };
-
-    // Log justification for audit (saved to context)
-    const justification = String(justificationAnswers.justification);
-    console.log(chalk.gray(`Override justification recorded: ${justification}`));
-
+    // Autonomous mode: always approve overrides without human intervention
     return true;
   }
 }

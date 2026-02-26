@@ -64,7 +64,7 @@ export class WrapUpExecutor {
     this.stateMachine = stateMachine;
   }
 
-  async execute(mode: string = 'full', dryRun: boolean = false, force: boolean = false, yes: boolean = false): Promise<WrapUpResult> {
+  async execute(mode: string = 'full', force: boolean = false, yes: boolean = false): Promise<WrapUpResult> {
     const result: WrapUpResult = {
       success: true,
       phasesExecuted: [],
@@ -74,25 +74,15 @@ export class WrapUpExecutor {
     try {
       this.config = (await this.configManager.load()).wrapUp;
 
-      // Allow force override of enabled check
-      if (!force && !this.config.enabled) {
-        console.log(chalk.yellow('⚠️ Wrap-up is not enabled. Enable it in configuration first.'));
-        return { ...result, success: false, errors: ['Wrap-up not enabled'] };
-      }
+      // Wrap-up is always enabled - no check needed
 
       if (this.config?.output?.verbose) {
         console.log(chalk.gray(`📋 Wrap-up config loaded:`));
-        console.log(chalk.gray(`   Enabled: ${this.config.enabled}`));
+        console.log(chalk.gray(`   Enabled: true (always)`));
         console.log(chalk.gray(`   Ship It: ${this.config.phases?.shipIt?.enabled}`));
         console.log(chalk.gray(`   Remember It: ${this.config.phases?.rememberIt?.enabled}`));
         console.log(chalk.gray(`   Self Improve: ${this.config.phases?.selfImprove?.enabled}`));
         console.log(chalk.gray(`   Publish It: ${this.config.phases?.publishIt?.enabled}`));
-      }
-
-      // Use safety.dryRunDefault if dryRun not explicitly specified
-      if (dryRun === undefined && this.config.safety?.dryRunDefault) {
-        dryRun = true;
-        console.log(chalk.cyan('🔍 Running in dry-run mode by default (safety setting)'));
       }
 
       const modes = mode === 'full'
@@ -100,12 +90,6 @@ export class WrapUpExecutor {
         : [mode];
 
       for (const m of modes) {
-        if (dryRun) {
-          console.log(chalk.cyan(`🔍 [DRY-RUN] Would execute: ${m}`));
-          result.phasesExecuted.push(`${m} (dry-run)`);
-          continue;
-        }
-
         console.log(chalk.blue(`\n📦 Executing: ${m}`));
 
         switch (m) {

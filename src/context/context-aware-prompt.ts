@@ -70,6 +70,11 @@ What is your test strategy?
 How will you handle errors and edge cases?
 What documentation is needed?`,
 
+      [Phase.WRAP_UP]: `For wrap-up phase:
+Let's consolidate what was accomplished.
+What lessons were learned?
+What should be documented for future sessions?`,
+
       [Phase.COMPLETE]: `Project is complete! What would you like to do next?`
     };
 

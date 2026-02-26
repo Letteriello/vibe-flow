@@ -26,7 +26,7 @@ export class VibeFlowCLI {
     this.program = new Command();
     this.stateMachine = new StateMachine();
     this.configManager = new ConfigManager();
-    this.decisionHandler = new DecisionHandler(this.configManager);
+    this.decisionHandler = new DecisionHandler();
     this.wrapUpExecutor = new WrapUpExecutor(this.configManager, this.stateMachine);
     this.helpExecutor = new HelpExecutor();
     this.commandRegistry = new CommandRegistry();
@@ -67,7 +67,6 @@ export class VibeFlowCLI {
       .command('wrap-up')
       .description('Execute wrap-up session')
       .option('-m, --mode <mode>', 'Mode: full, ship-it, remember-it, self-improve, publish-it', 'full')
-      .option('--dry-run', 'Show what would be done without executing')
       .option('--phase <phase>', 'Execute specific phase only')
       .option('--status', 'Show last wrap-up report')
       .option('--force', 'Force execution even if wrap-up is disabled in config')
@@ -326,17 +325,12 @@ export class VibeFlowCLI {
     }
 
     const mode = options.phase || options.mode || 'full';
-    const dryRun = options.dryRun || false;
 
     console.log(chalk.blue(`🔧 Running wrap-up in ${mode} mode...`));
 
-    if (dryRun) {
-      console.log(chalk.yellow('  🔍 Dry-run mode - no changes will be made'));
-    }
-
     const force = options.force || false;
     const yes = options.yes || false;
-    const result = await this.wrapUpExecutor.execute(mode, dryRun, force, yes);
+    const result = await this.wrapUpExecutor.execute(mode, force, yes);
 
     if (result.success) {
       await this.wrapUpExecutor.saveReport(result);

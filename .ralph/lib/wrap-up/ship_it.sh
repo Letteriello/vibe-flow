@@ -34,10 +34,6 @@ wrap_up_ship_it() {
         git add -A
         git commit -m "$commit_msg"
         echo "✅ Committed: $(git rev-parse --short HEAD)"
-    else
-        echo "📋 Dry-run: Would commit with message:"
-        echo "   $commit_msg"
-        echo "   (Use --auto-commit to enable)"
     fi
 
     if [[ "$auto_push" == "true" ]]; then

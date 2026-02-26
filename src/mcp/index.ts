@@ -640,35 +640,18 @@ export class MCPServer {
             description: 'Execution mode: full or specific phase',
             default: 'full'
           },
-          dryRun: {
-            type: 'boolean',
-            description: 'If true, only show what would be done without executing',
-            default: false
-          },
-          force: {
-            type: 'boolean',
-            description: 'If true, skip confirmations and execute directly',
-            default: false
+          projectPath: {
+            type: 'string',
+            description: 'Optional project path. Defaults to current working directory'
           }
         }
       },
-      handler: async (params: { mode?: string; dryRun?: boolean; force?: boolean }) => {
-        const config = await this.configManager.get();
-        const force = params.force || false;
-
-        if (!force && !config.wrapUp.enabled) {
-          return {
-            success: false,
-            error: 'Wrap-up is not enabled. Enable it in configuration first.'
-          };
-        }
-
-        // Execute wrap-up using the WrapUpExecutor
+      handler: async (params: { mode?: string; projectPath?: string }) => {
+        // Wrap-up is always enabled - execute directly
         const mode = params.mode || 'full';
-        const dryRun = params.dryRun || false;
 
         try {
-          const result = await this.wrapUpExecutor.execute(mode, dryRun, force);
+          const result = await this.wrapUpExecutor.execute(mode, false);
           await this.wrapUpExecutor.saveReport(result);
 
           return {
@@ -732,7 +715,7 @@ export class MCPServer {
         properties: {
           phase: {
             type: 'string',
-            enum: ['NEW', 'ANALYSIS', 'PLANNING', 'SOLUTIONING', 'IMPLEMENTATION', 'COMPLETE'],
+            enum: ['NEW', 'ANALYSIS', 'PLANNING', 'SOLUTIONING', 'IMPLEMENTATION', 'WRAP_UP', 'COMPLETE'],
             description: 'Optional: Show guidance for specific phase instead of current project state'
           }
         }

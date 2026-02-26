@@ -1,7 +1,21 @@
 /**
  * ContextDAGManager - Gerencia o DAG (Directed Acyclic Graph) de contexto
  */
-import { DAGState, LeafSummary, CondensedSummary, MessagePointer, SummaryPointer } from '../../context/summary-types.js';
+
+export interface DAGMessage {
+  id: string;
+  role: string;
+  content: string;
+  timestamp: number;
+}
+
+export interface CondensedSummary {
+  id: string;
+  condensedContent: string;
+  originalIds: string[];
+  level: number;
+  timestamp: number;
+}
 
 export interface DAGNode {
   id: string;
@@ -11,8 +25,14 @@ export interface DAGNode {
   metadata: Record<string, unknown>;
 }
 
+export interface LocalDAGState {
+  messages: DAGMessage[];
+  summaries: CondensedSummary[];
+  pointers: string[];
+}
+
 export class ContextDAGManager {
-  private dagState: DAGState;
+  private dagState: LocalDAGState;
   private nodeMap: Map<string, DAGNode>;
 
   constructor() {
@@ -24,7 +44,7 @@ export class ContextDAGManager {
     this.nodeMap = new Map();
   }
 
-  async buildDAG(rawSessionData: Record<string, unknown>): Promise<DAGState> {
+  async buildDAG(rawSessionData: Record<string, unknown>): Promise<LocalDAGState> {
     const messages = (rawSessionData.messages as Record<string, unknown>[]) || [];
 
     for (const msg of messages) {
@@ -67,10 +87,11 @@ export class ContextDAGManager {
       });
     }
 
+    this.dagState.summaries = summaries;
     return summaries;
   }
 
-  getDAGState(): DAGState {
+  getDAGState(): LocalDAGState {
     return this.dagState;
   }
 

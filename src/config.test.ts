@@ -39,7 +39,7 @@ describe('ConfigManager', () => {
         verboseMode: false,
         beginnerMode: false
       });
-      expect(config.wrapUp.enabled).toBe(false);
+      // wrapUp is always enabled - no 'enabled' property exists
     });
 
     it('should load custom config when file exists', async () => {
@@ -51,7 +51,6 @@ describe('ConfigManager', () => {
           beginnerMode: true
         },
         wrapUp: {
-          enabled: true,
           trigger: {
             postPhase: true,
             manual: false,
@@ -81,7 +80,7 @@ describe('ConfigManager', () => {
 
       expect(config.preferences.language).toBe('pt-BR');
       expect(config.preferences.autoAdvance).toBe(true);
-      expect(config.wrapUp.enabled).toBe(true);
+      // wrapUp is always enabled - no 'enabled' property exists
       expect(config.wrapUp.phases.shipIt.autoPush).toBe(true);
     });
 
