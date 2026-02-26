@@ -31,15 +31,6 @@ export interface PruneResult {
 }
 
 /**
- * Grupo de ações pelo target (arquivo/caminho)
- */
-interface ActionGroup {
-  events: WALLogEvent[];
-  actionType: WALActionType;
-  target: string;
-}
-
-/**
  * WALPruner - Remove logs duplicados e ações revertidas
  *
  * Algoritmo:
@@ -108,93 +99,73 @@ export class WALPruner {
   }
 
   /**
-   * Remove ações que foram revertidas/canceladas
-   * Ex: write(file) + delete(file) = ambos removidos
+   * Remove ações canceladas (write seguido de delete do mesmo arquivo)
+   * A lógica final é tratada em keepLatestVersions
+   * Aqui apenas retorna os eventos que não foram completamente revertidos
    */
   private static removeRevertedActions(events: WALLogEvent[]): WALLogEvent[] {
-    // Agrupa por target
-    const groups = this.groupByTarget(events);
-
-    const result: WALLogEvent[] = [];
-
-    for (const group of Array.from(groups.values())) {
-      const filtered = this.processActionGroup(group);
-      result.push(...filtered);
-    }
-
-    // Mantém eventos sem target (ações globais)
-    const globalEvents = events.filter(e => !e.target);
-    result.push(...globalEvents.filter(e =>
-      !result.some(r => r.id === e.id)
-    ));
-
-    return result;
+    // A poda real de ações revertidas é feita em keepLatestVersions
+    // Este método pode ser estendido para lógica adicional se necessário
+    return events;
   }
 
   /**
-   * Agrupa eventos por target
+   * Agrupa eventos por target (sem considerar action)
    */
-  private static groupByTarget(events: WALLogEvent[]): Map<string, ActionGroup> {
-    const groups = new Map<string, ActionGroup>();
+  private static groupByTarget(events: WALLogEvent[]): Map<string, WALLogEvent[]> {
+    const groups = new Map<string, WALLogEvent[]>();
 
     for (const event of events) {
       const target = event.target || '';
-      const key = `${event.action}:${target}`;
 
-      if (!groups.has(key)) {
-        groups.set(key, {
-          events: [],
-          actionType: event.action,
-          target
-        });
+      if (!groups.has(target)) {
+        groups.set(target, []);
       }
 
-      groups.get(key)!.events.push(event);
+      groups.get(target)!.push(event);
     }
 
     return groups;
   }
 
   /**
-   * Processa um grupo de ações para um mesmo target
-   */
-  private static processActionGroup(group: ActionGroup): WALLogEvent[] {
-    const events = group.events;
-
-    // Se só tem uma ação, mantém
-    if (events.length <= 1) {
-      return events;
-    }
-
-    // Para delete, mantém apenas o último delete
-    if (group.actionType === 'delete') {
-      return [events[events.length - 1]];
-    }
-
-    // Para write/edit, mantém apenas o último
-    if (group.actionType === 'write' || group.actionType === 'edit') {
-      return [events[events.length - 1]];
-    }
-
-    // Para outras ações, mantém todas
-    return events;
-  }
-
-  /**
    * Mantém apenas a última versão de cada target
+   * Se a última ação for delete, remove o arquivo da lista
+   * Se a última ação for write/edit, mantém apenas a versão final
    */
   private static keepLatestVersions(events: WALLogEvent[]): WALLogEvent[] {
-    const latestByTarget = new Map<string, WALLogEvent>();
+    // Primeiro, agrupa todas as ações por target
+    const actionsByTarget = new Map<string, WALLogEvent[]>();
 
     for (const event of events) {
       const target = event.target || event.id;
-      const key = `${event.action}:${target}`;
 
-      // Sobrescreve o anterior (já que está ordenado por timestamp)
-      latestByTarget.set(key, event);
+      if (!actionsByTarget.has(target)) {
+        actionsByTarget.set(target, []);
+      }
+
+      actionsByTarget.get(target)!.push(event);
     }
 
-    return Array.from(latestByTarget.values());
+    const result: WALLogEvent[] = [];
+
+    // Para cada target, mantém apenas a última ação
+    for (const [, targetEvents] of Array.from(actionsByTarget.entries())) {
+      if (targetEvents.length === 0) continue;
+
+      // O último evento (já ordenado por timestamp)
+      const lastEvent = targetEvents[targetEvents.length - 1];
+
+      // Se o último evento for delete, não inclui nada para esse target
+      if (lastEvent.action === 'delete') {
+        continue;
+      }
+
+      // Caso contrário, mantém o último evento
+      result.push(lastEvent);
+    }
+
+    return result;
   }
 
   /**
@@ -245,9 +216,9 @@ export class WALPruner {
     const groups = this.groupByTarget(events);
     let count = 0;
 
-    for (const group of Array.from(groups.values())) {
-      if (group.events.length > 1) {
-        count += group.events.length - 1;
+    for (const groupEvents of Array.from(groups.values())) {
+      if (groupEvents.length > 1) {
+        count += groupEvents.length - 1;
       }
     }
 

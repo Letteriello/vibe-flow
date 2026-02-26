@@ -66,6 +66,8 @@ export class MCPServer {
   private degradationConfig: DegradationConfig;
   private hotReloadInterval: NodeJS.Timeout | null = null;
   private isReloading: boolean = false;
+  private initialized: boolean = false;
+  private initializationPromise: Promise<void> | null = null;
 
   constructor(config?: Partial<DegradationConfig>) {
     this.stateMachine = new StateMachine();
@@ -78,20 +80,39 @@ export class MCPServer {
     this.toolFailures = [];
     this.degradationConfig = { ...DEFAULT_DEGRADATION_CONFIG, ...config };
     this.registerTools();
-    this.initializeToolHealth();
-    this.initializeJobStatus();
 
-    if (this.degradationConfig.enableHotReload) {
-      this.startHotReloadMechanism();
+    // Defer heavy initialization - will be called on first tool use
+    this.initializationPromise = this.deferredInit();
+  }
+
+  private async deferredInit(): Promise<void> {
+    if (this.initialized) return;
+
+    try {
+      // Initialize tool health (fast, in-memory only)
+      this.initializeToolHealth();
+
+      // Initialize job status manager (async, file I/O) - non-blocking
+      initializeJobStatusManager().catch(error => {
+        console.error('[MCP] Failed to initialize job status manager:', error);
+      });
+
+      // Start hot reload only after a short delay to not block startup
+      if (this.degradationConfig.enableHotReload) {
+        setTimeout(() => {
+          this.startHotReloadMechanism();
+        }, 5000);
+      }
+
+      this.initialized = true;
+    } catch (error) {
+      console.error('[MCP] Deferred initialization error:', error);
     }
   }
 
-  private async initializeJobStatus(): Promise<void> {
-    try {
-      await initializeJobStatusManager();
-      console.log('[MCP] Job status manager initialized');
-    } catch (error) {
-      console.error('[MCP] Failed to initialize job status manager:', error);
+  private async ensureInitialized(): Promise<void> {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
     }
   }
 
@@ -796,6 +817,9 @@ export class MCPServer {
   }
 
   async handleTool(name: string, params: any): Promise<any> {
+    // Ensure deferred initialization is complete before handling tool
+    await this.ensureInitialized();
+
     const tool = this.tools.get(name);
     if (!tool) {
       throw new Error(`Unknown tool: ${name}`);

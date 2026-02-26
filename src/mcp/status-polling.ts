@@ -333,6 +333,3 @@ export function updateWrapUpJobStatus(
   const manager = getJobStatusManager();
   return manager.updateJobStatus(jobId, status, options);
 }
-
-// Re-export types
-export type { JobStatusManager as JobStatusManager };
