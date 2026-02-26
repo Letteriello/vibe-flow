@@ -1,5 +1,5 @@
 // Test file for AgenticMapOperator
-import { AgenticMapOperator, agenticMap, SchemaValidator, MapInput } from './agentic-map.js';
+import { AgenticMapOperator, agenticMap, SchemaValidator, MapInput } from './src/mcp/agentic-map.js';
 
 async function testAgenticMap() {
   console.log('Testing AgenticMapOperator...\n');

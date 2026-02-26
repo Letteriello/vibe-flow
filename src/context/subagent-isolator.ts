@@ -320,7 +320,7 @@ The parent agent handles: ${this.config.retainedWork}
       totalChars += msg.content.length;
       if (msg.tool_calls) {
         for (const tc of msg.tool_calls) {
-          totalChars += tc.name.length + JSON.stringify(tc.arguments).length;
+          totalChars += tc.function.name.length + tc.function.arguments.length;
         }
       }
     }

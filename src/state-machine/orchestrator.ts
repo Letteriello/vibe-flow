@@ -5,6 +5,7 @@ import { StateMachine, Phase, ProjectState, ActionType, TransitionAuditEntry } f
 import { MCPClient, MCPClientManager } from '../mcp/client.js';
 import { MCPRouter, RouterConfig, DEFAULT_ROUTER_CONFIG } from '../mcp/router.js';
 import { FallbackRouter, FallbackConfig, DEFAULT_FALLBACK_CONFIG, FallbackResult } from '../mcp/fallback.js';
+import { MCPToolResponse } from '../mcp/types.js';
 import { pruneStaleTools } from '../context/pruner.js';
 import { ContextManager, createContextManager, OptimizedContextResult } from '../context/context-manager.js';
 import { StepValidator, ValidationLevel } from '../validation/step-validator.js';
@@ -457,12 +458,12 @@ export class LLMHttpClient {
 // Factory Functions
 // ============================================================================
 
-export function createOrchestrator(config?: OrchestratorConfig): Orchestrator {
-  return new Orchestrator(config ?? {});
+export function createOrchestrator(config: OrchestratorConfig): Orchestrator {
+  return new Orchestrator(config);
 }
 
 export function getDefaultOrchestrator(): Orchestrator {
-  return new Orchestrator({});
+  return new Orchestrator(DEFAULT_ORCHESTRATOR_CONFIG);
 }
 
 // ============================================================================
@@ -482,7 +483,7 @@ export const DEFAULT_ORCHESTRATOR_CONFIG: OrchestratorConfig = {
   },
   validation: {
     strictMode: false,
-    validationLevel: ValidationLevel.STANDARD
+    validationLevel: ValidationLevel.OUTPUT
   },
   isolation: {
     enableSubagentIsolation: true,
