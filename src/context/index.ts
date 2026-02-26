@@ -145,3 +145,25 @@ export {
   CompressContextOptions,
   CompressContextResult
 } from './worker-wrapper.js';
+// Context Editor - Active history cleaning for agent loop
+export {
+  ContextEditor,
+  ContextMessage,
+  ToolCall,
+  ContextEditorConfig,
+  ContextEditResult,
+  ContextEditStrategy,
+  TokenEstimation,
+  DEFAULT_CONTEXT_EDITOR_CONFIG,
+  editContext,
+  clearThinkingBlocks,
+  clearToolResults,
+  needsContextCleaning
+} from './context-pruner.js';
+// SubAgent Context Isolator - Sandboxed sub-agent execution
+export {
+  SubAgentContextIsolator,
+  SubAgentConfig,
+  SubAgentResult,
+  createSubAgentIsolator
+} from './subagent-isolator.js';

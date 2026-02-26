@@ -3,6 +3,9 @@ import { promises as fs } from 'fs';
 import { join, dirname } from 'path';
 import { homedir } from 'os';
 
+// Re-export fallback router
+export * from './fallback-router.js';
+
 export interface UserPreferences {
   language: string;
   autoAdvance: boolean;

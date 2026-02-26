@@ -943,3 +943,49 @@ export type {
   JobInfo,
   WrapUpJobResult
 } from './status-polling.js';
+
+// Re-export Programmatic Tool Calling
+export {
+  ProgrammaticCaller,
+  createProgrammaticCaller,
+  programmaticToolCallingTool,
+  createProgrammaticToolHandler
+} from './programmatic-caller.js';
+export type {
+  ProgrammaticExecutionResult,
+  ToolCallRecord,
+  ProgrammaticCallerConfig
+} from './programmatic-caller.js';
+
+// Re-export Agentic Map Operator
+export {
+  AgenticMapOperator,
+  MockLLMWorker,
+  SchemaValidator,
+  agenticMap,
+  DEFAULT_AGENTIC_MAP_CONFIG
+} from './agentic-map.js';
+export type {
+  AgenticMapConfig,
+  JSONSchema,
+  MapInput,
+  WorkerResult,
+  MapOperationResult,
+  LLMWorker,
+  ValidationResult
+} from './agentic-map.js';
+
+// Re-export ACP Broker (Agent Communication Protocol - A2A)
+export {
+  AgentCommunicationBroker,
+  getBroker,
+  resetBroker
+} from './acp-broker.js';
+export type {
+  DiscoveryEvent,
+  DiscoveryEventType,
+  DiscoverySeverity,
+  EventCallback,
+  RegisteredAgent,
+  BrokerStats
+} from './acp-broker.js';

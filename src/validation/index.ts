@@ -20,3 +20,5 @@ export { HumanReviewGate, ReviewDecision, requestHumanReview } from './human-rev
 export type { ReviewComment, HumanReviewRequest, ReviewGateOptions, ReviewGateResult } from './human-review-gate.js';
 export { SpecVersioning, createSpecVersion, compareSpecVersions, rollbackSpecVersion } from './spec-versioning.js';
 export type { SpecVersion, SpecVersionHistory, VersionComparison, VersionChange, SpecVersioningOptions } from './spec-versioning.js';
+export { SubAgentDelegationGuard, validateDelegation, InfiniteDelegationError } from './delegation-guard.js';
+export type { DelegationRequest, DelegationValidationResult } from './delegation-guard.js';
