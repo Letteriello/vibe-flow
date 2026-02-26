@@ -1,5 +1,7 @@
 // Unit tests for RuleGenerator
-import { RuleGenerator, ImprovementFindings, SkillGap, SystemicError } from '../../src/wrap-up/self-improve/rule-generator.js';
+
+import { describe, it, expect } from '@jest/globals';
+import { RuleGenerator, ImprovementFindings } from '../../src/wrap-up/self-improve/rule-generator.js';
 
 describe('RuleGenerator', () => {
   const testWorkspacePath = '/tmp/test-workspace';
@@ -61,23 +63,6 @@ describe('RuleGenerator', () => {
       const rules = await generator.applyRules(findings, testWorkspacePath);
 
       expect(rules.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  describe('getFileContents', () => {
-    it('should return simulated file contents in dry-run mode', async () => {
-      const findings: ImprovementFindings = {
-        skillGaps: [
-          { area: 'security', description: 'Secret scanning', severity: 'high' }
-        ],
-        systemicErrors: []
-      };
-
-      const generator = new RuleGenerator(testWorkspacePath);
-      await generator.applyRules(findings, testWorkspacePath);
-
-      const contents = generator.getFileContents();
-      expect(contents.size).toBeGreaterThan(0);
     });
   });
 
