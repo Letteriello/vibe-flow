@@ -926,6 +926,22 @@ export class MCPServer {
 // Re-export Router and Fallback
 export { MCPRouter, RouterConfig, RouterState, RoutingLog, DEFAULT_ROUTER_CONFIG } from './router.js';
 export { FallbackRouter, FallbackConfig, FallbackState, FallbackResult, DEFAULT_FALLBACK_CONFIG } from './fallback.js';
+// Re-export FallbackRouter with Circuit Breaker
+export {
+  FallbackRouter as FallbackRouterWithCircuitBreaker,
+  FallbackRouterConfig,
+  DEFAULT_FALLBACK_CONFIG as DEFAULT_CIRCUIT_BREAKER_CONFIG,
+  CircuitState,
+  ErrorType,
+  RoutedToolResult,
+  RoutingLogEntry,
+  CircuitBreakerOpenError,
+  FallbackExhaustedError,
+  TimeoutError,
+  RateLimitError,
+  AlternativeProvider,
+  CircuitBreakerState
+} from './fallback-router.js';
 export { MCPToolRequest, MCPToolResponse, ToolExecutionResult } from './types.js';
 
 // Re-export MCP Client
