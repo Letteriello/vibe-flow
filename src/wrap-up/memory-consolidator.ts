@@ -203,9 +203,9 @@ export function generateMemoryDelta(sessionInsights: SessionInsights): MemoryDel
     'best-practice': 0
   };
 
-  for (const [, items] of grouped) {
-    if (items.length > 0) {
-      categories[items[0].category] = items.length;
+  for (const entry of Array.from(grouped.values())) {
+    if (entry.length > 0) {
+      categories[entry[0].category] = entry.length;
     }
   }
 
