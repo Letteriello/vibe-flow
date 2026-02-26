@@ -1,5 +1,5 @@
 // Quick test for RuleGenerator
-import { RuleGenerator, ImprovementFindings } from '../wrap-up/index.js';
+import { RuleGenerator, ImprovementFindings } from './wrap-up/index.js';
 
 const findings: ImprovementFindings = {
   skillGaps: [
