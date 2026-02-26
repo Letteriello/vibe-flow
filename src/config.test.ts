@@ -64,7 +64,6 @@ describe('ConfigManager', () => {
             publishIt: { enabled: true }
           },
           safety: {
-            dryRunDefault: false,
             requireTestsPass: true,
             secretDetection: true
           }

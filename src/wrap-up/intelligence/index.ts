@@ -12,7 +12,8 @@
  */
 
 import { KnowledgeGraphCompiler, KnowledgeGraph } from './knowledge-graph.js';
-import { ContextDAGManager, DAGState } from './context-dag.js';
+import { ContextDAGManager } from './context-dag.js';
+import { DAGState } from '../../context/index.js';
 import { EscalationSummarizer, EscalationSummary } from './escalation-summarizer.js';
 import { JustificationLinker, JustificationLink } from './justification-linker.js';
 import { ArtifactSealer, SealedArtifact } from './artifact-sealer.js';
