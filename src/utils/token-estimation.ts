@@ -174,3 +174,150 @@ export const compactionEstimateTokens = estimateTokens;
 export const estimateTokenCount = estimateTokens;
 export const countTokens = estimateTokens;
 export const estimateFileTokens = estimateTokens;
+
+// ============================================================
+// CACHE IMPLEMENTATION (DEV-TASK-004)
+// ============================================================
+
+export interface CacheStats {
+  hits: number;
+  misses: number;
+  hitRate: number;
+  size: number;
+  maxSize: number;
+}
+
+/**
+ * Simple hash function for cache keys (non-cryptographic)
+ * Uses djb2-like algorithm for fast hashing
+ */
+function hashText(text: string): string {
+  let hash = 5381;
+  for (let i = 0; i < text.length; i++) {
+    hash = ((hash << 5) + hash) + text.charCodeAt(i);
+    hash = hash & 0xFFFFFFFF; // Keep within 32-bit integer
+  }
+  return hash.toString(36);
+}
+
+/**
+ * LRU Cache implementation with fixed size limit
+ */
+class LRUCache {
+  private cache: Map<string, number> = new Map();
+  private accessOrder: string[] = [];
+  private hits = 0;
+  private misses = 0;
+  private readonly maxSize: number;
+
+  constructor(maxSize: number = 1000) {
+    this.maxSize = maxSize;
+  }
+
+  get(key: string): number | undefined {
+    const value = this.cache.get(key);
+    if (value !== undefined) {
+      this.hits++;
+      // Move to end (most recently used)
+      this.accessOrder = this.accessOrder.filter(k => k !== key);
+      this.accessOrder.push(key);
+      return value;
+    }
+    this.misses++;
+    return undefined;
+  }
+
+  set(key: string, value: number): void {
+    // If key exists, update and move to end
+    if (this.cache.has(key)) {
+      this.cache.set(key, value);
+      this.accessOrder = this.accessOrder.filter(k => k !== key);
+      this.accessOrder.push(key);
+      return;
+    }
+
+    // Evict oldest if at capacity
+    if (this.cache.size >= this.maxSize) {
+      const oldestKey = this.accessOrder.shift();
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      }
+    }
+
+    this.cache.set(key, value);
+    this.accessOrder.push(key);
+  }
+
+  getStats(): CacheStats {
+    const total = this.hits + this.misses;
+    return {
+      hits: this.hits,
+      misses: this.misses,
+      hitRate: total > 0 ? this.hits / total : 0,
+      size: this.cache.size,
+      maxSize: this.maxSize,
+    };
+  }
+
+  clear(key?: string): void {
+    if (key) {
+      this.cache.delete(key);
+      this.accessOrder = this.accessOrder.filter(k => k !== key);
+    } else {
+      this.cache.clear();
+      this.accessOrder = [];
+      this.hits = 0;
+      this.misses = 0;
+    }
+  }
+}
+
+// Global cache instance
+const tokenCache = new LRUCache(1000);
+
+/**
+ * Estimates token count with caching for improved performance
+ * Uses LRU cache with 1000 entry limit and text hash as key
+ *
+ * @param text - Input text to estimate tokens for
+ * @param options - Optional configuration for estimation method
+ * @returns Estimated token count (cached if available)
+ */
+export function estimateTokensCached(text: string, options?: TokenEstimateOptions): number {
+  if (!text || text.length === 0) {
+    return 0;
+  }
+
+  // Generate cache key from text hash
+  const cacheKey = hashText(text);
+
+  // Check cache first
+  const cached = tokenCache.get(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  // Compute and cache result
+  const result = estimateTokens(text, options);
+  tokenCache.set(cacheKey, result);
+
+  return result;
+}
+
+/**
+ * Returns cache statistics (hits, misses, hit rate, size)
+ *
+ * @returns CacheStats object with cache performance metrics
+ */
+export function getCacheStats(): CacheStats {
+  return tokenCache.getStats();
+}
+
+/**
+ * Invalidates the token estimation cache
+ *
+ * @param key - Optional specific key to invalidate. If omitted, clears entire cache.
+ */
+export function invalidateCache(key?: string): void {
+  tokenCache.clear(key);
+}
