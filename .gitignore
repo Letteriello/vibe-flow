@@ -34,6 +34,7 @@ npm-debug.log*
 # State files
 .vibe-flow/
 *.state.json
+docs/planning/.workers/
 
 # Temp files
 *.tmp
