@@ -1,144 +1,74 @@
 {
-  "pipeline_id": "flow-20260227-auth",
-  "created_at": "2026-02-27T12:00:00.000Z",
-  "objective": "Add AI Code Review feature to vibe-flow",
-  "current_phase": "complete",
+  "pipeline_id": "flow-20260228-context-opt",
+  "created_at": "2026-02-28T12:00:00.000Z",
+  "objective": "Otimização de contexto - Melhorar performance e eficiência do context management",
+  "current_phase": "analyze",
   "phases": {
     "analyze": {
-      "status": "done",
-      "merge_status": "done",
+      "status": "in_progress",
       "work_units": [
         {
           "id": "ANA-001",
-          "scope": "cli-core",
-          "description": "Análise do CLI e comandos",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "docs/flow/analyze/core.md",
-          "files": ["src/cli.ts", "src/command-registry/", "src/types.ts"]
+          "scope": "context-engine",
+          "description": "Análise do motor de contexto (context-engine/)",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/context-engine/*.ts"]
         },
         {
           "id": "ANA-002",
-          "scope": "context-memory",
-          "description": "Análise de contexto e memória",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "docs/flow/analyze/context.md",
-          "files": ["src/context/", "src/context-engine/", "src/memory/"]
+          "scope": "context-core",
+          "description": "Análise do núcleo de contexto (src/context/)",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/context/*.ts", "src/context/operators/*.ts"]
         },
         {
           "id": "ANA-003",
-          "scope": "execution",
-          "description": "Análise do motor de execução",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "docs/flow/analyze/execution.md",
-          "files": ["src/execution/", "src/error-handler/", "src/drivers/"]
+          "scope": "compression-pruning",
+          "description": "Análise de algoritmos de compressão e pruning",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/context/compression.ts", "src/context/compaction*.ts", "src/context/prun*.ts"]
         },
         {
           "id": "ANA-004",
-          "scope": "security",
-          "description": "Análise de segurança existente",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "docs/flow/analyze/security.md",
-          "files": ["src/security/", "src/validation/"]
+          "scope": "workers-threads",
+          "description": "Análise de workers e processamento paralelo",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/context/worker*.ts"]
         },
         {
           "id": "ANA-005",
-          "scope": "state-config",
-          "description": "Análise de estado e configuração",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "docs/flow/analyze/state-config.md",
-          "files": ["src/state-machine/", "src/config/", "src/telemetry/"]
+          "scope": "state-telemetry",
+          "description": "Análise de estado e telemetria relacionado a contexto",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/state-machine/*.ts", "src/telemetry/*.ts"]
         }
       ],
-      "merge_status": "done"
+      "merge_status": "waiting"
     },
     "plan": {
-      "status": "done",
-      "work_units": [
-        {
-          "id": "PLAN-PRD-001",
-          "scope": "ai-code-review-prd",
-          "description": "Create PRD for AI Code Review feature",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "docs/flow/plan/ai-code-review/prd.md"
-        },
-        {
-          "id": "PLAN-UX-001",
-          "scope": "ai-code-review-ux",
-          "description": "UX Spec for AI Code Review",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": null,
-          "depends_on": ["PLAN-PRD-001"]
-        },
-        {
-          "id": "PLAN-TASKS-001",
-          "scope": "ai-code-review-tasks",
-          "description": "Task decomposition for AI Code Review",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "docs/flow/plan/mcp-tools/tasks.md",
-          "depends_on": ["PLAN-PRD-001", "PLAN-UX-001"]
-        }
-      ],
-      "merge_status": "done"
+      "status": "blocked_by:analyze",
+      "work_units": [],
+      "merge_status": "waiting"
     },
     "dev": {
-      "status": "done",
-      "work_units": [
-        {
-          "id": "DEV-TASK-001",
-          "scope": "adversarial-review",
-          "description": "Implement adversarial_review MCP tool",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "src/mcp/adversarial-critic.ts"
-        },
-        {
-          "id": "DEV-TASK-002",
-          "scope": "security-analysis",
-          "description": "Security analysis modules",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "src/security/"
-        },
-        {
-          "id": "DEV-TASK-003",
-          "scope": "quality-checker",
-          "description": "Quality analysis modules",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "src/quality/"
-        }
-      ],
-      "merge_status": "done"
+      "status": "blocked_by:plan",
+      "work_units": [],
+      "merge_status": "waiting"
     },
     "qa": {
-      "status": "completed",
-      "work_units": [
-        {
-          "id": "QA-REQ-001",
-          "scope": "requirements-validation",
-          "description": "Validate PRD requirements against implementation",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "docs/flow/qa/requirements.md"
-        },
-        {
-          "id": "QA-BUILD-001",
-          "scope": "build-validation",
-          "description": "Verify build and type check",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "npm run build - SUCCESS"
-        }
-      ],
-      "merge_status": "done"
+      "status": "blocked_by:dev",
+      "work_units": [],
+      "merge_status": "waiting"
     }
   },
   "workers": {},

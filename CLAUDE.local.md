@@ -162,3 +162,14 @@ Auto-generated lessons from vibe-flow sessions
   - Dev: 3 tasks (adversarial_review, security, quality)
   - QA: Requirements + Build validation passed
   - Pipeline status: COMPLETE
+  - Build: requires NODE_OPTIONS="--max-old-space-size=4096" to avoid OOM
+
+## Session Notes (2026-02-28)
+- /flow QA validation findings:
+  - RF-001 CLI Command: NOT implemented
+  - RF-002 MCP Tool (adversarial_review): ✅ Implemented
+  - RF-003 Pattern Detection: ⚠️ Partial (~10/15 patterns)
+  - RF-004 AST Analysis: ✅ Implemented
+  - RF-005 Scoring: NOT implemented
+  - RF-006 Report Output: NOT implemented
+  - Verdict: 🟡 RESSALVAS

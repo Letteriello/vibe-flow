@@ -39,6 +39,13 @@ Generated: 2026-02-26T03:31:32.553Z
 - **Occurrences:** 1
 - **Last seen:** 2026-02-27T00:17:00.000Z
 
+### Build memory issues
+
+- **Lesson:** TypeScript build may require increased memory on large projects. Use NODE_OPTIONS="--max-old-space-size=4096" to avoid OOM errors.
+- **Source:** error
+- **Occurrences:** 1
+- **Last seen:** 2026-02-28T00:00:00.000Z
+
 
 ---
 
@@ -133,6 +140,19 @@ Generated: 2026-02-26T03:31:32.553Z
 - ✓ Added format inference from property names (id→uuid, email→email, phone→phone)
 - ✓ Verified all tests passing with UUID, nested objects, and locale support
 
+
+---
+
+# Session Reflection - 2026-02-28T00:00:00.000Z
+
+## What Was Attempted
+
+- ✓ Executed /flow pipeline for AI Code Review feature
+- ✓ Completed Analyze phase: 5 work units (cli-core, context-memory, execution, security, state-config)
+- ✓ Completed Plan phase: PRD + UX + Tasks for feature
+- ✓ Completed Dev phase: adversarial_review, security-analysis, quality-checker
+- ✓ Completed QA phase: Requirements validation + Build validation
+- ✓ Build requires increased memory (NODE_OPTIONS="--max-old-space-size=4096")
 
 ---
 
