@@ -11,6 +11,21 @@ export {
 
 export { ProjectState, analyzeProjectMaturity } from './state-detector.js';
 
+// Re-export Hit-Pause (Epic 2 Story 2.8: Strategic Human Pauses)
+export {
+  HitPauseManager,
+  HitPauseTrigger,
+  HitPauseSeverity,
+  HitPauseStatus,
+  HitPauseConfig,
+  HitPauseEvent,
+  HitPauseResult,
+  DEFAULT_HIT_PAUSE_CONFIG,
+  INTERACTIVE_HIT_PAUSE_CONFIG,
+  createHitPauseManager,
+  createInteractiveHitPauseManager
+} from './hit-pause.js';
+
 export interface DecisionPoint {
   id: string;
   phase: Phase;
