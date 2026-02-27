@@ -1,68 +1,107 @@
 {
-  "pipeline_id": "flow-20260228-context-opt",
+  "pipeline_id": "flow-20260228-memory-init",
   "created_at": "2026-02-28T12:00:00.000Z",
-  "objective": "Otimização de contexto - Melhorar performance e eficiência do context management",
-  "current_phase": "analyze",
+  "objective": "Inicialização de Memória e Otimização de Contexto (Anti-Rot) - Executar Analyst para mapear arquitetura e implementar injeção de contexto atômica em src/context/",
+  "current_phase": "dev",
+  "previous_pipeline": "flow-20260228-context-opt",
+  "previous_status": "complete",
   "phases": {
     "analyze": {
-      "status": "in_progress",
+      "status": "done",
       "work_units": [
         {
           "id": "ANA-001",
           "scope": "context-engine",
-          "description": "Análise do motor de contexto (context-engine/)",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "files": ["src/context-engine/*.ts"]
+          "description": "Análise do motor de contexto atual",
+          "work_status": "done",
+          "worker": "claude-code",
+          "output": "docs/flow/analyze/context-engine.md"
         },
         {
           "id": "ANA-002",
-          "scope": "context-core",
-          "description": "Análise do núcleo de contexto (src/context/)",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "files": ["src/context/*.ts", "src/context/operators/*.ts"]
+          "scope": "wrap-up-module",
+          "description": "Análise do módulo wrap-up",
+          "work_status": "done",
+          "worker": "claude-code",
+          "output": "docs/flow/analyze/wrap-up-module.md"
         },
         {
           "id": "ANA-003",
-          "scope": "compression-pruning",
-          "description": "Análise de algoritmos de compressão e pruning",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "files": ["src/context/compression.ts", "src/context/compaction*.ts", "src/context/prun*.ts"]
+          "scope": "state-machine",
+          "description": "Análise do state-machine",
+          "work_status": "done",
+          "worker": "claude-code",
+          "output": "docs/flow/analyze/state-config.md"
         },
         {
           "id": "ANA-004",
-          "scope": "workers-threads",
-          "description": "Análise de workers e processamento paralelo",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "files": ["src/context/worker*.ts"]
-        },
-        {
-          "id": "ANA-005",
-          "scope": "state-telemetry",
-          "description": "Análise de estado e telemetria relacionado a contexto",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "files": ["src/state-machine/*.ts", "src/telemetry/*.ts"]
+          "scope": "mcp-tools",
+          "description": "Análise das ferramentas MCP",
+          "work_status": "done",
+          "worker": "claude-code",
+          "output": "docs/flow/analyze/mcp.md"
         }
       ],
-      "merge_status": "waiting"
+      "merge_status": "done"
     },
     "plan": {
-      "status": "blocked_by:analyze",
-      "work_units": [],
-      "merge_status": "waiting"
+      "status": "done",
+      "work_units": [
+        {
+          "id": "PLAN-PRD-001",
+          "scope": "atomic-context-injection",
+          "feature": "Injeção de Contexto Atômica",
+          "work_status": "done",
+          "worker": "claude-code",
+          "output": "docs/flow/plan/atomic-context-injection/"
+        },
+        {
+          "id": "PLAN-PRD-002",
+          "scope": "phase-gated-memory",
+          "feature": "Consolidação de Memória com Quality Gates",
+          "work_status": "done",
+          "worker": "claude-code",
+          "output": "docs/flow/plan/phase-gated-memory/"
+        },
+        {
+          "id": "PLAN-PRD-003",
+          "scope": "context-rot-prevention",
+          "feature": "Prevenção de Context Rot",
+          "work_status": "done",
+          "worker": "claude-code",
+          "output": "docs/flow/plan/context-rot-prevention/"
+        }
+      ],
+      "merge_status": "done"
     },
     "dev": {
-      "status": "blocked_by:plan",
-      "work_units": [],
+      "status": "in_progress",
+      "work_units": [
+        {
+          "id": "DEV-TASK-001",
+          "scope": "atomic-context-injection",
+          "description": "Implementar atomic-injector.ts",
+          "work_status": "pending",
+          "worker": null,
+          "prd": "docs/flow/plan/atomic-context-injection/prd.md"
+        },
+        {
+          "id": "DEV-TASK-002",
+          "scope": "phase-gated-memory",
+          "description": "Implementar quality-gate-consolidator.ts",
+          "work_status": "pending",
+          "worker": null,
+          "prd": "docs/flow/plan/phase-gated-memory/prd.md"
+        },
+        {
+          "id": "DEV-TASK-003",
+          "scope": "context-rot-prevention",
+          "description": "Implementar rot-detector.ts",
+          "work_status": "pending",
+          "worker": null,
+          "prd": "docs/flow/plan/context-rot-prevention/prd.md"
+        }
+      ],
       "merge_status": "waiting"
     },
     "qa": {
@@ -77,5 +116,25 @@
     "max_retries_per_unit": 3,
     "heartbeat_timeout_minutes": 30,
     "auto_advance_phases": true
-  }
+  },
+  "features": [
+    {
+      "id": "FEAT-001",
+      "name": "Inicialização do Analyst",
+      "description": "Gerar/atualizar docs/architecture/* para dar contexto aos agentes",
+      "justificativa": "Sem documentação base, agentes perdem coesão estrutural"
+    },
+    {
+      "id": "FEAT-002",
+      "name": "Isolamento Atômico em src/context/",
+      "description": "Particionar contexto por fase do state-machine para mitigar context rot",
+      "justificativa": "Reduzir volume de tokens enviados aos LLMs - dor #1 em comunidades"
+    },
+    {
+      "id": "FEAT-003",
+      "name": "Revisão do src/wrap-up/",
+      "description": "Garantir consolidação de memória correta no fim de sessão",
+      "justificativa": "Manter self-improvement loop contínuo sem inchar prompts"
+    }
+  ]
 }
