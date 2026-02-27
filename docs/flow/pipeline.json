@@ -11,18 +11,18 @@
           "id": "ANA-001",
           "scope": "cli-core",
           "description": "Análise do CLI e comandos",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
+          "work_status": "done",
+          "worker": "worker-local",
+          "output": "docs/flow/analyze/core.md",
           "files": ["src/cli.ts", "src/command-registry/", "src/types.ts"]
         },
         {
           "id": "ANA-002",
           "scope": "context-memory",
           "description": "Análise de contexto e memória",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
+          "work_status": "done",
+          "worker": "worker-local",
+          "output": "docs/flow/analyze/context.md",
           "files": ["src/context/", "src/context-engine/", "src/memory/"]
         },
         {
