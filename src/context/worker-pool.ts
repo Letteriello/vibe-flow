@@ -310,13 +310,13 @@ export class WorkerPool {
       managedWorker.inUse = false;
       managedWorker.idleSince = Date.now();
 
-      if (result.success) {
+      if (result && result.success) {
         this.stats.completedTasks++;
         // Worker always returns WorkerResult
         pendingTask.resolve(result as any);
       } else {
         this.stats.failedTasks++;
-        pendingTask.reject(new Error(result.error || 'Task failed'));
+        pendingTask.reject(new Error(result?.error || 'Task failed'));
       }
 
       // Return worker to idle pool
