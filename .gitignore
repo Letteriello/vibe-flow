@@ -21,6 +21,9 @@ Thumbs.db
 # Drafts (not versioned)
 drafts/
 
+# Local Claude settings (private)
+CLAUDE.local.md
+
 # Logs
 logs/
 *.log

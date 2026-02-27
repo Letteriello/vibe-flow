@@ -46,6 +46,20 @@ Generated: 2026-02-26T03:31:32.553Z
 - **Occurrences:** 1
 - **Last seen:** 2026-02-28T00:00:00.000Z
 
+### Duplicate export in index.ts
+
+- **Lesson:** When using barrel files (index.ts), ensure each symbol is exported only once. Duplicate exports cause TS2300 errors. Check both the export statement and the module source.
+- **Source:** error
+- **Occurrences:** 2
+- **Last seen:** 2026-02-28T12:00:00.000Z
+
+### Generic type in WorkerPool.execute()
+
+- **Lesson:** When using generic type parameters with worker message results, use double type assertion (as unknown as T) to satisfy TypeScript's strict type checking.
+- **Source:** error
+- **Occurrences:** 1
+- **Last seen:** 2026-02-28T12:00:00.000Z
+
 
 ---
 

@@ -28,9 +28,9 @@ export interface WorkerPoolConfig {
 }
 
 /**
- * Pool status metrics
+ * Pool statistics metrics
  */
-export interface PoolStatus {
+export interface PoolStats {
   /** Number of idle workers */
   idleWorkers: number;
   /** Number of busy workers */
@@ -43,6 +43,12 @@ export interface PoolStatus {
   completedTasks: number;
   /** Total tasks failed */
   failedTasks: number;
+}
+
+/**
+ * Pool status metrics (extended)
+ */
+export interface PoolStatus extends PoolStats {
   /** Pool is initialized */
   initialized: boolean;
   /** Pool is shutting down */
@@ -410,7 +416,7 @@ export class WorkerPool {
   /**
    * Get pool statistics
    */
-  getStats(): PoolStats {
+  getStats(): PoolStatus {
     let busyWorkers = 0;
     for (const managedWorker of this.workers.values()) {
       if (managedWorker.inUse) {
@@ -424,7 +430,9 @@ export class WorkerPool {
       totalWorkers: this.workers.size,
       queuedTasks: this.pendingTasks.length,
       completedTasks: this.stats.completedTasks,
-      failedTasks: this.stats.failedTasks
+      failedTasks: this.stats.failedTasks,
+      initialized: this.initialized,
+      shuttingDown: this.shuttingDown
     };
   }
 
@@ -432,12 +440,7 @@ export class WorkerPool {
    * Get current pool status
    */
   getStatus(): PoolStatus {
-    const stats = this.getStats();
-    return {
-      ...stats,
-      initialized: this.initialized,
-      shuttingDown: this.shuttingDown
-    };
+    return this.getStats();
   }
 
   /**
