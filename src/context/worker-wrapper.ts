@@ -1,22 +1,17 @@
 /**
  * Worker Thread wrapper for async context compression
  * Offloads CPU-intensive operations to worker threads
+ * Uses WorkerPool for efficient worker reuse
  */
 
-import { Worker } from 'worker_threads';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 import type {
   CompressContextOptions,
-  CompressContextResult,
-  WorkerResult
+  CompressContextResult
 } from './worker-types.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { getGlobalPool } from './worker-pool.js';
 
 /**
- * Compress context using Worker Threads
+ * Compress context using Worker Threads via WorkerPool
  * @param data - The context payload to compress
  * @param options - Compression options
  * @returns Promise with compressed result and metadata
@@ -25,61 +20,30 @@ export async function compressContextAsync(
   data: unknown,
   options: CompressContextOptions = {}
 ): Promise<CompressContextResult> {
-  return new Promise((resolve, reject) => {
-    // Create worker from current file path
-    const workerPath = join(__dirname, 'worker.js');
+  // Get the global worker pool (lazy initialized)
+  const pool = getGlobalPool();
 
-    const worker = new Worker(workerPath, {
-      workerData: {
-        payload: data,
-        options
-      }
-    });
+  // Prepare worker data
+  const workerData = {
+    payload: data,
+    options: {
+      sanitizeStrings: options.sanitizeStrings,
+      removeDuplicates: options.removeDuplicates,
+      aggressive: options.aggressive
+    }
+  };
 
-    let resolved = false;
+  // Execute via pool - worker is reused across calls
+  const result = await pool.execute(workerData);
 
-    const cleanup = () => {
-      if (!resolved) {
-        resolved = true;
-        worker.terminate();
-      }
+  if (result.success && result.compressed) {
+    return {
+      compressed: result.compressed,
+      metadata: result.metadata
     };
-
-    // Set timeout for worker execution
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('Worker thread timeout - compression took too long'));
-    }, 60000); // 60 second timeout
-
-    worker.on('message', (result: WorkerResult) => {
-      clearTimeout(timeout);
-      cleanup();
-
-      if (result.success && result.compressed) {
-        resolve({
-          compressed: result.compressed,
-          metadata: result.metadata
-        });
-      } else {
-        reject(new Error(result.error || 'Compression failed'));
-      }
-    });
-
-    worker.on('error', (error) => {
-      clearTimeout(timeout);
-      cleanup();
-      reject(error);
-    });
-
-    worker.on('exit', (code) => {
-      clearTimeout(timeout);
-      cleanup();
-
-      if (code !== 0 && !resolved) {
-        reject(new Error(`Worker exited with code ${code}`));
-      }
-    });
-  });
+  } else {
+    throw new Error(result.error || 'Compression failed');
+  }
 }
 
 export type { CompressContextOptions, CompressContextResult } from './worker-types.js';
