@@ -112,6 +112,17 @@ Auto-generated lessons from vibe-flow sessions
   - Added format inference from property names (id→uuid, email→email, phone→phone, etc.)
 
 ## Session Notes (2026-02-28)
+- Created TDDContextPruner in src/execution/context/tdd-pruner.ts:
+  - TDDContextPruner class with pruneIterationHistory(history: TDDHistory[])
+  - Implements sliding window + summarization for long TDD histories
+  - Strategy: keeps 3 most recent diffs intact, compresses older to summaries
+  - Very old iterations (>3) become error pointers (e.g., "Iter X failed by SyntaxError at Y:Z")
+  - Configurable token limit (default 8k) to prevent context degradation
+  - Based on LOCA-bench findings about repetitive contexts degrading agent performance
+  - Interfaces: TDDHistory, PrunedIteration, PruneResult, PrunerConfig
+  - Methods: extractErrorPointer(), createIterationSummary(), applySlidingWindowCompression()
+
+## Session Notes (2026-02-28)
 - Ran analyze-project: Project has 195 TypeScript files, 187 unit tests passing
 - Ran npm test: 368 tests passed, 1 test failed (EPERM - Windows file permission issue in state-machine.test.ts)
 - Updated docs/architecture/_meta.json with latest analysis
