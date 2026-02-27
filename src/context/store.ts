@@ -137,11 +137,28 @@ export class ImmutableStore {
   private saveIndex(): void {
     if (!this.enableIndex) return;
 
+    // Ensure directory exists
+    const dir = path.dirname(this.indexPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
     const tempPath = this.indexPath + '.tmp';
     fs.writeFileSync(tempPath, JSON.stringify(this.index), 'utf-8');
 
-    // atomic rename
-    fs.renameSync(tempPath, this.indexPath);
+    // atomic rename - with Windows fallback
+    try {
+      fs.renameSync(tempPath, this.indexPath);
+    } catch (renameErr) {
+      const err = renameErr as { code?: string };
+      if (err.code === 'EXDEV' || err.code === 'ENOENT') {
+        // Windows fallback: copy and delete
+        fs.copyFileSync(tempPath, this.indexPath);
+        fs.unlinkSync(tempPath);
+      } else {
+        throw renameErr;
+      }
+    }
   }
 
   /**

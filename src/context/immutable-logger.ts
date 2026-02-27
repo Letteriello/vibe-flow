@@ -168,12 +168,26 @@ export class ImmutableLogger {
     const line = JSON.stringify(entry) + '\n';
     const tempPath = this.filePath + '.tmp.' + Math.random().toString(36).substring(2);
 
+    // Ensure directory exists
+    if (!fs.existsSync(this.storageDir)) {
+      fs.mkdirSync(this.storageDir, { recursive: true });
+    }
+
     // Escrita atômica
     const exists = fs.existsSync(this.filePath);
     const currentSize = exists ? fs.statSync(this.filePath).size : 0;
 
     fs.writeFileSync(tempPath, line, 'utf-8');
-    fs.appendFileSync(this.filePath, line, 'utf-8');
+    try {
+      fs.appendFileSync(this.filePath, line, 'utf-8');
+    } catch (appendErr) {
+      // If append fails (e.g., file doesn't exist), try to copy temp to target
+      try {
+        fs.copyFileSync(tempPath, this.filePath);
+      } catch {
+        // Ignore if both fail
+      }
+    }
 
     // Limpar temp file
     try {
