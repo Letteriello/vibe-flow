@@ -111,10 +111,7 @@ Auto-generated lessons from vibe-flow sessions
   - Prevents "undefined" references when interfaces reference each other
   - Added format inference from property names (id→uuid, email→email, phone→phone, etc.)
 
-## Session Notes (2026-02-27)
-- Created MockFactory in src/execution/tdd/mock-factory.ts:
-  - Gerador de fixtures baseado em JSON Schema ou interface TypeScript
-  - Suporte a locale (en/pt-BR) para nomes e endereços
-  - commonSchemas: person, user, product, post, address
-  - Parser TypeScript com resolução de tipos aninhados
-  - Formatos: uuid, email, url, phone, cpf, cnpj, date-time, ipv4, ipv6
+## Session Notes (2026-02-28)
+- Ran analyze-project: Project has 195 TypeScript files, 187 unit tests passing
+- Ran npm test: 368 tests passed, 1 test failed (EPERM - Windows file permission issue in state-machine.test.ts)
+- Updated docs/architecture/_meta.json with latest analysis
