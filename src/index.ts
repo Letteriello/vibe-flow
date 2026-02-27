@@ -11,6 +11,19 @@ export { WrapUpExecutor, WrapUpResult } from './wrap-up/index.js';
 export { CommandRegistry, CommandDefinition, CommandResult } from './command-registry/index.js';
 export { VibeFlowCLI } from './cli.js';
 
+// Token Estimation
+export {
+  estimateTokens,
+  estimateMessagesTokens,
+  estimateObjectTokens,
+  createTokenEstimator,
+  TokenEstimateOptions,
+  TokenEstimateResult,
+  TokenEstimator,
+  TokenEncoding,
+  TokenModel,
+} from './utils/token-estimation.js';
+
 import { VibeFlowCLI } from './cli.js';
 
 const cli = new VibeFlowCLI();

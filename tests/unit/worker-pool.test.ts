@@ -21,8 +21,13 @@ const projectRoot = path.resolve(__dirname, '../..');
 const workerPoolModule = await import(path.join(projectRoot, 'dist/context/worker-pool.js'));
 const { WorkerPool, PoolStats } = workerPoolModule;
 
+// Get the types
+const WorkerPoolClass = WorkerPool;
+type WorkerPoolType = InstanceType<typeof WorkerPool>;
+type PoolStatsType = PoolStats;
+
 describe('WorkerPool', () => {
-  let pool: WorkerPool;
+  let pool: WorkerPoolType;
 
   beforeEach(() => {
     pool = new WorkerPool({
@@ -104,7 +109,7 @@ describe('WorkerPool', () => {
 
   describe('PoolStats interface', () => {
     it('should have all required properties', () => {
-      const stats: PoolStats = {
+      const stats: PoolStatsType = {
         idleWorkers: 1,
         busyWorkers: 2,
         totalWorkers: 3,

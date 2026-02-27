@@ -483,6 +483,15 @@ export class WorkerPool {
 
     this.workers.clear();
     this.idleWorkers.clear();
+    this.initialized = false;
+    this.shuttingDown = false;
+  }
+
+  /**
+   * Alias for terminate() - terminates all workers immediately
+   */
+  async terminateAll(): Promise<void> {
+    return this.terminate();
   }
 }
 
