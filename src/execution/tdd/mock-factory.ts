@@ -600,9 +600,14 @@ class TypeScriptParser {
       case 'object':
       case 'Object':
         return { type: 'object' };
-      default:
+      default: {
+        // Check if it's a known interface
+        if (this.interfaces.has(trimmed)) {
+          return this.interfaces.get(trimmed)!;
+        }
         // Could be a custom type - default to object
         return { type: 'object' };
+      }
     }
   }
 

@@ -100,11 +100,30 @@ export class TelemetryCollector {
    * Persist events to disk
    */
   private async persist(): Promise<void> {
+    const telemetryDir = dirname(TELEMETRY_FILE);
     const tempFile = TELEMETRY_FILE + '.tmp';
+
+    // Ensure directory exists
+    try {
+      await fs.mkdir(telemetryDir, { recursive: true });
+    } catch {
+      // Directory may already exist
+    }
 
     try {
       await fs.writeFile(tempFile, JSON.stringify(this.events, null, 2), 'utf-8');
-      await fs.rename(tempFile, TELEMETRY_FILE);
+      try {
+        await fs.rename(tempFile, TELEMETRY_FILE);
+      } catch (renameErr) {
+        // Windows fallback: copy file and delete temp
+        const err = renameErr as { code?: string };
+        if (err.code === 'EXDEV' || err.code === 'ENOENT') {
+          await fs.copyFile(tempFile, TELEMETRY_FILE);
+          await fs.unlink(tempFile);
+        } else {
+          throw renameErr;
+        }
+      }
     } catch (error) {
       console.error('[TelemetryCollector] Failed to persist telemetry:', error);
     }
