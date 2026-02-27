@@ -32,6 +32,13 @@ Generated: 2026-02-26T03:31:32.553Z
 - **Occurrences:** 1
 - **Last seen:** 2026-02-27T22:00:00.000Z
 
+### Regex corruption in source
+
+- **Lesson:** When editing regex patterns in TypeScript source files, verify compiled JS output matches expected pattern. Some tools may corrupt backslash characters.
+- **Source:** error
+- **Occurrences:** 1
+- **Last seen:** 2026-02-27T00:17:00.000Z
+
 
 ---
 
@@ -114,3 +121,14 @@ Generated: 2026-02-26T03:31:32.553Z
 - ✓ Fixed Windows compatibility in TelemetryCollector (EXDEV fallback)
 - ✓ Updated mock-factory exports
 - ✓ Committed and pushed to origin/main
+
+---
+
+# Session Reflection - 2026-02-28T12:00:00.000Z
+
+## What Was Attempted
+
+- ✓ Tested mock-factory TypeScript parsing
+- ✓ Fixed nested interface parsing with two-pass algorithm
+- ✓ Added format inference from property names (id→uuid, email→email, phone→phone)
+- ✓ Verified all tests passing with UUID, nested objects, and locale support

@@ -109,3 +109,12 @@ Auto-generated lessons from vibe-flow sessions
 - Fixed TypeScript parser in mock-factory.ts:
   - Two-pass interface parsing: first collect names, then parse properties
   - Prevents "undefined" references when interfaces reference each other
+  - Added format inference from property names (id→uuid, email→email, phone→phone, etc.)
+
+## Session Notes (2026-02-27)
+- Created MockFactory in src/execution/tdd/mock-factory.ts:
+  - Gerador de fixtures baseado em JSON Schema ou interface TypeScript
+  - Suporte a locale (en/pt-BR) para nomes e endereços
+  - commonSchemas: person, user, product, post, address
+  - Parser TypeScript com resolução de tipos aninhados
+  - Formatos: uuid, email, url, phone, cpf, cnpj, date-time, ipv4, ipv6
