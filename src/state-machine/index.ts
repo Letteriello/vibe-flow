@@ -605,6 +605,20 @@ export {
   resetGlobalQualityGate
 } from './quality-gate.js';
 
+// Re-export Security Guard - OWASP Security Scanner
+export {
+  SecurityGuard,
+  SecuritySeverity,
+  OWASPViolation,
+  OWASPScanResult,
+  SecurityGateConfig,
+  DEFAULT_SECURITY_GATE_CONFIG,
+  SecurityQualityCheck,
+  createSecurityGuard,
+  getGlobalSecurityGuard,
+  resetGlobalSecurityGuard
+} from './security-guard.js';
+
 // Re-export SubagentCoordinator - Parallel task coordination for Implementation phase
 export {
   SubagentCoordinator,

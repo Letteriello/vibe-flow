@@ -20,6 +20,12 @@ export {
   DEFAULT_ISOLATION_CONFIG
 } from './context.js';
 
+export {
+  AgenticMapExecutor,
+  createExecutor,
+  DEFAULT_EXECUTOR_CONFIG
+} from './executor.js';
+
 export type {
   TaskNode,
   DependencyEdge,

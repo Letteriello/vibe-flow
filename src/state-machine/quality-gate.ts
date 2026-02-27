@@ -423,13 +423,11 @@ export class QualityGateInterceptor {
    */
   private async runSecurityCheck(): Promise<QualityCheck> {
     try {
-      const validationResult = await this.securityGuard.validate();
+      const validationResult = await this.securityGuard.runSecurityScan();
 
-      const details = validationResult.errors.length > 0
-        ? validationResult.errors.join('; ')
-        : validationResult.warnings.length > 0
-          ? validationResult.warnings.join('; ')
-          : 'Security validation passed - no critical issues found';
+      const details = validationResult.vulnerabilities.length > 0
+        ? `${validationResult.vulnerabilities.length} vulnerabilities found: ${validationResult.details}`
+        : 'Security validation passed - no critical issues found';
 
       return {
         name: 'Security Validation (OWASP)',

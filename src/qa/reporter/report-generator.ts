@@ -21,7 +21,8 @@ import { generateMarkdownReport, formatSummaryLine } from './template';
  * Default configuration values
  */
 const DEFAULT_CONFIG: Partial<QAReportConfig> = {
-  outputDir: 'docs/flow/qa',
+  outputDir: 'docs/planning',
+  outputFilename: 'qa-report.md',
   blockOnFail: true,
   includeDetails: true,
   validationTimeout: 60000, // 60 seconds
@@ -202,6 +203,57 @@ export class QAReportGenerator {
   }
 
   /**
+   * Run lint validation
+   */
+  async runLintValidation(): Promise<VerificationResult> {
+    // Try eslint first, fall back to npm run lint if available
+    return this.runValidation('Lint', 'npx eslint src --ext .ts,.tsx', this.config.validationTimeout);
+  }
+
+  /**
+   * Run security validation using SecurityGuard
+   */
+  async runSecurityValidation(): Promise<VerificationResult> {
+    const startTime = Date.now();
+    const result: VerificationResult = {
+      name: 'Security',
+      status: 'PASS',
+      duration: 0,
+      issues: [],
+    };
+
+    try {
+      // Dynamic import to avoid circular dependencies
+      const { SecurityGuard } = await import('../../state-machine/security-guard');
+      const guard = new SecurityGuard(this.config.projectPath);
+      const securityResult = await guard.runSecurityScan();
+
+      result.duration = Date.now() - startTime;
+      result.output = securityResult.details;
+
+      if (securityResult.blocked) {
+        result.status = 'FAIL';
+        result.blocked = true;
+        result.issues = securityResult.vulnerabilities.map(
+          v => `[${v.severity}] ${v.category}: ${v.description} (${v.file}:${v.line})`
+        );
+      } else if (securityResult.vulnerabilities.length > 0) {
+        result.status = 'WARNING';
+        result.issues = securityResult.vulnerabilities.map(
+          v => `[${v.severity}] ${v.category}: ${v.description}`
+        );
+      }
+    } catch (error) {
+      result.duration = Date.now() - startTime;
+      result.status = 'WARNING';
+      result.output = error instanceof Error ? error.message : String(error);
+      result.issues = ['Security scan unavailable'];
+    }
+
+    return result;
+  }
+
+  /**
    * Add a verification result manually
    */
   addVerification(result: VerificationResult): void {
@@ -242,12 +294,11 @@ export class QAReportGenerator {
    */
   async save(report: QAReport): Promise<string> {
     // Ensure output directory exists
-    const outputDir = path.resolve(this.config.projectPath, this.config.outputDir || 'docs/flow/qa');
+    const outputDir = path.resolve(this.config.projectPath, this.config.outputDir || 'docs/planning');
     await fs.mkdir(outputDir, { recursive: true });
 
-    // Generate filename
-    const timestamp = new Date(report.timestamp).toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const filename = `report-${timestamp}.md`;
+    // Generate filename - use fixed name for main report, timestamp for archive
+    const filename = this.config.outputFilename || 'qa-report.md';
     const filepath = path.join(outputDir, filename);
 
     // Generate markdown content
@@ -283,14 +334,16 @@ export class QAReportGenerator {
    * Run all standard validations (test, build, types)
    */
   async runAllValidations(): Promise<void> {
-    // Run validations in parallel
-    const [testResult, buildResult, typesResult] = await Promise.all([
+    // Run all validations in parallel (as per RF-001)
+    const [testResult, buildResult, typesResult, lintResult, securityResult] = await Promise.all([
       this.runTestValidation(),
       this.runBuildValidation(),
       this.runTypesValidation(),
+      this.runLintValidation(),
+      this.runSecurityValidation(),
     ]);
 
-    this.verifications.push(testResult, buildResult, typesResult);
+    this.verifications.push(testResult, buildResult, typesResult, lintResult, securityResult);
   }
 }
 

@@ -462,6 +462,49 @@ export class SecurityGuard {
   getRulesCount(): number {
     return this.VULNERABILITY_PATTERNS.length;
   }
+
+  /**
+   * Validate - returns quality gate compatible result
+   * Used by QualityGateInterceptor
+   */
+  async validate(): Promise<{
+    valid: boolean;
+    passed: boolean;
+    errors: string[];
+    warnings: string[];
+    score: number;
+    vulnerabilities: OWASPViolation[];
+    details: string;
+  }> {
+    const result = await this.runSecurityScan();
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    // Categorize violations
+    for (const v of result.vulnerabilities) {
+      if (v.severity === 'critical' || v.severity === 'high') {
+        errors.push(`[${v.severity.toUpperCase()}] ${v.category}: ${v.description} (${v.file}:${v.line})`);
+      } else if (v.severity === 'medium') {
+        warnings.push(`[MEDIUM] ${v.category}: ${v.description} (${v.file}:${v.line})`);
+      }
+    }
+
+    // Calculate score
+    const blockingCount = result.vulnerabilities.filter(v =>
+      v.severity === 'critical' || v.severity === 'high'
+    ).length;
+    const score = blockingCount === 0 ? 10 : Math.max(0, 10 - blockingCount);
+
+    return {
+      valid: !result.blocked,
+      passed: !result.blocked,
+      errors,
+      warnings,
+      score,
+      vulnerabilities: result.vulnerabilities,
+      details: result.details
+    };
+  }
 }
 
 // ============================================

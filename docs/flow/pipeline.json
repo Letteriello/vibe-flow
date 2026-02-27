@@ -2,7 +2,7 @@
   "pipeline_id": "flow-20260227-quality-gates",
   "created_at": "2026-02-27T16:00:00.000Z",
   "objective": "Quality Gates (OWASP) e Integração de Execução Determinística (Agentic-Map) - Integrar src/security e src/quality ao state-machine para criar Quality Gates determinísticos no Ralph loop, bloqueando commits que falhem no scanner OWASP. Em paralelo, implementar estrutura Agentic-Map baseada em LCM para isolamento de contexto em execuções paralelas.",
-  "current_phase": "plan",
+  "current_phase": "dev",
   "status": "in_progress",
   "previous_pipeline": "flow-20260228-memory-init",
   "previous_status": "complete",
@@ -54,104 +54,120 @@
       "merge_status": "done"
     },
     "plan": {
-      "status": "in_progress",
+      "status": "done",
       "work_units": [
         {
           "id": "PLAN-PRD-001",
           "scope": "quality-gates-owasp",
           "feature": "FEAT-001",
           "description": "Gerar PRD para Quality Gates com OWASP scanning",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["docs/flow/analyze/_merged.md"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": "contracts: security-types.ts, security-gate.json"
         },
         {
           "id": "PLAN-PRD-002",
           "scope": "agentic-map",
           "feature": "FEAT-002",
           "description": "Gerar PRD para Agentic-Map baseado em LCM",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["docs/flow/analyze/_merged.md"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": "contracts: agentic-map/types.ts, test-specs"
         },
         {
           "id": "PLAN-PRD-003",
           "scope": "qa-report-generation",
           "feature": "FEAT-003",
           "description": "Gerar PRD para geração automatizada de qa-report.md",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["docs/flow/analyze/_merged.md"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": "contracts: qa-report/types.ts, mocks.ts"
         },
         {
           "id": "PLAN-UX-001",
           "scope": "quality-gates-owasp",
           "feature": "FEAT-001",
           "description": "Gerar UX Spec para Quality Gates",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["PLAN-PRD-001"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": null
         },
         {
           "id": "PLAN-UX-002",
           "scope": "agentic-map",
           "feature": "FEAT-002",
           "description": "Gerar UX Spec para Agentic-Map",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["PLAN-PRD-002"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": null
         },
         {
           "id": "PLAN-UX-003",
           "scope": "qa-report-generation",
           "feature": "FEAT-003",
           "description": "Gerar UX Spec para qa-report",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["PLAN-PRD-003"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": null
         },
         {
           "id": "PLAN-TASKS-001",
           "scope": "quality-gates-owasp",
           "feature": "FEAT-001",
           "description": "Decompor tasks para Quality Gates",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["PLAN-PRD-001", "PLAN-UX-001"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": null
         },
         {
           "id": "PLAN-TASKS-002",
           "scope": "agentic-map",
           "feature": "FEAT-002",
           "description": "Decompor tasks para Agentic-Map",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["PLAN-PRD-002", "PLAN-UX-002"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": null
         },
         {
           "id": "PLAN-TASKS-003",
           "scope": "qa-report-generation",
           "feature": "FEAT-003",
           "description": "Decompor tasks para qa-report",
-          "work_status": "pending",
-          "worker": null,
-          "output": null,
-          "dependencies": ["PLAN-PRD-003", "PLAN-UX-003"]
+          "work_status": "done",
+          "worker": "worker-current",
+          "output": null
         }
       ],
-      "merge_status": "waiting"
+      "merge_status": "done"
     },
     "dev": {
-      "status": "blocked_by:plan",
-      "work_units": [],
+      "status": "in_progress",
+      "work_units": [
+        {"id": "DEV-OWASP-B-100", "scope": "FEAT-001", "task": "Implementar SecurityGuard (security-guard.ts)", "work_status": "done", "worker": "worker-current", "output": "src/state-machine/security-guard.ts", "dependencies": []},
+        {"id": "DEV-OWASP-B-101", "scope": "FEAT-001", "task": "Integrar QualityGate ao state-machine", "work_status": "done", "worker": "worker-current", "output": "src/state-machine/quality-gate.ts", "dependencies": ["DEV-OWASP-B-100"]},
+        {"id": "DEV-OWASP-C-200", "scope": "FEAT-001", "task": "Export index.ts (state-machine)", "work_status": "done", "worker": "worker-current", "output": "src/state-machine/index.ts", "dependencies": ["DEV-OWASP-B-101"]},
+        {"id": "DEV-OWASP-C-201", "scope": "FEAT-001", "task": "Unit tests security-guard", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-OWASP-B-100"]},
+        {"id": "DEV-OWASP-C-202", "scope": "FEAT-001", "task": "Build validation", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-OWASP-C-200", "DEV-OWASP-C-201"]},
+        {"id": "DEV-AM-100", "scope": "FEAT-002", "task": "Implementar AgenticMapCore (core.ts)", "work_status": "done", "worker": "worker-current", "output": "src/context/agentic-map/core.ts", "dependencies": []},
+        {"id": "DEV-AM-101", "scope": "FEAT-002", "task": "Implementar ContextIsolation", "work_status": "done", "worker": "worker-current", "output": "src/context/agentic-map/context.ts", "dependencies": []},
+        {"id": "DEV-AM-102", "scope": "FEAT-002", "task": "Implementar Executor", "work_status": "in_progress", "worker": "worker-current", "output": null, "dependencies": ["DEV-AM-100", "DEV-AM-101"]},
+        {"id": "DEV-AM-103", "scope": "FEAT-002", "task": "Implementar MCP Exposure", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-AM-100"]},
+        {"id": "DEV-AM-104", "scope": "FEAT-002", "task": "Implementar Rollback", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-AM-102"]},
+        {"id": "DEV-AM-INT-001", "scope": "FEAT-002", "task": "Worker Pool connect", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-AM-102"]},
+        {"id": "DEV-AM-INT-002", "scope": "FEAT-002", "task": "Barrel exports (index.ts)", "work_status": "done", "worker": "worker-current", "output": "src/context/agentic-map/index.ts", "dependencies": ["DEV-AM-100", "DEV-AM-101"]},
+        {"id": "DEV-AM-INT-003", "scope": "FEAT-002", "task": "Integration tests", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-AM-INT-001", "DEV-AM-INT-002"]},
+        {"id": "DEV-AM-INT-004", "scope": "FEAT-002", "task": "Build validation", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-AM-INT-003"]},
+        {"id": "DEV-QA-100", "scope": "FEAT-003", "task": "Implementar QAReportGenerator", "work_status": "done", "worker": "worker-Skynet-756-1772202922", "output": "src/qa/reporter/", "dependencies": []},
+        {"id": "DEV-QA-101", "scope": "FEAT-003", "task": "Implementar TestCollector", "work_status": "pending", "worker": null, "output": null, "dependencies": []},
+        {"id": "DEV-QA-102", "scope": "FEAT-003", "task": "Implementar BuildCollector", "work_status": "pending", "worker": null, "output": null, "dependencies": []},
+        {"id": "DEV-QA-103", "scope": "FEAT-003", "task": "Implementar TypesCollector", "work_status": "pending", "worker": null, "output": null, "dependencies": []},
+        {"id": "DEV-QA-104", "scope": "FEAT-003", "task": "Implementar SecurityCollector", "work_status": "pending", "worker": null, "output": null, "dependencies": []},
+        {"id": "DEV-QA-105", "scope": "FEAT-003", "task": "Implementar CoverageCollector", "work_status": "pending", "worker": null, "output": null, "dependencies": []},
+        {"id": "DEV-QA-106", "scope": "FEAT-003", "task": "Implementar ReportFormatter", "work_status": "pending", "worker": null, "output": null, "dependencies": []},
+        {"id": "DEV-QA-INT-001", "scope": "FEAT-003", "task": "WrapUp integration", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-QA-100"]},
+        {"id": "DEV-QA-INT-002", "scope": "FEAT-003", "task": "CLI commands", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-QA-100"]},
+        {"id": "DEV-QA-INT-003", "scope": "FEAT-003", "task": "Configuration", "work_status": "pending", "worker": null, "output": null, "dependencies": ["DEV-QA-100"]}
+      ],
       "merge_status": "waiting"
     },
     "qa": {

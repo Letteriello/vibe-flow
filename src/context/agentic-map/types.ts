@@ -48,6 +48,7 @@ export interface ContextSnapshot {
   truncated: boolean;
   summary?: string;
   contextData: Record<string, unknown>;
+  createdAt?: string;
 }
 
 // AgenticMapConfig - Configuration for Agentic-Map execution
@@ -64,7 +65,7 @@ export interface AgenticMapConfig {
 export type GraphStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 // Task execution status
-export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped' | 'cancelled';
 
 // Task execution event for monitoring
 export interface TaskEvent {
