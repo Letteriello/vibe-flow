@@ -1,8 +1,12 @@
 {
-  "last_analyzed_commit": "9ea863d",
-  "last_analyzed_at": "2026-02-26T23:30:00.000Z",
+  "last_analyzed_commit": "cbc9926",
+  "last_analyzed_at": "2026-02-28T14:00:00.000Z",
   "project_name": "vibe-flow",
   "primary_language": "TypeScript",
   "framework": "Node.js CLI with MCP integration",
-  "analysis_version": "1.2"
+  "analysis_version": "1.3",
+  "total_src_files": 195,
+  "total_test_files": 25,
+  "build_status": "success",
+  "test_status": "passed"
 }
