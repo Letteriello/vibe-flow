@@ -1,13 +1,6 @@
 /**
  * Atomic Context Injector
  * Partitions context by state-machine phase to mitigate "context rot"
-<<<<<<< HEAD
- */
-
-import { readFile, readdir, stat } from 'fs/promises';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-=======
  * and reduce token waste in LLM calls
  */
 
@@ -16,7 +9,6 @@ import { readdirSync } from 'fs';
 import { join, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { estimateTokens } from '../utils/token-estimation.js';
->>>>>>> origin/main
 
 /**
  * Context phases matching state-machine phases
@@ -63,65 +55,38 @@ export interface PhaseConfig {
 /**
  * Default phase configurations
  */
-<<<<<<< HEAD
-export const PHASE_CONFIGS: Record<ContextPhase, PhaseConfig> = {
-  analysis: {
-    patterns: ['CLAUDE.md', 'docs/architecture/*.md'],
-=======
 const PHASE_CONFIGS: Record<ContextPhase, PhaseConfig> = {
   analysis: {
     patterns: ['CLAUDE.md', 'docs/architecture/*.md', 'docs/flow/analyze/*.md'],
->>>>>>> origin/main
     maxTokens: 4000,
     modelTier: 'sonet',
     relevanceWeights: {
       'CLAUDE.md': 'critical',
       'docs/architecture/overview.md': 'critical',
-<<<<<<< HEAD
-    }
-  },
-  planning: {
-    patterns: ['CLAUDE.md', 'docs/planning/*.md'],
-=======
       'docs/architecture/diagnostics.md': 'important',
     }
   },
   planning: {
     patterns: ['CLAUDE.md', 'docs/planning/*.md', 'docs/flow/plan/**/*.md'],
->>>>>>> origin/main
     maxTokens: 6000,
     modelTier: 'sonet',
     relevanceWeights: {
       'CLAUDE.md': 'critical',
       'docs/planning/prd.md': 'critical',
-<<<<<<< HEAD
-    }
-  },
-  dev: {
-    patterns: ['CLAUDE.md', 'src/**/*.ts'],
-=======
       'docs/flow/plan/*/prd.md': 'critical',
     }
   },
   dev: {
     patterns: ['CLAUDE.md', 'docs/flow/dev/*.md', 'src/**/*'],
->>>>>>> origin/main
     maxTokens: 8000,
     modelTier: 'opus',
     relevanceWeights: {
       'CLAUDE.md': 'critical',
-<<<<<<< HEAD
-    }
-  },
-  qa: {
-    patterns: ['CLAUDE.md', 'docs/planning/qa-report.md'],
-=======
       'docs/flow/dev/*.md': 'important',
     }
   },
   qa: {
     patterns: ['CLAUDE.md', 'docs/planning/qa-report.md', 'docs/flow/qa/*.md'],
->>>>>>> origin/main
     maxTokens: 4000,
     modelTier: 'sonet',
     relevanceWeights: {
@@ -144,13 +109,6 @@ const PHASE_CONFIGS: Record<ContextPhase, PhaseConfig> = {
  */
 export class PhaseContextCache {
   private cache: Map<ContextPhase, ContextPayload> = new Map();
-<<<<<<< HEAD
-  private ttl: number = 60000;
-
-  get(phase: ContextPhase): ContextPayload | null {
-    const payload = this.cache.get(phase);
-    if (!payload) return null;
-=======
   private ttl: number = 60000; // 1 minute default
 
   /**
@@ -161,20 +119,10 @@ export class PhaseContextCache {
     if (!payload) return null;
 
     // Check TTL
->>>>>>> origin/main
     if (payload.cachedAt && Date.now() - payload.cachedAt > this.ttl) {
       this.cache.delete(phase);
       return null;
     }
-<<<<<<< HEAD
-    return payload;
-  }
-
-  set(phase: ContextPhase, payload: ContextPayload): void {
-    this.cache.set(phase, { ...payload, cachedAt: Date.now() });
-  }
-
-=======
 
     return payload;
   }
@@ -192,27 +140,20 @@ export class PhaseContextCache {
   /**
    * Invalidate all cached context
    */
->>>>>>> origin/main
   invalidate(): void {
     this.cache.clear();
   }
 
-<<<<<<< HEAD
-=======
   /**
    * Invalidate specific phase
    */
->>>>>>> origin/main
   invalidatePhase(phase: ContextPhase): void {
     this.cache.delete(phase);
   }
 
-<<<<<<< HEAD
-=======
   /**
    * Get cache stats
    */
->>>>>>> origin/main
   getStats(): { phases: ContextPhase[]; size: number } {
     return {
       phases: Array.from(this.cache.keys()),
@@ -220,30 +161,14 @@ export class PhaseContextCache {
     };
   }
 
-<<<<<<< HEAD
-=======
   /**
    * Set TTL
    */
->>>>>>> origin/main
   setTTL(ttl: number): void {
     this.ttl = ttl;
   }
 }
 
-<<<<<<< HEAD
-const globalCache = new PhaseContextCache();
-
-let projectRoot: string = '';
-
-function resolveProjectRoot(): string {
-  if (projectRoot) return projectRoot;
-  return process.cwd();
-}
-
-function matchesPattern(path: string, pattern: string): boolean {
-  const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*');
-=======
 // Global cache instance
 const globalCache = new PhaseContextCache();
 
@@ -289,38 +214,24 @@ function matchesPattern(path: string, pattern: string): boolean {
     .replace(/\*/g, '.*')
     .replace(/\?/g, '.');
 
->>>>>>> origin/main
   const regex = new RegExp(`^${regexPattern}$`, 'i');
   return regex.test(path);
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Check if path matches any pattern
  */
->>>>>>> origin/main
 function matchesAnyPattern(path: string, patterns: string[]): boolean {
   return patterns.some(pattern => matchesPattern(path, pattern));
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Load artifact content
  */
->>>>>>> origin/main
 async function loadArtifactContent(basePath: string, artifactPath: string): Promise<string | null> {
   try {
     const fullPath = join(basePath, artifactPath);
     const stats = await stat(fullPath);
-<<<<<<< HEAD
-    if (stats.isDirectory()) {
-      const files = await readdir(fullPath);
-      const contents: string[] = [];
-      for (const file of files) {
-        if (file.endsWith('.md') || file.endsWith('.ts')) {
-=======
 
     if (stats.isDirectory()) {
       // Load all files in directory
@@ -329,16 +240,12 @@ async function loadArtifactContent(basePath: string, artifactPath: string): Prom
 
       for (const file of files) {
         if (file.endsWith('.md') || file.endsWith('.ts') || file === 'package.json') {
->>>>>>> origin/main
           const filePath = join(fullPath, file);
           const content = await readFile(filePath, 'utf-8');
           contents.push(`// ${artifactPath}/${file}\n${content}`);
         }
       }
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/main
       return contents.join('\n\n');
     } else {
       return await readFile(fullPath, 'utf-8');
@@ -348,13 +255,6 @@ async function loadArtifactContent(basePath: string, artifactPath: string): Prom
   }
 }
 
-<<<<<<< HEAD
-function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
-}
-
-=======
->>>>>>> origin/main
 /**
  * Build context payload for a phase
  */
@@ -366,38 +266,26 @@ export async function injectAtomicContext(
   const forceRefresh = options?.forceRefresh ?? false;
   const root = options?.customRoot ?? resolveProjectRoot();
 
-<<<<<<< HEAD
-  if (useCache && !forceRefresh) {
-    const cached = globalCache.get(phase);
-    if (cached) return cached;
-=======
   // Check cache first
   if (useCache && !forceRefresh) {
     const cached = globalCache.get(phase);
     if (cached) {
       return cached;
     }
->>>>>>> origin/main
   }
 
   const config = PHASE_CONFIGS[phase];
   const artifacts: ContextArtifact[] = [];
   let totalTokens = 0;
 
-<<<<<<< HEAD
-=======
   // Load matching artifacts
->>>>>>> origin/main
   for (const pattern of config.patterns) {
     const content = await loadArtifactContent(root, pattern.replace(/\*\*\/|\*/g, ''));
     if (content) {
       const tokens = estimateTokens(content);
       const relevance = config.relevanceWeights[pattern] || 'optional';
-<<<<<<< HEAD
-=======
 
       // Check token budget
->>>>>>> origin/main
       if (totalTokens + tokens <= config.maxTokens) {
         artifacts.push({
           type: pattern.includes('*') ? 'directory' : 'file',
@@ -418,12 +306,6 @@ export async function injectAtomicContext(
     modelTier: config.modelTier
   };
 
-<<<<<<< HEAD
-  if (useCache) globalCache.set(phase, payload);
-  return payload;
-}
-
-=======
   // Cache if enabled
   if (useCache) {
     globalCache.set(phase, payload);
@@ -435,53 +317,37 @@ export async function injectAtomicContext(
 /**
  * Get cached context (no computation)
  */
->>>>>>> origin/main
 export function getPhaseContext(phase: ContextPhase): ContextPayload | null {
   return globalCache.get(phase);
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Select model tier based on phase (cognitive tiering)
  */
->>>>>>> origin/main
 export function selectModelForPhase(phase: ContextPhase): ModelTier {
   return PHASE_CONFIGS[phase].modelTier;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Get phase configuration
  */
->>>>>>> origin/main
 export function getPhaseConfig(phase: ContextPhase): PhaseConfig {
   return PHASE_CONFIGS[phase];
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Get global cache instance
  */
->>>>>>> origin/main
 export function getGlobalCache(): PhaseContextCache {
   return globalCache;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Invalidate all caches
  */
->>>>>>> origin/main
 export function invalidateAllCaches(): void {
   globalCache.invalidate();
 }
 
-<<<<<<< HEAD
-=======
 // Backward compatibility alias
->>>>>>> origin/main
 export { PhaseContextCache as AtomicContextCache };
