@@ -100,8 +100,7 @@ export {
   thinkingBlockClearing,
   staleToolClearing,
   needsAggressiveCleaning,
-  ActiveWindowConfig,
-  CleaningResult
+  ActiveWindowConfig
 } from './pruning.js';
 // Three-Level Escalation - LCM pattern
 export {
@@ -187,3 +186,26 @@ export {
   SubAgentResult,
   createSubAgentIsolator
 } from './subagent-isolator.js';
+// Worker Pool - Manage a pool of workers for parallel task execution
+export {
+  WorkerPool,
+  WorkerPoolConfig as WorkerPoolOptions,
+  PoolStatus,
+  getGlobalPool,
+  initializePool,
+  shutdownPool
+} from './worker-pool.js';
+// Unified Cleaning Strategy - Consolidated cleaning interface
+export {
+  CleaningType,
+  CleaningStrategy,
+  CleaningConfig,
+  CleaningResult as UnifiedCleaningResult,
+  ContextMessage as UnifiedContextMessage,
+  DEFAULT_CLEANING_CONFIG,
+  createCleaningStrategy,
+  cleanContext,
+  ThoughtBlockCleaning,
+  ToolResultCleaning,
+  CompositeCleaningStrategy
+} from './cleaning-strategy.js';
