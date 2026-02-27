@@ -73,7 +73,7 @@ export const DEFAULT_POLICY: PolicyConfig = {
     { pattern: 'bash', action: 'ask', description: 'Shell commands require confirmation' },
 
     // Deny destructive operations
-    { pattern: 'delete', action: ': 'Delete operationsdeny', description are denied' },
+    { pattern: 'delete', action: 'deny', description: 'Delete operations are denied' },
     { pattern: 'remove', action: 'deny', description: 'Remove operations are denied' },
     { pattern: 'unlink', action: 'deny', description: 'Unlink operations are denied' },
   ]
