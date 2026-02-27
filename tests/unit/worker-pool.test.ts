@@ -122,4 +122,92 @@ describe('WorkerPool', () => {
       expect(stats.failedTasks).toBe(6);
     });
   });
+
+  describe('shutdown()', () => {
+    it('should complete shutdown gracefully', async () => {
+      await pool.initialize();
+
+      // Submit a simple task
+      const taskPromise = pool.execute({
+        type: 'compress',
+        payload: 'test'
+      });
+
+      // Wait for task to complete
+      await taskPromise;
+
+      // Shutdown should complete
+      await pool.shutdown();
+
+      // Pool should no longer be initialized
+      const status = pool.getStatus();
+      expect(status.initialized).toBe(false);
+      expect(status.shuttingDown).toBe(false);
+    });
+
+    it('should reject new tasks after shutdown is initiated', async () => {
+      await pool.initialize();
+
+      // Start shutdown
+      const shutdownPromise = pool.shutdown();
+
+      // Try to submit task after shutdown started - should throw
+      await expect(
+        pool.execute({ type: 'compress', payload: 'test' })
+      ).rejects.toThrow('shutting down');
+
+      await shutdownPromise;
+    });
+
+    it('should clear all workers after shutdown', async () => {
+      await pool.initialize();
+
+      const statusBefore = pool.getStatus();
+      expect(statusBefore.totalWorkers).toBeGreaterThan(0);
+
+      await pool.shutdown();
+
+      const statusAfter = pool.getStatus();
+      expect(statusAfter.totalWorkers).toBe(0);
+    });
+  });
+
+  describe('terminate()', () => {
+    it('should immediately terminate all workers', async () => {
+      await pool.initialize();
+
+      const statusBefore = pool.getStatus();
+      expect(statusBefore.totalWorkers).toBeGreaterThan(0);
+
+      await pool.terminate();
+
+      const statusAfter = pool.getStatus();
+      expect(statusAfter.totalWorkers).toBe(0);
+      expect(statusAfter.idleWorkers).toBe(0);
+      expect(statusAfter.busyWorkers).toBe(0);
+    });
+
+    it('should reset initialized flag after terminate', async () => {
+      await pool.initialize();
+
+      await pool.terminate();
+
+      const status = pool.getStatus();
+      expect(status.initialized).toBe(false);
+    });
+  });
+
+  describe('terminateAll()', () => {
+    it('should work as alias for terminate()', async () => {
+      await pool.initialize();
+
+      const statusBefore = pool.getStatus();
+      expect(statusBefore.totalWorkers).toBeGreaterThan(0);
+
+      await pool.terminateAll();
+
+      const statusAfter = pool.getStatus();
+      expect(statusAfter.totalWorkers).toBe(0);
+    });
+  });
 });
