@@ -380,10 +380,15 @@ class DataGenerators {
 // ============================================
 
 class TypeScriptParser {
+  private interfaces: Map<string, JsonSchema> = new Map();
+
   /**
    * Parseia uma string de interface TypeScript e gera JSON Schema
    */
   parseInterface(interfaceString: string): JsonSchema {
+    // First, extract all interfaces from the code
+    this.extractAllInterfaces(interfaceString);
+
     const schema: JsonSchema = {
       type: 'object',
       properties: {},
@@ -406,7 +411,6 @@ class TypeScriptParser {
     if (!bodyMatch) return schema;
 
     const body = bodyMatch[1];
-    // Split by semicolon, handling nested structures
     const propertyLines = body.split(';').filter(line => line.trim().length > 0);
 
     for (const line of propertyLines) {
@@ -419,7 +423,7 @@ class TypeScriptParser {
 
       const [, propName, optional, typeStr] = propMatch;
 
-      const propSchema = this.parseType(typeStr.trim());
+      const propSchema = this.parseType(typeStr.trim(), propName);
       schema.properties![propName] = propSchema;
 
       if (!optional) {
@@ -431,9 +435,76 @@ class TypeScriptParser {
   }
 
   /**
+   * Extract all interfaces from TypeScript code
+   */
+  private extractAllInterfaces(code: string): void {
+    this.interfaces.clear();
+
+    // Remove comments
+    const cleanCode = code
+      .replace(/\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\s+/g, ' ');
+
+    // Find all interface definitions
+    const interfaceRegex = /interface\s+(\w+)\s*\{([\s\S]*?)\}/g;
+    let match;
+
+    while ((match = interfaceRegex.exec(cleanCode)) !== null) {
+      const [, interfaceName, body] = match;
+      const properties: { [key: string]: JsonSchema } = {};
+      const required: string[] = [];
+
+      const propertyLines = body.split(';').filter(line => line.trim().length > 0);
+
+      for (const line of propertyLines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+
+        const propMatch = trimmed.match(/^(\w+)(\??)\s*:\s*(.+)$/);
+        if (!propMatch) continue;
+
+        const [, propName, optional, typeStr] = propMatch;
+        properties[propName] = this.parseType(typeStr.trim(), propName);
+
+        if (!optional) {
+          required.push(propName);
+        }
+      }
+
+      this.interfaces.set(interfaceName, {
+        type: 'object',
+        properties,
+        required
+      });
+    }
+  }
+
+  /**
+   * Infer format based on property name
+   */
+  private inferFormat(propName: string): string | undefined {
+    const lower = propName.toLowerCase();
+
+    if (lower === 'id' || lower.endsWith('id')) return 'uuid';
+    if (lower === 'email' || lower.includes('email')) return 'email';
+    if (lower === 'url' || lower.includes('url') || lower === 'website') return 'url';
+    if (lower === 'phone' || lower.includes('phone') || lower === 'tel' || lower === 'telephone') return 'phone';
+    if (lower === 'cpf') return 'cpf';
+    if (lower === 'cnpj') return 'cnpj';
+    if (lower === 'createdat' || lower === 'updatedat' || lower === 'date' || lower === 'timestamp') return 'date-time';
+    if (lower === 'ipv4' || lower === 'ip') return 'ipv4';
+    if (lower === 'ipv6') return 'ipv6';
+    if (lower === 'color' || lower === 'hexcolor') return 'hex-color';
+    if (lower.includes('password') || lower.includes('secret') || lower.includes('token')) return undefined; // Don't generate real secrets
+
+    return undefined;
+  }
+
+  /**
    * Parseia uma string de tipo TypeScript para JSON Schema
    */
-  parseType(typeStr: string): JsonSchema {
+  parseType(typeStr: string, propName?: string): JsonSchema {
     const trimmed = typeStr.trim();
 
     // Handle union types: string | number | null
