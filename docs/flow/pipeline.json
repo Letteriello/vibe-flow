@@ -75,37 +75,40 @@
       "merge_status": "done"
     },
     "dev": {
-      "status": "in_progress",
+      "status": "done",
       "work_units": [
         {
           "id": "DEV-TASK-001",
           "scope": "atomic-context-injection",
           "description": "Implementar atomic-injector.ts",
-          "work_status": "pending",
-          "worker": null,
-          "prd": "docs/flow/plan/atomic-context-injection/prd.md"
+          "work_status": "done",
+          "worker": "claude-code",
+          "prd": "docs/flow/plan/atomic-context-injection/prd.md",
+          "completed_at": "2026-02-27T20:00:00.000Z"
         },
         {
           "id": "DEV-TASK-002",
           "scope": "phase-gated-memory",
           "description": "Implementar quality-gate-consolidator.ts",
-          "work_status": "pending",
-          "worker": null,
-          "prd": "docs/flow/plan/phase-gated-memory/prd.md"
+          "work_status": "done",
+          "worker": "claude-code",
+          "prd": "docs/flow/plan/phase-gated-memory/prd.md",
+          "completed_at": "2026-02-27T20:00:00.000Z"
         },
         {
           "id": "DEV-TASK-003",
           "scope": "context-rot-prevention",
           "description": "Implementar rot-detector.ts",
-          "work_status": "pending",
-          "worker": null,
-          "prd": "docs/flow/plan/context-rot-prevention/prd.md"
+          "work_status": "done",
+          "worker": "claude-code",
+          "prd": "docs/flow/plan/context-rot-prevention/prd.md",
+          "completed_at": "2026-02-27T20:00:00.000Z"
         }
       ],
       "merge_status": "waiting"
     },
     "qa": {
-      "status": "blocked_by:dev",
+      "status": "ready",
       "work_units": [],
       "merge_status": "waiting"
     }

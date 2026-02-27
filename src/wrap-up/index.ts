@@ -696,3 +696,13 @@ export {
   type EstablishedConvention,
   type ReflectionSummary
 } from './reflection.js';
+
+// Quality Gate Consolidator - Blocks wrap-up if QA not approved
+export {
+  QualityGateResult,
+  ConsolidationResult,
+  canConsolidateMemory,
+  consolidateWithGate,
+  isWrapUpBlocked,
+  clearQAStatusCache
+} from './quality-gate-consolidator.js';

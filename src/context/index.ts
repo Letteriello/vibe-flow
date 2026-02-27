@@ -224,3 +224,35 @@ export {
   countPatternOccurrences,
   estimateCleaningTokens
 } from './cleaning-strategy.js';
+
+// Context Rot Detector - Context degradation detection and prevention
+export {
+  ContextRotDetector,
+  ContextHealth,
+  ContextMetrics,
+  DegradationIndicator,
+  RotationEscalationResult,
+  RotDetectorConfig,
+  DEFAULT_ROT_CONFIG,
+  getGlobalRotDetector,
+  detectContextRot,
+  shouldPrune,
+  escalateContext
+} from './rot-detector.js';
+
+// Atomic Context Injector - Phase-based context partitioning
+export {
+  ContextPhase,
+  ModelTier,
+  ContextPayload,
+  ContextArtifact,
+  PhaseConfig,
+  PhaseContextCache,
+  AtomicContextCache,
+  injectAtomicContext,
+  getPhaseContext,
+  selectModelForPhase,
+  getPhaseConfig,
+  getGlobalCache,
+  invalidateAllCaches
+} from './atomic-injector.js';
