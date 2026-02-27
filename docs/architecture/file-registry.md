@@ -38,6 +38,36 @@ This registry tracks all TypeScript source files in the `src/` directory.
 
 ---
 
+## Execution - Agents Module
+
+| File | Type | Purpose | Status |
+|------|------|---------|--------|
+| `src/execution/agents/refactor-agent.ts` | Class | RefactorAgent - Automated refactoring | Active |
+| `src/execution/agents/index.ts` | Exports | Module exports | Active |
+
+## Execution - Orchestration Module
+
+| File | Type | Purpose | Status |
+|------|------|---------|--------|
+| `src/execution/orchestration/tdd-coordinator.ts` | Class | TDDCoordinator - Agent coordination | Active |
+| `src/execution/orchestration/index.ts` | Exports | Module exports | Active |
+
+## Execution - Security Module
+
+| File | Type | Purpose | Status |
+|------|------|---------|--------|
+| `src/execution/security/tdd-sandbox.ts` | Class | SecuritySandboxWrapper - Safe TDD execution | Active |
+| `src/execution/security/index.ts` | Exports | Module exports | Active |
+
+## Execution - Telemetry Module
+
+| File | Type | Purpose | Status |
+|------|------|---------|--------|
+| `src/execution/telemetry/tdd-metrics.ts` | Module | TDDMetrics - Execution telemetry | Active |
+| `src/execution/telemetry/index.ts` | Exports | Module exports | Active |
+
+---
+
 ## Context Management Module
 
 | File | Type | Purpose | Status |
