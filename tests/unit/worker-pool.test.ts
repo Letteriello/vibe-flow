@@ -1,7 +1,7 @@
 /**
  * Worker Pool Unit Tests
  *
- * Testa o WorkerPool e o método getStats().
+ * Testa o WorkerPool e o método getStatus().
  *
  * Executar com:
  *   npm test -- --testPathPattern=worker-pool
@@ -37,11 +37,11 @@ describe('WorkerPool', () => {
     await pool.terminateAll();
   });
 
-  describe('getStats()', () => {
+  describe('getStatus()', () => {
     it('should return correct PoolStats structure', async () => {
       await pool.initialize();
 
-      const stats = pool.getStats();
+      const stats = pool.getStatus();
 
       // Verify all required fields exist
       expect(stats).toHaveProperty('idleWorkers');
@@ -63,7 +63,7 @@ describe('WorkerPool', () => {
     it('should return zero for completed and failed tasks initially', async () => {
       await pool.initialize();
 
-      const stats = pool.getStats();
+      const stats = pool.getStatus();
 
       expect(stats.completedTasks).toBe(0);
       expect(stats.failedTasks).toBe(0);
@@ -72,7 +72,7 @@ describe('WorkerPool', () => {
     it('should return zero queued tasks initially', async () => {
       await pool.initialize();
 
-      const stats = pool.getStats();
+      const stats = pool.getStatus();
 
       expect(stats.queuedTasks).toBe(0);
     });
@@ -84,7 +84,7 @@ describe('WorkerPool', () => {
       });
       await pool2Workers.initialize();
 
-      const stats = pool2Workers.getStats();
+      const stats = pool2Workers.getStatus();
 
       expect(stats.totalWorkers).toBe(2);
       expect(stats.idleWorkers).toBeGreaterThanOrEqual(0);
@@ -95,7 +95,7 @@ describe('WorkerPool', () => {
     it('should return idleWorkers + busyWorkers = totalWorkers', async () => {
       await pool.initialize();
 
-      const stats = pool.getStats();
+      const stats = pool.getStatus();
 
       expect(stats.idleWorkers + stats.busyWorkers).toBe(stats.totalWorkers);
     });

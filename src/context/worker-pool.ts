@@ -214,7 +214,7 @@ export class WorkerPool {
 
       const pendingTask: PendingTask = {
         data,
-        resolve: resolve as (value: WorkerResult) => void,
+        resolve: resolve as any,
         reject,
         timeout: taskTimeout
       };
@@ -306,9 +306,8 @@ export class WorkerPool {
 
       if (result.success) {
         this.stats.completedTasks++;
-        // Type assertion needed since worker always returns WorkerResult
-        // and T is only for API compatibility
-        pendingTask.resolve(result as T);
+        // Worker always returns WorkerResult
+        pendingTask.resolve(result as any);
       } else {
         this.stats.failedTasks++;
         pendingTask.reject(new Error(result.error || 'Task failed'));
@@ -409,9 +408,9 @@ export class WorkerPool {
   }
 
   /**
-   * Get current pool status
+   * Get pool statistics
    */
-  getStatus(): PoolStatus {
+  getStats(): PoolStats {
     let busyWorkers = 0;
     for (const managedWorker of this.workers.values()) {
       if (managedWorker.inUse) {
@@ -425,7 +424,17 @@ export class WorkerPool {
       totalWorkers: this.workers.size,
       queuedTasks: this.pendingTasks.length,
       completedTasks: this.stats.completedTasks,
-      failedTasks: this.stats.failedTasks,
+      failedTasks: this.stats.failedTasks
+    };
+  }
+
+  /**
+   * Get current pool status
+   */
+  getStatus(): PoolStatus {
+    const stats = this.getStats();
+    return {
+      ...stats,
       initialized: this.initialized,
       shuttingDown: this.shuttingDown
     };
