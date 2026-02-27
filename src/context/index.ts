@@ -243,8 +243,8 @@ export {
   invalidateAllCaches
 } from './atomic-injector.js';
 export {
-  RotDetector,
-  createRotDetector,
+  ContextRotDetector as RotDetector,
+  getGlobalRotDetector as createRotDetector,
   detectContextRot,
   shouldPrune,
   escalateContext,
