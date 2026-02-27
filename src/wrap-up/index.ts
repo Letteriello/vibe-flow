@@ -697,12 +697,16 @@ export {
   type ReflectionSummary
 } from './reflection.js';
 
-// Quality Gate Consolidator - Blocks wrap-up if QA not approved
+// Quality Gate Consolidator - Deterministic quality gates before memory consolidation
 export {
-  QualityGateResult,
-  ConsolidationResult,
+  QualityGateConsolidator,
+  getQualityGateConsolidator,
+  resetQualityGateConsolidator,
+  isWrapUpBlocked,
   canConsolidateMemory,
   consolidateWithGate,
-  isWrapUpBlocked,
-  clearQAStatusCache
+  type QualityGateResult,
+  type ConsolidationResult,
+  type QualityGateConfig,
+  DEFAULT_QUALITY_GATE_CONFIG
 } from './quality-gate-consolidator.js';

@@ -28,7 +28,7 @@ const {
   estimateTokensCached,
   getCacheStats,
   invalidateCache,
-} = await import(path.join(projectRoot, 'dist/utils/token-estimation.js'));
+} = await import(path.join(projectRoot, 'src/utils/token-estimation.ts'));
 
 // Define types locally (they are not exported from dist)
 interface ToolCall {
@@ -527,25 +527,25 @@ describe('Token Estimation Module', () => {
 
   describe('Backward Compatibility Aliases', () => {
     it('compactionEstimateTokens should work', async () => {
-      const mod = await import(path.join(projectRoot, 'dist/utils/token-estimation.js'));
+      const mod = await import(path.join(projectRoot, 'src/utils/token-estimation.ts'));
       const { compactionEstimateTokens } = mod;
       expect(compactionEstimateTokens).toBe(estimateTokens);
     });
 
     it('estimateTokenCount should work', async () => {
-      const mod = await import(path.join(projectRoot, 'dist/utils/token-estimation.js'));
+      const mod = await import(path.join(projectRoot, 'src/utils/token-estimation.ts'));
       const { estimateTokenCount } = mod;
       expect(estimateTokenCount).toBe(estimateTokens);
     });
 
     it('countTokens should work', async () => {
-      const mod = await import(path.join(projectRoot, 'dist/utils/token-estimation.js'));
+      const mod = await import(path.join(projectRoot, 'src/utils/token-estimation.ts'));
       const { countTokens } = mod;
       expect(countTokens).toBe(estimateTokens);
     });
 
     it('estimateFileTokens should work', async () => {
-      const mod = await import(path.join(projectRoot, 'dist/utils/token-estimation.js'));
+      const mod = await import(path.join(projectRoot, 'src/utils/token-estimation.ts'));
       const { estimateFileTokens } = mod;
       expect(estimateFileTokens).toBe(estimateTokens);
     });

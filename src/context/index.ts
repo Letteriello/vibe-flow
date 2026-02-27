@@ -190,6 +190,7 @@ export {
 export {
   WorkerPool,
   WorkerPoolConfig as WorkerPoolOptions,
+  PoolStats,
   PoolStatus,
   getGlobalPool,
   initializePool,
@@ -224,22 +225,6 @@ export {
   countPatternOccurrences,
   estimateCleaningTokens
 } from './cleaning-strategy.js';
-
-// Context Rot Detector - Context degradation detection and prevention
-export {
-  ContextRotDetector,
-  ContextHealth,
-  ContextMetrics,
-  DegradationIndicator,
-  RotationEscalationResult,
-  RotDetectorConfig,
-  DEFAULT_ROT_CONFIG,
-  getGlobalRotDetector,
-  detectContextRot,
-  shouldPrune,
-  escalateContext
-} from './rot-detector.js';
-
 // Atomic Context Injector - Phase-based context partitioning
 export {
   ContextPhase,
@@ -247,6 +232,7 @@ export {
   ContextPayload,
   ContextArtifact,
   PhaseConfig,
+  PHASE_CONFIGS,
   PhaseContextCache,
   AtomicContextCache,
   injectAtomicContext,
@@ -256,3 +242,12 @@ export {
   getGlobalCache,
   invalidateAllCaches
 } from './atomic-injector.js';
+export {
+  RotDetector,
+  createRotDetector,
+  detectContextRot,
+  shouldPrune,
+  escalateContext,
+  ContextHealth,
+  RotDetectorConfig
+} from './rot-detector.js';
