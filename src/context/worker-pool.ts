@@ -306,7 +306,9 @@ export class WorkerPool {
 
       if (result.success) {
         this.stats.completedTasks++;
-        pendingTask.resolve(result as unknown as T);
+        // Type assertion needed since worker always returns WorkerResult
+        // and T is only for API compatibility
+        pendingTask.resolve(result as T);
       } else {
         this.stats.failedTasks++;
         pendingTask.reject(new Error(result.error || 'Task failed'));

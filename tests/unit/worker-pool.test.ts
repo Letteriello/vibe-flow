@@ -9,7 +9,6 @@
  */
 
 import * as path from 'path';
-import * as fs from 'fs';
 import { fileURLToPath } from 'url';
 
 // ESM compatibility
@@ -19,23 +18,18 @@ const __dirname = path.dirname(__filename);
 // Import after setting up paths
 const projectRoot = path.resolve(__dirname, '../..');
 const workerPoolModule = await import(path.join(projectRoot, 'dist/context/worker-pool.js'));
-const { WorkerPool, PoolStats } = workerPoolModule;
-
-// Get the types
-const WorkerPoolClass = WorkerPool;
-type WorkerPoolType = InstanceType<typeof WorkerPool>;
-type PoolStatsType = PoolStats;
+const WorkerPool = workerPoolModule.WorkerPool;
 
 describe('WorkerPool', () => {
-  let pool: WorkerPoolType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let pool: any;
 
   beforeEach(() => {
     pool = new WorkerPool({
       minWorkers: 1,
       maxWorkers: 2,
       idleTimeout: 5000,
-      taskTimeout: 5000,
-      acquireTimeout: 5000
+      taskTimeout: 5000
     });
   });
 
@@ -109,13 +103,15 @@ describe('WorkerPool', () => {
 
   describe('PoolStats interface', () => {
     it('should have all required properties', () => {
-      const stats: PoolStatsType = {
+      const stats = {
         idleWorkers: 1,
         busyWorkers: 2,
         totalWorkers: 3,
         queuedTasks: 4,
         completedTasks: 5,
-        failedTasks: 6
+        failedTasks: 6,
+        initialized: true,
+        shuttingDown: false
       };
 
       expect(stats.idleWorkers).toBe(1);
