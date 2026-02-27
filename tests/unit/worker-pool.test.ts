@@ -1,0 +1,124 @@
+/**
+ * Worker Pool Unit Tests
+ *
+ * Testa o WorkerPool e o método getStats().
+ *
+ * Executar com:
+ *   npm test -- --testPathPattern=worker-pool
+ *   npx jest tests/unit/worker-pool.test.ts
+ */
+
+import * as path from 'path';
+import * as fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// ESM compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Import after setting up paths
+const projectRoot = path.resolve(__dirname, '../..');
+const workerPoolModule = await import(path.join(projectRoot, 'dist/context/worker-pool.js'));
+const { WorkerPool, PoolStats } = workerPoolModule;
+
+describe('WorkerPool', () => {
+  let pool: WorkerPool;
+
+  beforeEach(() => {
+    pool = new WorkerPool({
+      minWorkers: 1,
+      maxWorkers: 2,
+      idleTimeout: 5000,
+      taskTimeout: 5000,
+      acquireTimeout: 5000
+    });
+  });
+
+  afterEach(async () => {
+    await pool.terminateAll();
+  });
+
+  describe('getStats()', () => {
+    it('should return correct PoolStats structure', async () => {
+      await pool.initialize();
+
+      const stats = pool.getStats();
+
+      // Verify all required fields exist
+      expect(stats).toHaveProperty('idleWorkers');
+      expect(stats).toHaveProperty('busyWorkers');
+      expect(stats).toHaveProperty('totalWorkers');
+      expect(stats).toHaveProperty('queuedTasks');
+      expect(stats).toHaveProperty('completedTasks');
+      expect(stats).toHaveProperty('failedTasks');
+
+      // Verify types
+      expect(typeof stats.idleWorkers).toBe('number');
+      expect(typeof stats.busyWorkers).toBe('number');
+      expect(typeof stats.totalWorkers).toBe('number');
+      expect(typeof stats.queuedTasks).toBe('number');
+      expect(typeof stats.completedTasks).toBe('number');
+      expect(typeof stats.failedTasks).toBe('number');
+    });
+
+    it('should return zero for completed and failed tasks initially', async () => {
+      await pool.initialize();
+
+      const stats = pool.getStats();
+
+      expect(stats.completedTasks).toBe(0);
+      expect(stats.failedTasks).toBe(0);
+    });
+
+    it('should return zero queued tasks initially', async () => {
+      await pool.initialize();
+
+      const stats = pool.getStats();
+
+      expect(stats.queuedTasks).toBe(0);
+    });
+
+    it('should track total workers based on minWorkers', async () => {
+      const pool2Workers = new WorkerPool({
+        minWorkers: 2,
+        maxWorkers: 4
+      });
+      await pool2Workers.initialize();
+
+      const stats = pool2Workers.getStats();
+
+      expect(stats.totalWorkers).toBe(2);
+      expect(stats.idleWorkers).toBeGreaterThanOrEqual(0);
+
+      await pool2Workers.terminateAll();
+    });
+
+    it('should return idleWorkers + busyWorkers = totalWorkers', async () => {
+      await pool.initialize();
+
+      const stats = pool.getStats();
+
+      expect(stats.idleWorkers + stats.busyWorkers).toBe(stats.totalWorkers);
+    });
+  });
+
+  describe('PoolStats interface', () => {
+    it('should have all required properties', () => {
+      const stats: PoolStats = {
+        idleWorkers: 1,
+        busyWorkers: 2,
+        totalWorkers: 3,
+        queuedTasks: 4,
+        completedTasks: 5,
+        failedTasks: 6
+      };
+
+      expect(stats.idleWorkers).toBe(1);
+      expect(stats.busyWorkers).toBe(2);
+      expect(stats.totalWorkers).toBe(3);
+      expect(stats.queuedTasks).toBe(4);
+      expect(stats.completedTasks).toBe(5);
+      expect(stats.failedTasks).toBe(6);
+    });
+  });
+});
