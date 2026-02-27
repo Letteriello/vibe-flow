@@ -119,26 +119,26 @@
       "merge_status": "done"
     },
     "qa": {
-      "status": "done",
+      "status": "in_progress",
       "work_units": [
         {
           "id": "QA-REQ-001",
           "scope": "requirements-validation",
           "description": "Validate PRD requirements against implementation",
-          "work_status": "done",
+          "work_status": "in_progress",
           "worker": "worker-local",
-          "output": "✅ RF-001: adversarial_review implemented in src/mcp/adversarial-critic.ts"
+          "output": "docs/flow/qa/requirements.md"
         },
         {
           "id": "QA-BUILD-001",
           "scope": "build-validation",
           "description": "Verify build and type check",
-          "work_status": "done",
-          "worker": "worker-local",
-          "output": "✅ Build passes - tsc compiles successfully"
+          "work_status": "pending",
+          "worker": null,
+          "output": null
         }
       ],
-      "merge_status": "done"
+      "merge_status": "waiting"
     }
   },
   "workers": {},
