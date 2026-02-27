@@ -64,3 +64,41 @@ export interface MetricEvent {
   timestamp: string;
   metadata?: Record<string, unknown>;
 }
+
+// AI Code Review types
+export type FocusArea = 'bug' | 'logical_flaw' | 'security_vulnerability' | 'anti_pattern' | 'performance_issue' | 'code_smell' | 'spec_violation';
+
+export interface AdversarialReviewParams {
+  files: string[];
+  focusAreas?: FocusArea[];
+  compareWithSpec?: boolean;
+  projectPath?: string;
+}
+
+export interface ReviewFinding {
+  type: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  file: string;
+  line?: number;
+  description: string;
+  suggestion?: string;
+}
+
+export interface AdversarialReviewResult {
+  findings: ReviewFinding[];
+  summary: {
+    total: number;
+    critical: number;
+    warnings: number;
+  };
+}
+
+export interface SecurityScanParams {
+  path: string;
+  patterns?: string[];
+}
+
+export interface QualityCheckParams {
+  path: string;
+  severity?: 'error' | 'warning' | 'info';
+}
