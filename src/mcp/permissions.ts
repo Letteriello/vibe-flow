@@ -5,6 +5,7 @@
  * before allowing execution. Supports allow/deny/ask policies.
  */
 
+import { randomUUID } from 'crypto';
 import readline from 'node:readline';
 import {
   PolicyAction,
@@ -313,7 +314,7 @@ Allow this tool to execute? [y/N/a (always)]:
   createMiddleware(executor: ToolExecutor) {
     return async (toolName: string, args: Record<string, unknown>): Promise<ToolExecutionResult> => {
       const context: ToolContext = {
-        executionId: crypto.randomUUID(),
+        executionId: randomUUID(),
         toolName,
         arguments: args,
         timestamp: new Date(),

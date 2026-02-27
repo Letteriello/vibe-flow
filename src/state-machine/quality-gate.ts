@@ -279,12 +279,14 @@ export class QualityGateInterceptor {
   private driftDetector: StateDriftDetector;
   private architectureGuard: ArchitectureGuard;
   private refinerManager: RefinerManager;
+  private securityGuard: SecurityGuard;
 
   constructor(projectPath: string = process.cwd()) {
     this.projectPath = projectPath;
     this.driftDetector = new StateDriftDetector(projectPath);
     this.architectureGuard = new ArchitectureGuard(projectPath);
     this.refinerManager = new RefinerManager(projectPath);
+    this.securityGuard = new SecurityGuard(projectPath);
   }
 
   /**
@@ -309,6 +311,13 @@ export class QualityGateInterceptor {
     const archCheck = await this.runArchitectureCheck();
     checks.push(archCheck);
     if (!archCheck.passed) {
+      allPassed = false;
+    }
+
+    // Check 3: Security Validation (OWASP)
+    const securityCheck = await this.runSecurityCheck();
+    checks.push(securityCheck);
+    if (!securityCheck.passed) {
       allPassed = false;
     }
 
