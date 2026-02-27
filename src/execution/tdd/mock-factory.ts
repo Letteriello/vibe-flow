@@ -446,12 +446,24 @@ class TypeScriptParser {
       .replace(/\/\*[\s\S]*?\*\//g, '')
       .replace(/\s+/g, ' ');
 
-    // Find all interface definitions
+    // First pass: find all interface names and create placeholder schemas
     const interfaceRegex = /interface\s+(\w+)\s*\{([\s\S]*?)\}/g;
     let match;
+    const interfaceBodies: { name: string; body: string }[] = [];
 
     while ((match = interfaceRegex.exec(cleanCode)) !== null) {
       const [, interfaceName, body] = match;
+      // Create placeholder
+      this.interfaces.set(interfaceName, {
+        type: 'object',
+        properties: {},
+        required: []
+      });
+      interfaceBodies.push({ name: interfaceName, body });
+    }
+
+    // Second pass: parse properties (now all interfaces are known)
+    for (const { name: interfaceName, body } of interfaceBodies) {
       const properties: { [key: string]: JsonSchema } = {};
       const required: string[] = [];
 
