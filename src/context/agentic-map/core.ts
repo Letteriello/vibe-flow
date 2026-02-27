@@ -172,7 +172,7 @@ export class AgenticMap {
     const recursionStack = new Set<string>();
     const path: string[] = [];
 
-    const dfs = (nodeId: string): boolean => {
+    const dfs = (nodeId: string): CycleDetectionResult | null => {
       visited.add(nodeId);
       recursionStack.add(nodeId);
       path.push(nodeId);
@@ -184,8 +184,9 @@ export class AgenticMap {
 
       for (const dependent of dependents) {
         if (!visited.has(dependent)) {
-          if (dfs(dependent)) {
-            return true;
+          const result = dfs(dependent);
+          if (result) {
+            return result;
           }
         } else if (recursionStack.has(dependent)) {
           // Found cycle
@@ -193,20 +194,20 @@ export class AgenticMap {
           return {
             hasCycle: true,
             cyclePath: [...path.slice(cycleStart), dependent]
-          } as CycleDetectionResult;
+          };
         }
       }
 
       path.pop();
       recursionStack.delete(nodeId);
-      return false;
+      return null;
     };
 
     // Check all nodes
     for (const node of this.graph.nodes) {
       if (!visited.has(node.id)) {
         const result = dfs(node.id);
-        if (typeof result === 'object' && result.hasCycle) {
+        if (result) {
           return result;
         }
       }

@@ -419,6 +419,35 @@ export class QualityGateInterceptor {
   }
 
   /**
+   * Run security validation check (OWASP)
+   */
+  private async runSecurityCheck(): Promise<QualityCheck> {
+    try {
+      const validationResult = await this.securityGuard.validate();
+
+      const details = validationResult.errors.length > 0
+        ? validationResult.errors.join('; ')
+        : validationResult.warnings.length > 0
+          ? validationResult.warnings.join('; ')
+          : 'Security validation passed - no critical issues found';
+
+      return {
+        name: 'Security Validation (OWASP)',
+        passed: validationResult.passed,
+        details,
+        severity: validationResult.passed ? 'info' : 'error'
+      };
+    } catch (error: any) {
+      return {
+        name: 'Security Validation (OWASP)',
+        passed: false,
+        details: `Security check failed: ${error.message}`,
+        severity: 'error'
+      };
+    }
+  }
+
+  /**
    * Check if quality gate can be bypassed (for override scenarios)
    */
   canBypass(): boolean {
@@ -432,7 +461,8 @@ export class QualityGateInterceptor {
     return {
       enabledChecks: [
         'StateDriftDetector',
-        'ArchitectureGuard'
+        'ArchitectureGuard',
+        'SecurityGuard'
       ]
     };
   }

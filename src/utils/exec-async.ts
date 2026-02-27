@@ -40,12 +40,16 @@ export async function execAsync(
       timeout,
     }) as { stdout: string | Buffer; stderr: string | Buffer };
 
-    const stdout = typeof raw.stdout === 'string' ? raw.stdout : raw.stdout.toString('utf-8');
-    const stderr = typeof raw.stderr === 'string' ? raw.stderr : raw.stderr.toString('utf-8');
+    const stdoutStr = (raw.stdout instanceof Buffer)
+      ? raw.stdout.toString('utf-8')
+      : raw.stdout;
+    const stderrStr = (raw.stderr instanceof Buffer)
+      ? raw.stderr.toString('utf-8')
+      : raw.stderr;
 
     return {
-      stdout,
-      stderr,
+      stdout: stdoutStr,
+      stderr: stderrStr,
       exitCode: 0,
     };
   } catch (error) {
