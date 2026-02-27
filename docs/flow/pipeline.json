@@ -5,7 +5,8 @@
   "current_phase": "analyze",
   "phases": {
     "analyze": {
-      "status": "in_progress",
+      "status": "done",
+      "merge_status": "ready",
       "work_units": [
         {
           "id": "ANA-001",
@@ -47,10 +48,10 @@
           "id": "ANA-005",
           "scope": "state-config",
           "description": "Análise de estado e configuração",
-          "work_status": "pending",
-          "worker": null": null,
-          "files": [",
-          "outputsrc/state-machine/", "src/config/", "src/telemetry/"]
+          "work_status": "done",
+          "worker": "worker-local",
+          "output": "docs/flow/analyze/state-config.md",
+          "files": ["src/state-machine/", "src/config/", "src/telemetry/"]
         }
       ],
       "merge_status": "waiting"
