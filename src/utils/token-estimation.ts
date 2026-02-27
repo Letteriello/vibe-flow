@@ -321,3 +321,6 @@ export function getCacheStats(): CacheStats {
 export function invalidateCache(key?: string): void {
   tokenCache.clear(key);
 }
+
+// Type exports for test compatibility
+// Note: ContextMessage, ToolCall, TokenEstimateOptions, TokenEstimateResult, TokenEncoding, TokenModel already exported above

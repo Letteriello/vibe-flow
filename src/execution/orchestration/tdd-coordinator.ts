@@ -12,6 +12,7 @@
 import { EventEmitter } from 'events';
 import { TDDTask, TDDTaskStatus, TaskIngestor } from '../tdd/task-queue';
 import { TDDPhase, TestResult, TDDRunResult } from '../tdd/loop-controller';
+import { TestRunner } from '../tdd/test-runner.js';
 import { AgentCommunicationBroker, DiscoveryEvent } from '../../mcp/acp-broker';
 
 /**
@@ -724,17 +725,28 @@ export class TDDCoordinator extends EventEmitter {
   }
 
   /**
-   * Executa teste (stub - deve ser substituído por implementação real)
+   * Executa teste usando o TestRunner real
    */
   private async runTest(testCode: string, implementationCode?: string): Promise<TestResult> {
-    // Stub: Em implementação real, isso chamaria o TestRunner
-    // Por agora, retorna sucesso para permitir flow
-    // TODO: Integrar com TestRunner real
-    return {
-      success: false,
-      output: 'Test execution not implemented - stub',
-      duration: 0
-    };
+    // Save test code to temp file if needed, then run with TestRunner
+    const runner = new TestRunner({ timeout: 60000, verbose: false });
+
+    // Run the test using npx jest with the test file
+    // For now, execute jest on the project tests
+    try {
+      const result = await runner.run('npm test -- --passWithNoTests --json');
+      return {
+        success: result.passed,
+        output: result.errorOutput,
+        duration: 0
+      };
+    } catch (error) {
+      return {
+        success: false,
+        output: error instanceof Error ? error.message : 'Test execution failed',
+        duration: 0
+      };
+    }
   }
 
   /**
