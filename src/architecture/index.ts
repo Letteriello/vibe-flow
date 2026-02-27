@@ -10,6 +10,5 @@ export type { ValidationResult, ValidationError } from './types.js';
 export { HumanReviewGate } from './human-review-gate.js';
 export type { ReviewDecision } from './types.js';
 
-// TODO: Implement SpecVersionManager
-// export { SpecVersionManager } from './version-manager.js';
-// export type { SpecVersion } from './types.js';
+export { SpecVersionManager } from './version-manager.js';
+export type { SpecVersion } from './types.js';
