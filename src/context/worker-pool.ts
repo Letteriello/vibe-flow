@@ -305,12 +305,13 @@ export class WorkerPool {
 
     worker.once('message', (result: WorkerResult) => {
       resolved = true;
-      clearTimeout(pendingTask.timeout);
 
       // Guard against missing pending task (e.g., during shutdown)
       if (!pendingTask) {
         return;
       }
+
+      clearTimeout(pendingTask.timeout);
 
       managedWorker.taskCount++;
       managedWorker.inUse = false;
@@ -338,6 +339,11 @@ export class WorkerPool {
 
     worker.once('error', (error) => {
       if (!resolved) {
+        // Guard against missing pending task (e.g., during shutdown)
+        if (!pendingTask) {
+          return;
+        }
+
         clearTimeout(pendingTask.timeout);
         managedWorker.inUse = false;
         this.stats.failedTasks++;
