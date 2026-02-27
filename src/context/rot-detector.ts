@@ -29,7 +29,7 @@ export interface ContextHealth {
 /**
  * Escalation result for rot detection
  */
-export interface RotRotEscalationResult {
+export interface RotEscalationResult {
   success: boolean;
   messagesRemoved: number;
   tokensSaved: number;

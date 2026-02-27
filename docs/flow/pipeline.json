@@ -2,7 +2,8 @@
   "pipeline_id": "flow-20260228-memory-init",
   "created_at": "2026-02-28T12:00:00.000Z",
   "objective": "Inicialização de Memória e Otimização de Contexto (Anti-Rot) - Executar Analyst para mapear arquitetura e implementar injeção de contexto atômica em src/context/",
-  "current_phase": "qa",
+  "current_phase": "complete",
+  "status": "complete",
   "previous_pipeline": "flow-20260228-context-opt",
   "previous_status": "complete",
   "phases": {
