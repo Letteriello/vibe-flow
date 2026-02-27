@@ -190,6 +190,7 @@ export {
 export {
   WorkerPool,
   WorkerPoolConfig as WorkerPoolOptions,
+  PoolStats,
   PoolStatus,
   getGlobalPool,
   initializePool,
@@ -224,3 +225,29 @@ export {
   countPatternOccurrences,
   estimateCleaningTokens
 } from './cleaning-strategy.js';
+// Atomic Context Injector - Phase-based context partitioning
+export {
+  ContextPhase,
+  ModelTier,
+  ContextPayload,
+  ContextArtifact,
+  PhaseConfig,
+  PHASE_CONFIGS,
+  PhaseContextCache,
+  AtomicContextCache,
+  injectAtomicContext,
+  getPhaseContext,
+  selectModelForPhase,
+  getPhaseConfig,
+  getGlobalCache,
+  invalidateAllCaches
+} from './atomic-injector.js';
+export {
+  RotDetector,
+  createRotDetector,
+  detectContextRot,
+  shouldPrune,
+  escalateContext,
+  ContextHealth,
+  RotDetectorConfig
+} from './rot-detector.js';

@@ -696,3 +696,17 @@ export {
   type EstablishedConvention,
   type ReflectionSummary
 } from './reflection.js';
+
+// Quality Gate Consolidator - Deterministic quality gates before memory consolidation
+export {
+  QualityGateConsolidator,
+  getQualityGateConsolidator,
+  resetQualityGateConsolidator,
+  isWrapUpBlocked,
+  canConsolidateMemory,
+  consolidateWithGate,
+  type QualityGateResult,
+  type ConsolidationResult,
+  type QualityGateConfig,
+  DEFAULT_QUALITY_GATE_CONFIG
+} from './quality-gate-consolidator.js';

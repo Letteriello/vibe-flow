@@ -7,9 +7,9 @@
 import { estimateTokens } from '../utils/token-estimation.js';
 
 /**
- * Context message structure
+ * Context message structure for rot detection
  */
-export interface ContextMessage {
+export interface RotMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp?: number;
@@ -27,9 +27,9 @@ export interface ContextHealth {
 }
 
 /**
- * Escalation result
+ * Escalation result for rot detection
  */
-export interface EscalationResult {
+export interface RotRotEscalationResult {
   success: boolean;
   messagesRemoved: number;
   tokensSaved: number;
@@ -61,7 +61,7 @@ const DEFAULT_CONFIG: RotDetectorConfig = {
  */
 export class RotDetector {
   private config: RotDetectorConfig;
-  private history: ContextMessage[] = [];
+  private history: RotMessage[] = [];
   private healthScore: number = 100;
 
   constructor(config: Partial<RotDetectorConfig> = {}) {
@@ -71,7 +71,7 @@ export class RotDetector {
   /**
    * Add message to history
    */
-  addMessage(message: ContextMessage): void {
+  addMessage(message: RotMessage): void {
     this.history.push({
       ...message,
       timestamp: message.timestamp || Date.now(),
@@ -83,7 +83,7 @@ export class RotDetector {
   /**
    * Detect context rot
    */
-  detectContextRot(messages?: ContextMessage[]): ContextHealth {
+  detectContextRot(messages?: RotMessage[]): ContextHealth {
     const msgs = messages || this.history;
     const issues: string[] = [];
     const recommendations: string[] = [];
@@ -135,7 +135,7 @@ export class RotDetector {
   /**
    * Calculate repetition score
    */
-  private calculateRepetitionScore(messages: ContextMessage[]): number {
+  private calculateRepetitionScore(messages: RotMessage[]): number {
     if (messages.length < 2) return 0;
 
     const contentHashes = new Map<string, number>();
@@ -183,7 +183,7 @@ export class RotDetector {
   /**
    * Check if should prune
    */
-  shouldPrune(messages?: ContextMessage[]): boolean {
+  shouldPrune(messages?: RotMessage[]): boolean {
     const msgs = messages || this.history;
     const totalTokens = msgs.reduce((sum, m) => sum + (m.tokenCount || estimateTokens(m.content)), 0);
     const health = this.detectContextRot(msgs);
@@ -197,7 +197,7 @@ export class RotDetector {
   /**
    * Escalate context - sliding window
    */
-  async escalateContext(messages?: ContextMessage[]): Promise<EscalationResult> {
+  async escalateContext(messages?: RotMessage[]): Promise<RotEscalationResult> {
     const msgs = messages || this.history;
 
     if (msgs.length <= this.config.slidingWindowSize) {
@@ -270,7 +270,7 @@ export function createRotDetector(config?: Partial<RotDetectorConfig>): RotDetec
 /**
  * Convenience function to detect rot
  */
-export function detectContextRot(messages: ContextMessage[]): ContextHealth {
+export function detectContextRot(messages: RotMessage[]): ContextHealth {
   const detector = new RotDetector();
   return detector.detectContextRot(messages);
 }
@@ -278,7 +278,7 @@ export function detectContextRot(messages: ContextMessage[]): ContextHealth {
 /**
  * Convenience function to check if should prune
  */
-export function shouldPrune(messages: ContextMessage[]): boolean {
+export function shouldPrune(messages: RotMessage[]): boolean {
   const detector = new RotDetector();
   return detector.shouldPrune(messages);
 }
@@ -286,7 +286,7 @@ export function shouldPrune(messages: ContextMessage[]): boolean {
 /**
  * Convenience function to escalate
  */
-export async function escalateContext(messages: ContextMessage[]): Promise<EscalationResult> {
+export async function escalateContext(messages: RotMessage[]): Promise<RotEscalationResult> {
   const detector = new RotDetector();
   return detector.escalateContext(messages);
 }
