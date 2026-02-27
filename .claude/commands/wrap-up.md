@@ -6,6 +6,33 @@ Você é um agente de encerramento de sessão. Execute **todas as 4 fases abaixo
 
 ---
 
+## FASE 0 — 🔄 Verificação de Análise Pendente
+
+Antes de tudo, verifique se a análise do projeto está atualizada:
+
+1. Leia `docs/architecture/_meta.json` (se existir).
+2. Compare `last_analyzed_commit` com o HEAD atual.
+3. Conte quantos commits existem desde a última análise (`git rev-list --count {last_commit}..HEAD`).
+4. Se houver **5 ou mais commits** desde a última análise, registre no relatório final:
+   `"⚠️ Análise do projeto desatualizada ({N} commits desde a última). Recomendado: rodar /analyze"`
+5. Se `docs/architecture/diagnostics.md` existir, leia a seção de 🚨 Bloqueadores e liste-os no relatório como aviso.
+6. Se `docs/planning/tasks.md` existir, leia as tasks e atualize o status:
+   - Tasks cujos arquivos de ownership já existem e testes passam → marque `✅ Done`
+   - Tasks cujos arquivos foram criados mas testes falham → marque `🔧 Em progresso`
+   - Tasks sem arquivos criados → mantenha `📋 Pendente`
+   - Registre o progresso no relatório: "{N}/{Total} tasks concluídas"
+
+7. Se `docs/planning/.workers/` existir, faça limpeza de workers:
+   - Leia todos os `*.json` e identifique workers com `last_heartbeat` > 30 min → renomeie para `*.dead.json`
+   - Consolide `completed_tasks` de todos os workers (ativos + mortos) no relatório
+   - Registre progresso: "{N}/{Total} tasks concluídas por {M} workers"
+8. Se `docs/planning/qa-report.md` existir, leia o veredito:
+   - Se 🔴 REPROVADO → Emita aviso forte: `"🚨 QA REPROVADO — deploy bloqueado. Corrija os bloqueadores antes ou rode /qa novamente após os fixes."`
+   - Se 🟡 RESSALVAS → Emita aviso: `"⚠️ QA com ressalvas — deploy possível mas revise os itens pendentes."`
+   - Se ✅ APROVADO → Registre: `"✅ QA aprovado — pronto para deploy."`
+
+---
+
 ## FASE 1 — 🚀 Ship It (Entrega)
 
 ### 1.1 Commit & Push
@@ -59,7 +86,8 @@ Analise toda a conversa desta sessão e extraia conhecimentos. Para cada item, d
 3. Adicione os novos itens sob seções organizadas (crie seções se necessário).
 4. Para `CLAUDE.local.md`: crie o arquivo se não existir e adicione ao `.gitignore` se ainda não estiver lá.
 5. Para auto memory: use linguagem concisa e objetiva.
-6. Registre no relatório final o que foi salvo e onde.
+6. Se `docs/architecture/file-registry.md` existir, verifique se arquivos criados nesta sessão estão registrados. Se não, adicione-os com status `🆕 Novo — pendente análise completa`.
+7. Registre no relatório final o que foi salvo e onde.
 
 ---
 
@@ -115,6 +143,14 @@ Após completar todas as fases, imprima um relatório consolidado no seguinte fo
 ╔══════════════════════════════════════════════════╗
 ║           📋 WRAP-UP REPORT — SESSION END        ║
 ╠══════════════════════════════════════════════════╣
+║                                                  ║
+║  🔄 ANALYSIS STATUS                             ║
+║  └─ {✅ Atualizada | ⚠️ Desatualizada (N commits)} ║
+║     {Lista de Bloqueadores ativos, se houver}    ║
+║                                                  ║
+║  🎯 PLANNING STATUS                             ║
+║  └─ {N}/{Total} tasks concluídas ({%})           ║
+║     Fase atual: {A | B | C | completo}           ║
 ║                                                  ║
 ║  🚀 SHIP IT                                     ║
 ║  ├─ Commits: {N} commits enviados               ║
