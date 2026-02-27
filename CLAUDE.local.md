@@ -87,6 +87,12 @@ Auto-generated lessons from vibe-flow sessions
   - Feeds TDDLoopController for execution loop
 
 ## Session Notes (2026-02-27)
+- Created tests/unit/failure-analyzer.test.ts with 14 tests
+  - Tests Jest/Vitest patterns, snapshots, timeouts, error types
+  - Fixed vitest pattern parsing (remove "describe >" prefix)
+  - Fixed timeout detection (prioritize isTimeout flag over extractErrorType)
+
+## Session Notes (2026-02-27)
 - Fixed TypeScript errors in TDD modules:
   - Fixed partiallyCoveredBranches property name in coverage-tracker.ts
   - Fixed Set iteration with Array.from() for ES5 compatibility

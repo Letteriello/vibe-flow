@@ -571,8 +571,11 @@ class TypeScriptParser {
     // Handle basic types
     switch (trimmed) {
       case 'string':
-      case 'String':
-        return { type: 'string' };
+      case 'String': {
+        // Infer format from property name if available
+        const format = propName ? this.inferFormat(propName) : undefined;
+        return format ? { type: 'string', format } : { type: 'string' };
+      }
       case 'number':
       case 'Number':
         return { type: 'number' };

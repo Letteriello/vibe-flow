@@ -459,6 +459,13 @@ export class StateMachine {
     const walFile = join(stateDir, 'state.wal');
     const tempFile = STATE_FILE + '.tmp';
 
+    // Ensure directory exists before writing
+    try {
+      await fs.mkdir(stateDir, { recursive: true });
+    } catch {
+      // Directory may already exist
+    }
+
     // Write-Ahead Log: always write to WAL first for crash recovery
     const walEntry = {
       timestamp: new Date().toISOString(),
@@ -472,8 +479,29 @@ export class StateMachine {
     }
 
     // Atomic write using temp file + rename
+    // On Windows, rename fails if dest doesn't exist, so we handle both cases
     await fs.writeFile(tempFile, JSON.stringify(this.state, null, 2), 'utf-8');
-    await fs.rename(tempFile, STATE_FILE);
+    try {
+      await fs.rename(tempFile, STATE_FILE);
+    } catch (renameErr) {
+      // Windows fallback: copy file and delete temp
+      const err = renameErr as { code?: string };
+      if (err.code === 'EXDEV' || err.code === 'ENOENT') {
+        // Try to handle the case where destination doesn't exist
+        try {
+          // Check if target exists, if not we can just use the temp file as the new file
+          await fs.copyFile(tempFile, STATE_FILE);
+          await fs.unlink(tempFile);
+        } catch (copyErr) {
+          // If copy also fails, try one more approach
+          const content = await fs.readFile(tempFile, 'utf-8');
+          await fs.writeFile(STATE_FILE, content, 'utf-8');
+          await fs.unlink(tempFile).catch(() => { /* ignore if already deleted */ });
+        }
+      } else {
+        throw renameErr;
+      }
+    }
   }
 
   // Utility methods for external use
