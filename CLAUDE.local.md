@@ -97,3 +97,15 @@ Auto-generated lessons from vibe-flow sessions
   - Fixed partiallyCoveredBranches property name in coverage-tracker.ts
   - Fixed Set iteration with Array.from() for ES5 compatibility
   - Added src/execution/tdd/index.ts export for coverage-tracker
+
+## Session Notes (2026-02-27)
+- Fixed Windows test failures (369 tests now passing):
+  - Added fs.mkdir with recursive:true before atomic writes in state-machine, telemetry
+  - Added Windows fallback: fs.rename fails if dest doesn't exist (EXDEV/ENOENT)
+  - Fallback uses fs.copyFile + fs.unlink instead of rename
+  - Fixed ImmutableLogger and ImmutableStore file write issues
+
+## Session Notes (2026-02-27)
+- Fixed TypeScript parser in mock-factory.ts:
+  - Two-pass interface parsing: first collect names, then parse properties
+  - Prevents "undefined" references when interfaces reference each other
