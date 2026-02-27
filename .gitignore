@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dependencies
 node_modules/
 
@@ -43,3 +44,8 @@ docs/flow/.workers/
 # Temp files
 *.tmp
 *.temp
+=======
+.ralph/logs/
+_bmad-output/
+node_modules
+>>>>>>> 8cce905 (feat(quality-gates): add SecurityGuard for OWASP vulnerability scanning)
