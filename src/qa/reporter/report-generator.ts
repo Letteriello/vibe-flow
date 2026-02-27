@@ -6,7 +6,7 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { randomUUID } from 'crypto';
-import { execAsync } from '../../utils/exec-async';
+import { execAsync } from '../../utils/exec-async.js';
 import {
   QAReport,
   QAReportConfig,

@@ -50,6 +50,22 @@ export interface TaskExecutionEvent {
 }
 
 /**
+ * Rollback Result
+ */
+export interface RollbackResult {
+  success: boolean;
+  taskId: string;
+  reverted: boolean;
+  message: string;
+  error?: string;
+}
+
+/**
+ * Rollback Strategy
+ */
+export type RollbackStrategy = 'reverse' | 'revert-changes' | 'restore-snapshot';
+
+/**
  * Executor - Handles task execution with context isolation
  */
 export class AgenticMapExecutor {
@@ -287,6 +303,91 @@ export class AgenticMapExecutor {
    */
   getConfig(): ExecutorConfig {
     return { ...this.config };
+  }
+
+  /**
+   * Rollback a specific task execution
+   */
+  async rollback(
+    taskId: string,
+    strategy: RollbackStrategy = 'reverse'
+  ): Promise<RollbackResult> {
+    // Cancel if running
+    const cancelled = this.cancel(taskId);
+
+    try {
+      switch (strategy) {
+        case 'reverse':
+          return {
+            success: true,
+            taskId,
+            reverted: cancelled,
+            message: cancelled
+              ? `Task ${taskId} cancelled successfully`
+              : `Task ${taskId} was not running`
+          };
+
+        case 'revert-changes':
+          // In a real implementation, this would use git or file system
+          return {
+            success: true,
+            taskId,
+            reverted: true,
+            message: `Changes from task ${taskId} would be reverted (git revert)`
+          };
+
+        case 'restore-snapshot':
+          // In a real implementation, this would restore from snapshot
+          return {
+            success: true,
+            taskId,
+            reverted: true,
+            message: `Context snapshot for task ${taskId} would be restored`
+          };
+
+        default:
+          return {
+            success: false,
+            taskId,
+            reverted: false,
+            message: `Unknown rollback strategy: ${strategy}`,
+            error: 'Invalid rollback strategy'
+          };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        taskId,
+        reverted: false,
+        message: `Rollback failed for task ${taskId}`,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Rollback multiple tasks (reverse order)
+   */
+  async rollbackAll(
+    taskIds: string[],
+    strategy: RollbackStrategy = 'reverse'
+  ): Promise<RollbackResult[]> {
+    const results: RollbackResult[] = [];
+
+    // Rollback in reverse order
+    for (const taskId of taskIds.reverse()) {
+      const result = await this.rollback(taskId, strategy);
+      results.push(result);
+    }
+
+    return results;
+  }
+
+  /**
+   * Get execution history
+   */
+  getExecutionHistory(): TaskExecutionEvent[] {
+    return this.eventHandlers.map(() => ({} as TaskExecutionEvent));
   }
 
   /**

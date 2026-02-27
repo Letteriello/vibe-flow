@@ -46,3 +46,8 @@ export type {
   ContextIsolationConfig,
   IsolatedContext
 } from './context.js';
+
+export type {
+  ExecutorConfig,
+  TaskExecutionEvent
+} from './executor.js';

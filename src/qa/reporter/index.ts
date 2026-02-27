@@ -18,4 +18,13 @@ export type {
 export { QAReportGenerator, createQAReportGenerator } from './report-generator';
 
 // Template
-export { generateMarkdownReport, formatSummaryLine } from './template';
+export { generateMarkdownReport, formatSummaryLine } from './template.js';
+
+// Collectors
+export {
+  TestCollector,
+  BuildCollector,
+  TypeCollector,
+  SecurityCollector,
+  CoverageCollector,
+} from './collectors/index.js';

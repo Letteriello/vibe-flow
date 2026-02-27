@@ -5,7 +5,7 @@
  * This file serves as the test specification document.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { AgenticMapCore } from '../../src/context/agentic-map/core.js';
 import type { TaskNode, TaskGraph, ExecutionResult, AgenticMapConfig } from '../../src/context/agentic-map/types.js';
 
@@ -68,7 +68,7 @@ describe('AgenticMapCore', () => {
       const cyclicGraph: TaskGraph = {
         nodes: [
           { id: 'a', command: 'echo a', dependsOn: ['b'] },
-          { name: 'b', command: 'echo b', dependsOn: ['a'] }
+          { id: 'b', command: 'echo b', dependsOn: ['a'] }
         ],
         edges: [
           { from: 'a', to: 'b' },
