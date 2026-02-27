@@ -12,6 +12,26 @@ O projeto vibe-flow possui documentacao completa em `docs/architecture/`:
 - 187 testes unitarios passando
 - Build compila com sucesso
 - Compatibilidade Windows verificada
+- Divida tecnica: ZERO (verificado em 2026-02-28)
+
+---
+
+## Planejamento Ativo
+
+**Status:** Concluido - Nenhuma divida tecnica encontrada
+
+### Documentacao de Planejamento
+- `docs/planning/prd.md` - PRD principal do projeto
+- `docs/planning/ux-design.md` - Especificacao de UX
+- `docs/planning/epics.md` - Divisao em epicos
+- `docs/planning/debt-analysis.md` - Analise de divida tecnica (2026-02-28)
+- `docs/planning/tasks.md` - Tarefas de divida tecnica
+
+### Resultado da Analise
+- TODOs reais no codigo: 0
+- Patterns de deteccao: 55 (usados pelo qa-auditor)
+- Tarefas obrigatorias: 0
+- Tarefa opcional: 1 (ativar SpecVersionManager)
 
 ---
 
