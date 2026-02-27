@@ -1,0 +1,81 @@
+{
+  "pipeline_id": "flow-20260227-auth",
+  "created_at": "2026-02-27T12:00:00.000Z",
+  "objective": "Sistema de autenticação completo para vibe-flow",
+  "current_phase": "analyze",
+  "phases": {
+    "analyze": {
+      "status": "in_progress",
+      "work_units": [
+        {
+          "id": "ANA-001",
+          "scope": "cli-core",
+          "description": "Análise do CLI e comandos",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/cli.ts", "src/command-registry/", "src/types.ts"]
+        },
+        {
+          "id": "ANA-002",
+          "scope": "context-memory",
+          "description": "Análise de contexto e memória",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/context/", "src/context-engine/", "src/memory/"]
+        },
+        {
+          "id": "ANA-003",
+          "scope": "execution",
+          "description": "Análise do motor de execução",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/execution/", "src/error-handler/", "src/drivers/"]
+        },
+        {
+          "id": "ANA-004",
+          "scope": "security",
+          "description": "Análise de segurança existente",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/security/", "src/validation/"]
+        },
+        {
+          "id": "ANA-005",
+          "scope": "state-config",
+          "description": "Análise de estado e configuração",
+          "work_status": "pending",
+          "worker": null,
+          "output": null,
+          "files": ["src/state-machine/", "src/config/", "src/telemetry/"]
+        }
+      ],
+      "merge_status": "waiting"
+    },
+    "plan": {
+      "status": "blocked_by:analyze",
+      "work_units": [],
+      "merge_status": "waiting"
+    },
+    "dev": {
+      "status": "blocked_by:plan",
+      "work_units": [],
+      "merge_status": "waiting"
+    },
+    "qa": {
+      "status": "blocked_by:dev",
+      "work_units": [],
+      "merge_status": "waiting"
+    }
+  },
+  "workers": {},
+  "circuit_breakers": {},
+  "config": {
+    "max_retries_per_unit": 3,
+    "heartbeat_timeout_minutes": 30,
+    "auto_advance_phases": true
+  }
+}
