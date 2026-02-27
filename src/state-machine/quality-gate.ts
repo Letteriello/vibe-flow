@@ -6,6 +6,7 @@ import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { Phase, ProjectState, StateDriftDetector, DriftStatus } from './index.js';
 import { SpecValidator } from '../architecture/spec-validator.js';
+import { SecurityGuard } from './security-guard.js';
 
 // Quality gate status
 export enum QualityGateStatus {

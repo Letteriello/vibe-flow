@@ -34,15 +34,18 @@ export async function execAsync(
   const { timeout = 60000, cwd = process.cwd(), ...execOptions } = options;
 
   try {
-    const { stdout, stderr } = await execAsyncNative(command, {
+    const raw = await execAsyncNative(command, {
       ...execOptions,
       cwd,
       timeout,
-    });
+    }) as { stdout: string | Buffer; stderr: string | Buffer };
+
+    const stdout = typeof raw.stdout === 'string' ? raw.stdout : raw.stdout.toString('utf-8');
+    const stderr = typeof raw.stderr === 'string' ? raw.stderr : raw.stderr.toString('utf-8');
 
     return {
-      stdout: typeof stdout === 'string' ? stdout : stdout.toString('utf-8'),
-      stderr: typeof stderr === 'string' ? stderr : stderr.toString('utf-8'),
+      stdout,
+      stderr,
       exitCode: 0,
     };
   } catch (error) {
