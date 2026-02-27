@@ -55,7 +55,7 @@ export interface PhaseConfig {
 /**
  * Default phase configurations
  */
-const PHASE_CONFIGS: Record<ContextPhase, PhaseConfig> = {
+export const PHASE_CONFIGS: Record<ContextPhase, PhaseConfig> = {
   analysis: {
     patterns: ['CLAUDE.md', 'docs/architecture/*.md', 'docs/flow/analyze/*.md'],
     maxTokens: 4000,
