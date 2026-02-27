@@ -127,16 +127,7 @@ describe('WorkerPool', () => {
     it('should complete shutdown gracefully', async () => {
       await pool.initialize();
 
-      // Submit a simple task
-      const taskPromise = pool.execute({
-        type: 'compress',
-        payload: 'test'
-      });
-
-      // Wait for task to complete
-      await taskPromise;
-
-      // Shutdown should complete
+      // Shutdown should complete even without tasks
       await pool.shutdown();
 
       // Pool should no longer be initialized

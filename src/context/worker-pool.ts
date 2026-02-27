@@ -306,6 +306,12 @@ export class WorkerPool {
     worker.once('message', (result: WorkerResult) => {
       resolved = true;
       clearTimeout(pendingTask.timeout);
+
+      // Guard against missing pending task (e.g., during shutdown)
+      if (!pendingTask) {
+        return;
+      }
+
       managedWorker.taskCount++;
       managedWorker.inUse = false;
       managedWorker.idleSince = Date.now();
@@ -316,7 +322,8 @@ export class WorkerPool {
         pendingTask.resolve(result as any);
       } else {
         this.stats.failedTasks++;
-        pendingTask.reject(new Error(result?.error || 'Task failed'));
+        const errorMsg = result?.error ?? 'Task failed';
+        pendingTask.reject(new Error(errorMsg));
       }
 
       // Return worker to idle pool
