@@ -6,8 +6,8 @@ This registry tracks all TypeScript source files in the `src/` directory.
 
 ## Summary Statistics
 
-- **Total TypeScript files:** 195
-- **Test files:** 13
+- **Total TypeScript files:** 205
+- **Test files:** 27
 - **Build status:** Compiles successfully
 
 ---
@@ -149,6 +149,7 @@ This registry tracks all TypeScript source files in the `src/` directory.
 |------|------|---------|--------|
 | `src/decision/state-detector.ts` | Class | ProjectState detection (NEW/IN_PROGRESS/REVERSE) | Active |
 | `src/decision/ensemble-voting.ts` | Module | Ensemble voting for decisions | Active |
+| `src/decision/hit-pause.ts` | Class | HitPauseManager - Strategic human pauses | Active |
 
 ---
 

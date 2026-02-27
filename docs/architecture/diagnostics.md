@@ -19,7 +19,7 @@ This report documents identified issues, technical debt, and areas for improveme
 
 ## Technical Debt
 
-### TODO/FIXME Markers (56 total)
+### TODO/FIXME Markers (54 total)
 
 Found 56 TODO/FIXME/HACK markers across 16 files:
 

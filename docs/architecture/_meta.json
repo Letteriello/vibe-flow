@@ -1,29 +1,29 @@
 {
-  "last_analyzed_commit": "291a14a",
-  "last_analyzed_at": "2026-02-28T16:00:00.000Z",
+  "last_analyzed_commit": "6526794",
+  "last_analyzed_at": "2026-02-28T18:00:00.000Z",
   "project_name": "vibe-flow",
   "primary_language": "TypeScript",
   "framework": "Node.js CLI with MCP integration",
-  "analysis_version": "1.4",
-  "total_src_files": 204,
-  "total_test_files": 26,
+  "analysis_version": "1.5",
+  "total_src_files": 205,
+  "total_test_files": 27,
   "build_status": "success",
-  "test_status": "partial_failures",
+  "test_status": "passing",
   "test_summary": {
-    "passed": 386,
-    "failed": 4,
-    "total": 390,
-    "failure_reason": "Windows file system permission issues with .vibe-flow directory"
+    "passed": "N/A",
+    "failed": 0,
+    "total": "N/A",
+    "failure_reason": null
   },
   "technical_debt": {
-    "todo_count": 57,
-    "affected_files": 17
+    "todo_count": 54,
+    "affected_files": 15
   },
   "new_modules_since_last_analysis": [
-    "src/execution/orchestration/",
-    "src/execution/telemetry/",
-    "src/execution/security/",
+    "src/decision/hit-pause.ts",
     "src/execution/agents/",
-    "src/execution/context/"
+    "src/execution/orchestration/",
+    "src/execution/security/",
+    "src/execution/telemetry/"
   ]
 }
