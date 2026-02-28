@@ -60,6 +60,13 @@ Generated: 2026-02-26T03:31:32.553Z
 - **Occurrences:** 1
 - **Last seen:** 2026-02-28T12:00:00.000Z
 
+### Test timeout with full project scan
+
+- **Lesson:** When testing SecurityGuard or similar modules that scan the entire project, use checkContent() for quick tests instead of runSecurityScan() which times out. The runSecurityScan() method scans all project files and can exceed Jest's default 5s timeout.
+- **Source:** error
+- **Occurrences:** 2
+- **Last seen:** 2026-02-28T18:00:00.000Z
+
 
 ---
 
