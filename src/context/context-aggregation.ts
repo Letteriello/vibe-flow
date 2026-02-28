@@ -129,8 +129,18 @@ export class ContextAggregator {
       // Verify it's valid JSON before renaming
       await fs.readFile(tempPath, 'utf-8'); // This will throw if invalid
 
-      // Atomic rename
-      await fs.rename(tempPath, this.contextFilePath);
+      // Atomic rename with Windows fallback
+      try {
+        await fs.rename(tempPath, this.contextFilePath);
+      } catch (renameErr) {
+        const err = renameErr as { code?: string };
+        if (err.code === 'EXDEV' || err.code === 'ENOENT') {
+          await fs.copyFile(tempPath, this.contextFilePath);
+          await fs.unlink(tempPath);
+        } else {
+          throw renameErr;
+        }
+      }
 
       // Also save summary separately for quick access
       await fs.writeFile(
@@ -238,7 +248,17 @@ export class ContextAggregator {
       // Write back
       const tempPath = this.contextFilePath + '.tmp';
       await fs.writeFile(tempPath, JSON.stringify(context, null, 2), 'utf-8');
-      await fs.rename(tempPath, this.contextFilePath);
+      try {
+        await fs.rename(tempPath, this.contextFilePath);
+      } catch (renameErr) {
+        const err = renameErr as { code?: string };
+        if (err.code === 'EXDEV' || err.code === 'ENOENT') {
+          await fs.copyFile(tempPath, this.contextFilePath);
+          await fs.unlink(tempPath);
+        } else {
+          throw renameErr;
+        }
+      }
     } catch {
       // File doesn't exist, create new
       const context = {
