@@ -18,7 +18,11 @@ O projeto vibe-flow possui documentacao completa em `docs/architecture/`:
 
 ## Planejamento Ativo
 
-**Status:** Concluido - Nenhuma divida tecnica encontrada
+**Status:** Em planejamento - Consolidação State Machine
+
+### Feature em Desenvolvimento
+- **Nome:** State Machine Consolidation
+- **Objetivo:** Unificar Circuit Breaker, integrar WAL, unificar telemetry, otimizar persistência
 
 ### Documentacao de Planejamento
 - `docs/planning/prd.md` - PRD principal do projeto
@@ -26,6 +30,17 @@ O projeto vibe-flow possui documentacao completa em `docs/architecture/`:
 - `docs/planning/epics.md` - Divisao em epicos
 - `docs/planning/debt-analysis.md` - Analise de divida tecnica (2026-02-28)
 - `docs/planning/tasks.md` - Tarefas de divida tecnica
+- `docs/planning/state-machine-consolidation/prd.md` - PRD da consolidação
+- `docs/planning/state-machine-consolidation/ux-spec.md` - UX Spec da consolidação
+- `docs/planning/state-machine-consolidation/tasks.md` - Tasks da consolidação
+- `docs/planning/state-machine-consolidation/execution-map.md` - Mapa de execução
+
+### Tarefas da Consolidação
+- **Fase A:** TASK-000 - Contratos (15 min)
+- **Fase B:**
+  - Round 1: TASK-100-104 (5 tarefas paralelas, ~90 min)
+  - Round 2: TASK-105 (~20 min)
+- **Fase C:** TASK-INT-001-003 (serializado, ~90 min)
 
 ### Resultado da Analise
 - TODOs reais no codigo: 0
