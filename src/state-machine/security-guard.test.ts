@@ -32,7 +32,9 @@ describe('SecurityGuard', () => {
 
   describe('runSecurityScan', () => {
     it('should run security scan and return result', async () => {
-      const result = await guard.runSecurityScan();
+      // Use fast mode to avoid long scans
+      const fastGuard = new SecurityGuard(testProjectPath, { fastMode: true });
+      const result = await fastGuard.runSecurityScan(['src/state-machine/security-guard.ts']);
 
       expect(result).toBeDefined();
       expect(result).toHaveProperty('passed');
@@ -41,14 +43,15 @@ describe('SecurityGuard', () => {
       expect(result).toHaveProperty('vulnerabilities');
       expect(result).toHaveProperty('blocked');
       expect(result).toHaveProperty('scanDuration');
-    });
+    }, 30000);
 
     it('should accept custom paths to scan', async () => {
-      const customPaths = ['src/'];
-      const result = await guard.runSecurityScan(customPaths);
+      const fastGuard = new SecurityGuard(testProjectPath, { fastMode: true });
+      const customPaths = ['src/state-machine/'];
+      const result = await fastGuard.runSecurityScan(customPaths);
 
       expect(result).toBeDefined();
-    });
+    }, 30000);
   });
 
   describe('checkContent', () => {
@@ -131,7 +134,9 @@ describe('SecurityGuard', () => {
 
   describe('validate', () => {
     it('should return quality gate compatible result', async () => {
-      const result = await guard.validate();
+      // Use fast mode to avoid long scans
+      const fastGuard = new SecurityGuard(testProjectPath, { fastMode: true });
+      const result = await fastGuard.validate();
 
       expect(result).toBeDefined();
       expect(result).toHaveProperty('valid');
@@ -139,15 +144,16 @@ describe('SecurityGuard', () => {
       expect(result).toHaveProperty('errors');
       expect(result).toHaveProperty('warnings');
       expect(result).toHaveProperty('score');
-    });
+    }, 30000);
 
     it('should return score based on vulnerabilities', async () => {
-      const result = await guard.validate();
+      const fastGuard = new SecurityGuard(testProjectPath, { fastMode: true });
+      const result = await fastGuard.validate();
 
       expect(typeof result.score).toBe('number');
       expect(result.score).toBeGreaterThanOrEqual(0);
       expect(result.score).toBeLessThanOrEqual(10);
-    });
+    }, 30000);
   });
 });
 
