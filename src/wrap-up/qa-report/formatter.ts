@@ -92,14 +92,8 @@ export class ReportFormatter {
       lines.push('## Type Check');
       lines.push('');
       lines.push(`- **Status:** ${data.types.success ? 'PASS' : 'FAIL'}`);
-      lines.push(`- **Errors:** ${data.types.errors}`);
+      lines.push(`- **Errors:** ${data.types.errors.length}`);
       lines.push(`- **Duration:** ${(data.types.duration / 1000).toFixed(2)}s`);
-      if (data.types.output) {
-        lines.push('');
-        lines.push('```');
-        lines.push(data.types.output.slice(-2000));
-        lines.push('```');
-      }
       lines.push('');
     }
 

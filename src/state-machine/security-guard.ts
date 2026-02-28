@@ -47,7 +47,7 @@ export interface SecurityGateConfig {
   severityThreshold: 'CRITICAL' | 'HIGH' | 'MEDIUM';
   allowBypass: boolean;
   excludedPatterns: string[];
-  fastMode: {
+  fastMode: boolean | {
     enabled: boolean;
     scanStagedOnly: boolean;
   };
@@ -159,7 +159,17 @@ export class SecurityGuard {
 
   constructor(projectPath: string = process.cwd(), config?: Partial<SecurityGateConfig>) {
     this.projectPath = projectPath;
-    this.config = { ...DEFAULT_SECURITY_GATE_CONFIG, ...config };
+
+    // Handle fastMode: boolean | object
+    const resolvedFastMode = typeof config?.fastMode === 'boolean'
+      ? { enabled: config.fastMode, scanStagedOnly: config.fastMode }
+      : config?.fastMode;
+
+    this.config = {
+      ...DEFAULT_SECURITY_GATE_CONFIG,
+      ...config,
+      fastMode: resolvedFastMode ?? DEFAULT_SECURITY_GATE_CONFIG.fastMode
+    };
   }
 
   /**

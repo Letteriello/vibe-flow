@@ -79,6 +79,17 @@ const SAFE_ENV_VARS = [
   'NODE_OPTIONS',
   'TS_NODE_OPTIONS',
   'npm_config_cache',
+  // Safe variables that shouldn't be blocked (avoid false positives from KEY/SECRET/TOKEN/PASSWORD checks)
+  'TOKEN_COUNT',
+  'TOKEN_LIMIT',
+  'TOKEN_USED',
+  'SECURITY_KEY',
+  'PUBLIC_KEY',
+  'API_KEY_RATE',
+  'PASSWORD_STRENGTH',
+  'PASSWORD_MIN_LENGTH',
+  'SECRET_QUESTION',
+  'SECRET_ANSWER',
 ];
 
 /**
