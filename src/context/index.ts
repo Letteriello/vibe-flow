@@ -249,5 +249,6 @@ export {
   shouldPrune,
   escalateContext,
   ContextHealth,
-  RotDetectorConfig
+  RotDetectorConfig,
+  RotationEscalationResult
 } from './rot-detector.js';

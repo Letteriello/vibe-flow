@@ -53,10 +53,17 @@ export async function execAsync(
       exitCode: 0,
     };
   } catch (error) {
-    const execError = error as ExecException & { code?: number; stderr?: string };
+    const execError = error as ExecException & { code?: number; stdout?: string | Buffer; stderr?: string | Buffer };
+    // Capture stdout/stderr from the error object when command fails
+    const stdoutStr = execError.stdout
+      ? (execError.stdout instanceof Buffer ? execError.stdout.toString('utf-8') : execError.stdout)
+      : '';
+    const stderrStr = execError.stderr
+      ? (execError.stderr instanceof Buffer ? execError.stderr.toString('utf-8') : execError.stderr)
+      : execError.message || String(error);
     return {
-      stdout: '',
-      stderr: execError.message || String(error),
+      stdout: stdoutStr,
+      stderr: stderrStr,
       exitCode: execError.code ?? 1,
     };
   }

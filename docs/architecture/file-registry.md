@@ -183,4 +183,16 @@ This registry tracks all TypeScript source files in the `src/` directory.
 
 ---
 
-*Generated: 2026-02-26*
+## Arquivos Planejados (State Machine Consolidation)
+
+| Arquivo | Tipo | Descrição | Status |
+|---------|------|-----------|--------|
+| `src/consolidated/circuit-breaker.types.ts` | Types | Interfaces unificadas de Circuit Breaker | Planejado |
+| `src/consolidated/telemetry.types.ts` | Types | Interfaces unificadas de Telemetry | Planejado |
+| `src/telemetry/unified.ts` | Class | UnifiedTelemetry (substitui 4 sistemas) | Planejado |
+| `src/state-machine/wal-integration.ts` | Module | Integração StateMachine + WALManager | Planejado |
+| `src/state-machine/persistence-strategy.ts` | Module | Persistência lazy/batch | Planejado |
+
+---
+
+*Generated: 2026-02-28*

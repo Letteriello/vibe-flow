@@ -7,8 +7,6 @@
  * - Feature Creep (unrequested additions)
  */
 
-import { SecurityScanner } from '../security/secret-scanner.js';
-
 /**
  * Types of drift detected
  */

@@ -38,6 +38,7 @@ export interface QAReportConfig {
   projectPath: string;
   pipeline?: string;
   outputDir?: string;
+  outputFilename?: string;
   blockOnFail?: boolean;
   includeDetails?: boolean;
   validationTimeout?: number;

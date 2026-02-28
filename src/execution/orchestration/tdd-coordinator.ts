@@ -735,11 +735,7 @@ export class TDDCoordinator extends EventEmitter {
     // For now, execute jest on the project tests
     try {
       const result = await runner.run('npm test -- --passWithNoTests --json');
-      return {
-        success: result.passed,
-        output: result.errorOutput,
-        duration: 0
-      };
+      return this.mapTestRunnerResult(result);
     } catch (error) {
       return {
         success: false,
@@ -747,6 +743,19 @@ export class TDDCoordinator extends EventEmitter {
         duration: 0
       };
     }
+  }
+
+  /**
+   * Maps TestRunner's TestResult to TDD's TestResult interface
+   * TestRunner returns: { passed, failedTests, errorOutput }
+   * TDD expects: { success, output, duration }
+   */
+  private mapTestRunnerResult(runnerResult: { passed: boolean; failedTests?: string[]; errorOutput?: string }): TestResult {
+    return {
+      success: runnerResult.passed,
+      output: runnerResult.failedTests?.join('\n') ?? runnerResult.errorOutput ?? '',
+      duration: 0
+    };
   }
 
   /**

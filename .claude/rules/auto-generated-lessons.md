@@ -48,6 +48,13 @@ Generated: 2026-02-26T03:31:32.553Z
 
 ### Duplicate export in index.ts
 
+- **Lesson:** When importing types from same module with same name, rename with alias or use type-only imports to avoid conflicts
+- **Source:** error
+- **Occurrences:** 1
+- **Last seen:** 2026-02-28T12:00:00.000Z
+
+### Collector module conflict
+
 - **Lesson:** When using barrel files (index.ts), ensure each symbol is exported only once. Duplicate exports cause TS2300 errors. Check both the export statement and the module source.
 - **Source:** error
 - **Occurrences:** 2
@@ -59,6 +66,13 @@ Generated: 2026-02-26T03:31:32.553Z
 - **Source:** error
 - **Occurrences:** 1
 - **Last seen:** 2026-02-28T12:00:00.000Z
+
+### Test timeout with full project scan
+
+- **Lesson:** When testing SecurityGuard or similar modules that scan the entire project, use checkContent() for quick tests instead of runSecurityScan() which times out. The runSecurityScan() method scans all project files and can exceed Jest's default 5s timeout.
+- **Source:** error
+- **Occurrences:** 2
+- **Last seen:** 2026-02-28T18:00:00.000Z
 
 
 ---

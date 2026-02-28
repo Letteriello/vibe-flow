@@ -77,7 +77,18 @@ export class QuotaTracker {
     try {
       const tempFile = QUOTA_STATE_FILE + '.tmp';
       await fs.writeFile(tempFile, JSON.stringify(state, null, 2), 'utf-8');
-      await fs.rename(tempFile, QUOTA_STATE_FILE);
+      try {
+        await fs.rename(tempFile, QUOTA_STATE_FILE);
+      } catch (renameErr) {
+        // Windows fallback: copy file and delete temp
+        const err = renameErr as { code?: string };
+        if (err.code === 'EXDEV' || err.code === 'ENOENT') {
+          await fs.copyFile(tempFile, QUOTA_STATE_FILE);
+          await fs.unlink(tempFile);
+        } else {
+          throw renameErr;
+        }
+      }
     } catch (error) {
       console.error('[QuotaTracker] Failed to persist quota state:', error);
     }

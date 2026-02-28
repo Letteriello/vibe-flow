@@ -111,6 +111,26 @@ export class MCPPermissionGuard {
       permission: PermissionLevel.ALLOW,
       description: "LCM grep operations are always permitted",
     },
+    {
+      toolPattern: "adversarial_review",
+      permission: PermissionLevel.ALLOW,
+      description: "Adversarial code review is always permitted",
+    },
+    {
+      toolPattern: "start_project",
+      permission: PermissionLevel.ALLOW,
+      description: "Start project workflow is always permitted",
+    },
+    {
+      toolPattern: "advance_step",
+      permission: PermissionLevel.ALLOW,
+      description: "Advance workflow step is always permitted",
+    },
+    {
+      toolPattern: "get_wrapup_status",
+      permission: PermissionLevel.ALLOW,
+      description: "Wrap-up status queries are always permitted",
+    },
 
     // Write operations - require confirmation
     {

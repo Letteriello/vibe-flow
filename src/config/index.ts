@@ -147,7 +147,18 @@ export class ConfigManager {
 
     const tempFile = this.configPath + '.tmp';
     await fs.writeFile(tempFile, JSON.stringify(this.config, null, 2), 'utf-8');
-    await fs.rename(tempFile, this.configPath);
+    try {
+      await fs.rename(tempFile, this.configPath);
+    } catch (renameErr) {
+      // Windows fallback: copy file and delete temp
+      const err = renameErr as { code?: string };
+      if (err.code === 'EXDEV' || err.code === 'ENOENT') {
+        await fs.copyFile(tempFile, this.configPath);
+        await fs.unlink(tempFile);
+      } else {
+        throw renameErr;
+      }
+    }
   }
 
   async update(updates: Partial<VibeFlowConfig>): Promise<VibeFlowConfig> {
