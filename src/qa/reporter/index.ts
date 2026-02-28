@@ -15,7 +15,7 @@ export type {
 } from './types';
 
 // Report Generator
-export { QAReportGenerator, createQAReportGenerator } from './report-generator';
+export { QAReportGenerator, createQAReportGenerator } from './report-generator.js';
 
 // Template
 export { generateMarkdownReport, formatSummaryLine } from './template.js';

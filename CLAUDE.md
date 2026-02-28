@@ -18,29 +18,31 @@ O projeto vibe-flow possui documentacao completa em `docs/architecture/`:
 
 ## Planejamento Ativo
 
-**Status:** Em planejamento - Consolidação State Machine
+**Status:** Em planejamento - Flow Orchestrator Implementation
 
 ### Feature em Desenvolvimento
-- **Nome:** State Machine Consolidation
-- **Objetivo:** Unificar Circuit Breaker, integrar WAL, unificar telemetry, otimizar persistência
+- **Nome:** Flow Orchestrator
+- **Objetivo:** Implementar o orchestrator que lê .claude/commands/flow.md e executa o pipeline automaticamente
+
+### Problemas Identificados (da análise)
+1. Flow Orchestrator não implementado - apenas documentação em .claude/commands/flow.md
+2. QA verdict não bloqueia wrap-up
+3. SecurityGuard não integrado no pipeline QA
+4. Pipeline streaming não operacional
 
 ### Documentacao de Planejamento
-- `docs/planning/prd.md` - PRD principal do projeto
-- `docs/planning/ux-design.md` - Especificacao de UX
-- `docs/planning/epics.md` - Divisao em epicos
-- `docs/planning/debt-analysis.md` - Analise de divida tecnica (2026-02-28)
-- `docs/planning/tasks.md` - Tarefas de divida tecnica
-- `docs/planning/state-machine-consolidation/prd.md` - PRD da consolidação
-- `docs/planning/state-machine-consolidation/ux-spec.md` - UX Spec da consolidação
-- `docs/planning/state-machine-consolidation/tasks.md` - Tasks da consolidação
-- `docs/planning/state-machine-consolidation/execution-map.md` - Mapa de execução
+- `docs/planning/flow-orchestrator/prd.md` - PRD da implementação
+- `docs/planning/flow-orchestrator/ux-spec.md` - UX Spec da implementação
+- `docs/planning/flow-orchestrator/tasks.md` - Tasks detalhadas
+- `docs/planning/flow-orchestrator/contracts.md` - Contratos de interfaces
 
-### Tarefas da Consolidação
-- **Fase A:** TASK-000 - Contratos (15 min)
-- **Fase B:**
-  - Round 1: TASK-100-104 (5 tarefas paralelas, ~90 min)
-  - Round 2: TASK-105 (~20 min)
-- **Fase C:** TASK-INT-001-003 (serializado, ~90 min)
+### Tarefas do Flow Orchestrator
+- **Fase A (Contratos):** 5 tasks sequenciais (~90 min)
+- **Fase B (Implementação):** 18 tasks paralelas (~75 min)
+  - Rodada 1: 9 tarefas paralelas (PipelineManager, MergeGate, Worker, Orchestrator)
+  - Rodada 2: 10 tarefas paralelas (CLI commands)
+- **Fase C (Integração):** 6 tasks sequenciais (~140 min)
+- **Total:** 29 tasks
 
 ### Resultado da Analise
 - TODOs reais no codigo: 0

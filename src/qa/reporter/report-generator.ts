@@ -14,8 +14,8 @@ import {
   QASummary,
   Verdict,
   VerificationStatus,
-} from './types';
-import { generateMarkdownReport, formatSummaryLine } from './template';
+} from './types.js';
+import { generateMarkdownReport, formatSummaryLine } from './template.js';
 
 /**
  * Default configuration values
