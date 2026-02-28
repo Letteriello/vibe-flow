@@ -125,6 +125,22 @@ export async function atomicWrite(
           backupFile: backupCreated ? backupFile : undefined
         };
       } catch (renameError) {
+        // Windows fallback: copy file and delete temp
+        const err = renameError as { code?: string };
+        if (err.code === 'EXDEV' || err.code === 'ENOENT') {
+          try {
+            await fs.copyFile(tempFile, targetPath);
+            await fs.unlink(tempFile);
+            tempFileCleaned = true;
+            return {
+              success: true,
+              tempFileCleaned: true,
+              backupFile: backupCreated ? backupFile : undefined
+            };
+          } catch (copyErr) {
+            // Copy also failed, continue to cleanup
+          }
+        }
         // Rename failed - cleanup temp file
         try {
           await fs.unlink(tempFile);

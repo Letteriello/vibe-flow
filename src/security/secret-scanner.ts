@@ -85,12 +85,6 @@ const SECRET_PATTERNS: SecretPattern[] = [
     pattern: /\bsk-ant-[a-zA-Z0-9_-]{20,}\b/gi,
     description: 'Anthropic API Key detected'
   },
-  // Anthropic Legacy Key (sk-...)
-  {
-    name: 'Anthropic Legacy Key',
-    pattern: /\bsk-[a-zA-Z0-9_-]{20,}\b/g,
-    description: 'Anthropic API Key (legacy) detected'
-  },
   // JWT (JSON Web Token) - three base64url parts separated by dots
   {
     name: 'JWT Token',
@@ -121,23 +115,11 @@ const SECRET_PATTERNS: SecretPattern[] = [
     pattern: /\b(ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9]{36,}\b/g,
     description: 'GitHub Token (Classic) detected'
   },
-  // GitHub Fine-grained Token
-  {
-    name: 'GitHub Fine-grained Token',
-    pattern: /\bgho_[a-zA-Z0-9]{36,}\b/g,
-    description: 'GitHub Fine-grained Token detected'
-  },
   // GitHub App Token
   {
     name: 'GitHub App Token',
     pattern: /\bgithub_pat_[a-zA-Z0-9_]{22,}\b/g,
     description: 'GitHub App Token detected'
-  },
-  // GitHub OAuth Access Token
-  {
-    name: 'GitHub OAuth Token',
-    pattern: /\bgho_[a-zA-Z0-9]{36,}\b/g,
-    description: 'GitHub OAuth Token detected'
   },
   // Slack Token
   {
